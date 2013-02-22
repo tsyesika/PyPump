@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# don't forget to replace stuff inside of []
+
+curl -X POST https://microca.st/api/client/register -d 'client_name=[ Your client name ]&type=client_associate&application_type=[ Your client type]' && echo
+
+echo "Registered :)"
