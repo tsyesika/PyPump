@@ -79,6 +79,30 @@ class PyPump(object):
         data = self.request(endpoint)
         return data
 
+    def follow(self, nickname):
+        """ This will use the api/user/<nickname>/feed endpoint to make a follow activity
+        nickname = the ID of the person you would like to follow. e.g. Tsyesika@microca.st
+        """
+        if not "@" in nickname:
+            # oh they didn't give a server (i.e. nick@server)
+            # lets add the current server as an assumption
+            nickname = "%s@%s" % (nickname, self.server)
+
+        # all id's for this need acct: prefix
+        if not nickname.startswith("acct:"):
+            nickname = "acct:%s" % nickname
+
+        post = {
+            "verb":"follow",
+            "object":{
+                "objectType":"person",
+                "id":nickname
+            }
+        }
+
+        return self.feed(post)
+
+
     def feed(self, data=""):
         """ This uses the /api/user/<nickname>/feed endpoint.
         This where you post new activities and where you can read other users activities
@@ -87,8 +111,8 @@ class PyPump(object):
         if not self.nickname:
             raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
 
-        endpoint = "api/user/%s/feed" % nickname
-        data = self.request(endpoint, method="POST", data=data)
+        endpoint = "api/user/%s/feed" % self.nickname
+        data = self.request(endpoint, method="POST", data=data, attempts=1)
         
         return data
 
@@ -112,7 +136,7 @@ class PyPump(object):
             }
         }
 
-        return self.feed(self.nickname, data=post)
+        return self.feed(post)
 
 
     def set_nickname(self, nickname):
@@ -141,6 +165,7 @@ class PyPump(object):
         if data:
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
+            print(data)
 
         # make the oauth request
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, self.oauth_token, http_method=method, http_url="https://%s/%s" % (self.server, endpoint))
