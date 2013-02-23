@@ -23,11 +23,6 @@ import traceback #remove me, i'm just for debug
 
 import oauth.oauth as oauth
 
-key = ""
-secret = ""
-
-## settings?
-server = "microca.st"
 
 class PyPumpException(Exception):
     pass
@@ -49,7 +44,12 @@ class PyPump(object):
         token_secret = this is your token secret if you've already athenticated before (default None)
         save_token = this is a callback (func/method) which is called to save token and token_secret when they've been got (default None)
         """
-        self.server = server
+        if "@" in server:
+            # it's a web fingerprint!
+            self.nickname, self.server = server.split("@")
+        else:
+            self.server = server
+            self.nickname = None # should be set with <instance>.set_nickname(<nickname>)
         
         # oauthy stuff
         self.consumer = oauth.OAuthConsumer(key, secret)
@@ -63,33 +63,32 @@ class PyPump(object):
             self.token_secret = token_secret
             self.oauth_token = oauth.OAuthToken(self.token, self.token_secret)
 
-        # now set defaults which should be set using setters.
-        self.nickname = None
     ##
     # pump.io specific stuff
     ##
-    def inbox(self, nickname):
-        """ This uses the /api/user/<nickname>/inbox endpoint.
-        This is for reading posts sent to <nickname>
+    def inbox(self):
+        """ This uses the /api/user/<self.nickname>/inbox endpoint.
+        This is for reading posts sent to <self.nickname>
         """
-        endpoint = "api/user/%s/inbox" % nickname
+        if not self.nickname:
+            raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
+
+        endpoint = "api/user/%s/inbox" % self.nickname
         
         # make request and decode
-        data = self.request(endpoint, attempts=1)
+        data = self.request(endpoint)
         return data
 
-    def feed(self, nickname=None, data=""):
+    def feed(self, data=""):
         """ This uses the /api/user/<nickname>/feed endpoint.
         This where you post new activities and where you can read other users activities
         """
 
-        if not nickname and self.nickname:
-            nickname = self.nickname
-        elif not nickname:
+        if not self.nickname:
             raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
 
         endpoint = "api/user/%s/feed" % nickname
-        data = self.request(endpoint, method="POST", data=data, attempts=1)
+        data = self.request(endpoint, method="POST", data=data)
         
         return data
 
@@ -119,7 +118,7 @@ class PyPump(object):
     def set_nickname(self, nickname):
         """ This sets the nickname being used """
         if nickname:
-            self.nickname = nickname
+            self.nickname = str(self.nickname) # everything in python can be converted to a string right?
         else:
             # they didn't enter a nickname?
             raise Exception("Nickname can't be of length 0")
@@ -180,10 +179,11 @@ class PyPump(object):
         access = self.request_access(tokens[self.PARAM_TOKEN], tokens[self.PARAM_TOKEN_SECRET], code) 
         access = access.split("&")
         for item in access:
-            if item.startswith("oauth_token"):
-                self.token = item.split("=")[1]
-            elif item.startswith("oauth_token_secret"):
+            # don't change the order >.< as they both start with oauth_token
+            if item.startswith("oauth_token_secret"):
                 self.token_secret = item.split("=")[1]
+            elif item.startswith("oauth_token"):
+                self.token = item.split("=")[1]
 
     def get_access(self, token):
         """ this asks the user to let us use their account """
@@ -207,12 +207,4 @@ class PyPump(object):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=request_token, verifier=code, callback="oob", http_method="POST", http_url="https://%s/oauth/access_token" % self.server)
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, request_token)
         request = urllib.request.Request("https://%s/oauth/access_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
-        return self.pump.open(request).read().decode("utf-8")
-
-if __name__ == "__main__":
-    # okay.
-    client = PumpIO(server, key, secret)
-    client.set_nickname("YourName")
-    print(client.post_note("Notices"))
-
-    
+        return self.pump.open(request).read().decode("utf-8")   
