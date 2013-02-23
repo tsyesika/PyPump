@@ -102,6 +102,31 @@ class PyPump(object):
 
         return self.feed(post)
 
+    def unfollow(self, nickname):
+        """ This will use the api/user/<nickname>/feed endpoint to make a unfollow activity
+        This will unfollow a user if you're following them (returning a True if you have
+        unfollowed them successfully and a False if it failed (maybe because you're not following them))
+        """
+
+        if not "@" in nickname:
+            nickname = "%s@%s" % (nickname, self.server)
+
+        # all id's for this need the acct: prefix
+        if not nickname.startswith("acct:"):
+            nickname = "acct:%s" % nickname
+
+        post = {
+            "verb":"stop-following",
+            "object":{
+                "objectType":"person",
+                "id":nickname
+            }
+        }
+
+        data = self.feed(post)
+        
+        return data
+
 
     def feed(self, data=""):
         """ This uses the /api/user/<nickname>/feed endpoint.
