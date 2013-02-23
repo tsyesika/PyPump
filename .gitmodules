@@ -1,0 +1,3 @@
+[submodule "oauth"]
+	path = oauth
+	url = git@github.com:xray7224/oauth3000.git
