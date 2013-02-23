@@ -100,7 +100,10 @@ class PyPump(object):
             }
         }
 
-        return self.feed(post)
+        try:
+            return self.feed(post)
+        except:
+            return None # probably already following them.
 
     def unfollow(self, nickname):
         """ This will use the api/user/<nickname>/feed endpoint to make a unfollow activity
@@ -123,9 +126,10 @@ class PyPump(object):
             }
         }
 
-        data = self.feed(post)
-        
-        return data
+        try:
+            return self.feed(post)
+        except:
+            return None # probably weren't follwoing to start with.
 
 
     def feed(self, data=""):
