@@ -32,18 +32,23 @@ class PyPump(object):
     PARAM_TOKEN = "oauth_token"
     PARAM_TOKEN_SECRET = "oauth_token_secret"
 
-    def __init__(self, server, key, secret, token=None, token_secret=None, save_token=None):
+    URL_CLIENT_REGISTRATION = "/api/client/register"
+
+    def __init__(self, server, key=None, secret=None, client_name="", client_type="web", token=None, token_secret=None, save_token=None):
         """ This will initate the pump.io library 
         == required ==
         server = this is the server you're going to connect to (microca.st, pumpity.net, etc...)
+        
+        == optional ==
         key = This is your client key
         secret = this is the client secret
-
-        == optional ==
+        client_name = this is the name of the client
+        client_type = the type of your client (defaults to 'web')
         token = This is the token if you've already authenticated by oauth before (default None)
         token_secret = this is your token secret if you've already athenticated before (default None)
         save_token = this is a callback (func/method) which is called to save token and token_secret when they've been got (default None)
         """
+
         if "@" in server:
             # it's a web fingerprint!
             self.nickname, self.server = server.split("@")
@@ -52,7 +57,16 @@ class PyPump(object):
             self.nickname = None # should be set with <instance>.set_nickname(<nickname>)
         
         # oauthy stuff
-        self.consumer = oauth.OAuthConsumer(key, secret)
+        if not (key and secret):
+            # okay we should assume then we're dynamically registrering a client
+            self.consumer = oauth.OAuthConsumer(
+                client_name=client_name, 
+                client_type=client_type,
+                server="https://{server}{endpoint}".format(server=server, endpoint=self.URL_CLIENT_REGISTRATION)
+            )
+        else:
+            self.consumer = oauth.OAuthConsumer(key, secret)
+
         self.pump = urllib.request.build_opener()
         
         if not (token and token_secret):
@@ -62,6 +76,17 @@ class PyPump(object):
             self.token = token
             self.token_secret = token_secret
             self.oauth_token = oauth.OAuthToken(self.token, self.token_secret)
+
+    ##
+    # getters to expose some data which might be useful
+    ##
+    def get_registration(self):
+        """ This is if key and secret weren't specified at instansiation so we registered them """
+        return (self.consumer.key, self.consumer.secret, self.consumer.expirey)
+
+    def get_token(self):
+        """ This is for when we don't have a token but we've registered one (by asking the user) """
+        return (self.token, self.token_secret)
 
     ##
     # pump.io specific stuff
@@ -261,4 +286,5 @@ class PyPump(object):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=request_token, verifier=code, callback="oob", http_method="POST", http_url="https://%s/oauth/access_token" % self.server)
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, request_token)
         request = urllib.request.Request("https://%s/oauth/access_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
-        return self.pump.open(request).read().decode("utf-8")   
+        return self.pump.open(request).read().decode("utf-8") 
+
