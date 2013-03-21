@@ -62,20 +62,24 @@ class PyPump(object):
             self.consumer = oauth.OAuthConsumer(
                 client_name=client_name, 
                 client_type=client_type,
-                server="https://{server}{endpoint}".format(server=server, endpoint=self.URL_CLIENT_REGISTRATION)
+                server="https://{server}{endpoint}".format(server=self.server, endpoint=self.URL_CLIENT_REGISTRATION)
             )
         else:
             self.consumer = oauth.OAuthConsumer(key, secret)
 
+        
         self.pump = urllib.request.build_opener()
         
         if not (token and token_secret):
             # we need to make a new oauth request
-            self.oauth_request()
+            tokens = self.oauth_request()
+            self.token = tokens["oauth_token"]
+            self.token_secret = tokens["oauth_token_secret"]    
         else:
             self.token = token
             self.token_secret = token_secret
-            self.oauth_token = oauth.OAuthToken(self.token, self.token_secret)
+        
+        self.oauth_token = oauth.OAuthToken(self.token, self.token_secret)
 
     ##
     # getters to expose some data which might be useful
@@ -219,7 +223,6 @@ class PyPump(object):
         if data:
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
-            print(data)
 
         # make the oauth request
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, self.oauth_token, http_method=method, http_url="https://%s/%s" % (self.server, endpoint))
@@ -263,6 +266,8 @@ class PyPump(object):
                 self.token_secret = item.split("=")[1]
             elif item.startswith("oauth_token"):
                 self.token = item.split("=")[1]
+        
+        return tokens
 
     def get_access(self, token):
         """ this asks the user to let us use their account """
