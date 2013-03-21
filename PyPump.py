@@ -100,7 +100,7 @@ class PyPump(object):
         This is for reading posts sent to <self.nickname>
         """
         if not self.nickname:
-            raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
+            raise PyPumpException("Please set the nickname (see PyPump.set_nickname(username)")
 
         endpoint = "api/user/%s/inbox" % self.nickname
         
@@ -223,17 +223,16 @@ class PyPump(object):
         if data:
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
-
         # make the oauth request
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, self.oauth_token, http_method=method, http_url="https://%s/%s" % (self.server, endpoint))
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, http_method=method, http_url="https://%s/%s" % (self.server, endpoint))
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, self.oauth_token)
         attempts_done = 0
         while attempts_done < attempts:
             try:
                 if "GET" == method:
-                    request = urllib.request.Request("https://%s/%s" % (self.server, endpoint), headers=oauth_request.to_header())
+                    request = urllib.request.Request("https://%s/%s" % (self.server, endpoint), headers=oauth_request.to_header('OAuth'))
                 else:
-                    request = urllib.request.Request("https://%s/%s" % (self.server, endpoint), headers=oauth_request.to_header())
+                    request = urllib.request.Request("https://%s/%s" % (self.server, endpoint), headers=oauth_request.to_header('OAuth'))
                     request.add_header("Content-Type", "application/json")
                     request.data = data.encode()
                 return json.loads(self.pump.open(request).read().decode("utf-8"))
@@ -282,7 +281,7 @@ class PyPump(object):
         """ Gets a request token so that we can then ask the user for access to the accoutn """
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, callback="oob", http_method="POST", http_url="https://%s/oauth/request_token" % self.server)
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, None)
-        request = urllib.request.Request("https://%s/oauth/request_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
+        request = urllib.request.Request("https://%s/oauth/request_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header('OAuth'))
         return self.pump.open(request).read().decode("utf-8")
 
     def request_access(self, token, token_secret, code):
