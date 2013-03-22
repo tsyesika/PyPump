@@ -288,14 +288,3 @@ class PyPump(object):
         request = urllib.request.Request("https://%s/oauth/access_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
         return self.pump.open(request).read().decode("utf-8")
 
-if __name__ == "__main__":
-    pump = PyPump(
-        "Tsyesika@pump.megworld.co.uk",
-        client_name="Muon",
-        key="kyfUlorMnP8Nkf0nBcCMlA",
-        secret="zzl3vT7uw19tOiknNjoQL8SXs6ndOGGy1iqc284lPxg",
-    )
-
-    print(pump.get_registration())
-    print(pump.get_token())
-    print(pump.inbox())
