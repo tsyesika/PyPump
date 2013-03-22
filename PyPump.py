@@ -72,9 +72,7 @@ class PyPump(object):
         
         if not (token and token_secret):
             # we need to make a new oauth request
-            tokens = self.oauth_request()
-            self.token = tokens["oauth_token"]
-            self.token_secret = tokens["oauth_token_secret"]    
+            self.oauth_request() # this does NOT return access tokens but None
         else:
             self.token = token
             self.token_secret = token_secret
@@ -238,7 +236,7 @@ class PyPump(object):
                 return json.loads(self.pump.open(request).read().decode("utf-8"))
             except:
                 traceback.print_exc()
-                attempts_done += 1
+                attempts_done += 0
 
         return '' # failed :(
 
@@ -262,11 +260,9 @@ class PyPump(object):
         for item in access:
             # don't change the order >.< as they both start with oauth_token
             if item.startswith("oauth_token_secret"):
-                self.token_secret = item.split("=")[1]
+                self.token_secret = item[19:] # len("oauth_token_secret=") == 19
             elif item.startswith("oauth_token"):
-                self.token = item.split("=")[1]
-        
-        return tokens
+                self.token = item[12:] # len("oauth_token") == 12
 
     def get_access(self, token):
         """ this asks the user to let us use their account """
@@ -290,5 +286,16 @@ class PyPump(object):
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=request_token, verifier=code, callback="oob", http_method="POST", http_url="https://%s/oauth/access_token" % self.server)
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, request_token)
         request = urllib.request.Request("https://%s/oauth/access_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
-        return self.pump.open(request).read().decode("utf-8") 
+        return self.pump.open(request).read().decode("utf-8")
 
+if __name__ == "__main__":
+    pump = PyPump(
+        "Tsyesika@pump.megworld.co.uk",
+        client_name="Muon",
+        key="kyfUlorMnP8Nkf0nBcCMlA",
+        secret="zzl3vT7uw19tOiknNjoQL8SXs6ndOGGy1iqc284lPxg",
+    )
+
+    print(pump.get_registration())
+    print(pump.get_token())
+    print(pump.inbox())
