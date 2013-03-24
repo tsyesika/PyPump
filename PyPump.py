@@ -93,6 +93,19 @@ class PyPump(object):
     ##
     # pump.io specific stuff
     ##
+    def get_note(self, pumpid, otype="note"):
+        """ Gets a note based upon an ID (at endpoint <server>/api/<type>/<pumpid> """
+        if not self.nickname:
+            raise PyPumpException("Please set the nickname (see PyPump.set_nickname(username)")
+        
+        # check they have stripped the ID identifiers off
+        pumpid = pumpid.split(":")[-1]
+
+        endpoint = "api/{type}/{oid}".format(type=otype, oid=pumpid)
+
+        data = self.request(endpoint)
+        return data
+
     def inbox(self):
         """ This uses the /api/user/<self.nickname>/inbox endpoint.
         This is for reading posts sent to <self.nickname>
@@ -288,3 +301,7 @@ class PyPump(object):
         request = urllib.request.Request("https://%s/oauth/access_token" % self.server, data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
         return self.pump.open(request).read().decode("utf-8")
 
+if __name__ == "__main__":
+    pump = PyPump("Tsyesika@pump.megworld.co.uk", client_name="Muon")
+    print(pump.get_registration())
+    print(pump.get_token())
