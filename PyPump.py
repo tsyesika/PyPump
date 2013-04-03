@@ -19,7 +19,6 @@
 
 import urllib.request, urllib.error, urllib.parse
 import json
-import traceback #remove me, i'm just for debug
 
 import oauth.oauth as oauth
 
@@ -34,7 +33,9 @@ class PyPump(object):
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
-    def __init__(self, server, key=None, secret=None, client_name="", client_type="web", token=None, token_secret=None, save_token=None, secure = False):
+    def __init__(self, server, key=None, secret=None, 
+                client_name="", client_type="web", token=None, 
+                token_secret=None, save_token=None, secure = False):
         """ This will initate the pump.io library 
         == required ==
         server = this is the server you're going to connect to (microca.st, pumpity.net, etc...)
@@ -112,14 +113,25 @@ class PyPump(object):
         data = self.request(endpoint)
         return data
 
-    def inbox(self):
+    def inbox(self, inbox="", direct=False):
         """ This uses the /api/user/<self.nickname>/inbox endpoint.
         This is for reading posts sent to <self.nickname>
+        inbox = these values could be 'major' or 'minor'
+        direct = this selects the direct inbox (notes to 'to' or 'bto')
         """
         if not self.nickname:
             raise PyPumpException("Please set the nickname (see PyPump.set_nickname(username)")
 
+        if not inbox in ["major", "minor"]:
+            raise PyPumpException("Invalid inbox %s.")
+
         endpoint = "api/user/%s/inbox" % self.nickname
+
+        if direct:
+            endpoint += "/direct"
+
+        if inbox:
+            endpoint += "/%s" % inbox
         
         # make request and decode
         data = self.request(endpoint)
@@ -242,20 +254,27 @@ class PyPump(object):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
         # make the oauth request
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, http_method=method, http_url="%s%s/%s" % (self.proto, self.server, endpoint))
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, 
+                                                                   http_method=method, http_url="%s%s/%s" % (
+                                                                            self.proto, self.server, endpoint)
+                                                                    )
+
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, self.oauth_token)
         attempts_done = 0
+
         while attempts_done < attempts:
             try:
                 if "GET" == method:
-                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), headers=oauth_request.to_header('OAuth'))
+                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), 
+                                                                 headers=oauth_request.to_header('OAuth'))
                 else:
-                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), headers=oauth_request.to_header('OAuth'))
+                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), 
+                                                                 headers=oauth_request.to_header('OAuth'))
+
                     request.add_header("Content-Type", "application/json")
                     request.data = data.encode()
                 return json.loads(self.pump.open(request).read().decode("utf-8"))
             except:
-                traceback.print_exc()
                 attempts_done += 0
 
         return '' # failed :(
@@ -295,17 +314,40 @@ class PyPump(object):
 
     def request_token(self):
         """ Gets a request token so that we can then ask the user for access to the accoutn """
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, callback="oob", http_method="POST", http_url="%s%s/oauth/request_token" % (self.proto, self.server))
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
+                                                                   callback="oob", 
+                                                                   http_method="POST", 
+                                                                   http_url="%s%s/oauth/request_token" % (
+                                                                            self.proto, self.server
+                                                                            )
+                                                                   )
+
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, None)
-        request = urllib.request.Request("%s%s/oauth/request_token" % (self.proto, self.server), data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header('OAuth'))
+
+        request = urllib.request.Request("%s%s/oauth/request_token" % (self.proto, self.server), 
+                                                                       data=oauth_request.to_postdata().encode(), 
+                                                                       headers=oauth_request.to_header('OAuth')
+                                        )
+
         return self.pump.open(request).read().decode("utf-8")
 
     def request_access(self, token, token_secret, code):
         """ This is for when we've got the user's access value and we're asking the server for our access token """
         request_token = oauth.OAuthToken(token, token_secret)
-        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=request_token, verifier=code, callback="oob", http_method="POST", http_url="%s%s/oauth/access_token" % (self.proto, self.server))
+        oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, 
+                                                                   token=request_token, 
+                                                                   verifier=code,
+                                                                   callback="oob", 
+                                                                   http_method="POST", 
+                                                                   http_url="%s%s/oauth/access_token" % (
+                                                                        self.proto, self.server)
+                                                                   )
+
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, request_token)
-        request = urllib.request.Request("%s%s/oauth/access_token" % (self.proto, self.server), data=oauth_request.to_postdata().encode(), headers=oauth_request.to_header())
+        request = urllib.request.Request("%s%s/oauth/access_token" % (self.proto, self.server), 
+                                         data=oauth_request.to_postdata().encode(), 
+                                         headers=oauth_request.to_header())
+
         return self.pump.open(request).read().decode("utf-8")
 
 if __name__ == "__main__":
