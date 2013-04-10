@@ -229,7 +229,7 @@ class PyPump(object):
     def set_nickname(self, nickname):
         """ This sets the nickname being used """
         if nickname:
-            self.nickname = str(self.nickname) # everything in python can be converted to a string right?
+            self.nickname = str(nickname) # everything in python can be converted to a string right?
         else:
             # they didn't enter a nickname?
             raise Exception("Nickname can't be of length 0")
