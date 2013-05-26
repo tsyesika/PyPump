@@ -15,6 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+from datetime import datetime
+
 class Person:
     
     id = ""
@@ -27,9 +29,47 @@ class Person:
     summery = "" # lil bit about them =]    
     image = None # Image items
 
-    links = [] # links to endpoints
-
     is_self = False # is this you?
+
+    def __init__(self, id, username, url, summery="", 
+                 display_name="", image=None, published=None, 
+                 updated=None, location=None, me=None):
+        """
+        id - the ID of the person. e.g. acct:Username@server.example
+        username - persons username
+        url - url to profile
+        summery - summer of the user
+        display_name - what the user want's to show up (defualt: username)
+        image - image of the user (default: No image/None)
+        published - when the user joined pump (default: now)
+        updated - when the user last updated their profile (default: published)
+        location - where the user resides (default: No location/None)
+        me - you, used to set is_self, if not given it assumes this person _isn't_ you
+        """
+
+        self.id = id
+        self.username = username
+        self.url = url
+        self.summery = summery
+        self.image = image        
+
+        if display_name:
+            self.display_name = display_name
+        else:
+            self.display_name = self.username
+
+        if published:
+            self.published = published
+        else:
+            self.published = datetime.now()
+        
+        if updated:
+            self.updated = updated
+        else:
+            self.updated = self.published
+
+        if me and self.id == me.id:
+            self.is_self = True
 
     def follow(self): 
         """ You follow this user """

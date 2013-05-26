@@ -15,6 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+from datetime import datetime
+
 class Note(object):
     
     content = ""
@@ -25,6 +27,21 @@ class Note(object):
     # where to?
     to = []
     cc = []
+
+    def __init__(self, content, to, actor, published=None, updated=None):
+        self.content = content
+        self.to = to
+        self.actor = actor
+
+        if published:
+            self.published = published
+        else:
+            self.published = datetime.now()
+
+        if updated:
+            self.updated = updated
+        else:
+            self.updated = self.published
     
     def comment(self, comment):
         pass

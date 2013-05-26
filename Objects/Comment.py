@@ -15,11 +15,30 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+from datetime import datetime
 
 class Comment:
     
     body = ""
     note = None # note it's a comment to
+    updated = None
+    published = None
+    likes = []
+
+    def __init__(self, body, note, published=None, updated=None, likes=[]):
+        body = body
+        note = note
+        likes = likes
+        
+        if published:
+            self.published = published 
+        else:
+            self.published = datetime.now()
+
+        if updated:
+            self.updated = updated
+        else:
+            self.updated = self.published
 
     def like(self):
         """ Will like the comment """
