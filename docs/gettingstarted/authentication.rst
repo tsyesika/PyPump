@@ -7,7 +7,7 @@ Pump.io uses oauth 1.0 with dynamic client registration, this available through 
 Oauth works by exchanging a pre-established key and secret, you however have to provide those each time you make instantiate the PyPump object. You will have to provide a mechanism to store these so that you can you can provide them the next time.
 
 Example
-=======
+-------
 
 The following will create (for the first time) a connection to a pump.io server for the user Tsyesika@pump.megworld.co.uk for my client named "Test.io"::
 

@@ -9,7 +9,7 @@ Welcome to PyPump's documentation!
 .. toctree::
    :maxdepth: 1
 
-   gettingstarted/install
+   gettingstarted/installing
    gettingstarted/authentication
    gettingstarted/common
    

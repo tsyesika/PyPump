@@ -64,7 +64,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
 
 Example
-=======
+-------
 
 This shows making a new post
 

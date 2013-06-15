@@ -56,7 +56,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
 
 Example
-=======
+-------
 
 This shows making a comment on a note
 

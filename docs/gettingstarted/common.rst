@@ -12,5 +12,14 @@ This is how to post a note on Pump.io::
 
 
 Commenting on a note
-====================
+--------------------
+
+You need to create a Comment object and then use the comment method on the note
+
+    >>> my_note
+    <Note: "This is a note!">
+    >>> my_comment = Comment("This is a comment")
+    >>> my_note.comment(my_comment)
+    >>> # done!
+
 

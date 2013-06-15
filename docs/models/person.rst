@@ -90,7 +90,7 @@ This object represents a user on pump.io.
         
 
 Example
-=======
+-------
 
 This shows how to follow someone
 

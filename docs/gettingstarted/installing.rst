@@ -11,7 +11,7 @@ The best way to install PyPump is via pip, if you have't, setup::
 
 
 Using git
-=========
+---------
 
 .. Warning:: The code on git may break, the code on pip is likely to be much more stable
 
