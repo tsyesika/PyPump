@@ -3,7 +3,7 @@
 Using pip
 ==========
 
-The best way to install PyPump is via pip, if you have't, setup::
+The best way to install PyPump is via pip, if you haven't, setup::
 
     virtualenv path/to/virtualenv
     source path/to/virtualenv/bin/activate

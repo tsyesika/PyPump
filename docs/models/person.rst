@@ -65,11 +65,11 @@ This object represents a user on pump.io.
              >>> a_person.location
              <Location: Manchester, UK>
 
-    .. py:attribute:: summery
+    .. py:attribute:: summary
 
-        This is the summer of the user (unicode)
+        This is the summary of the user (unicode)
 
-             >>> a_person.summery
+             >>> a_person.summary
              u'The maker of this fabulous library!'
 
     .. py:attribute:: image
@@ -94,9 +94,9 @@ Example
 
 This shows how to follow someone
 
-    >>> a_person.follow() # yay we're not following them!
+    >>> a_person.follow() # yay we're now following them!
 
-What happens when i try and follow someone I am? 
+What happens when I try to follow someone I am already following?
 
     >>> a_person.follow() # nothing? yep.
     
