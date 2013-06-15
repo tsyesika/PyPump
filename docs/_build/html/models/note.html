@@ -1,0 +1,231 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Note &mdash; PyPump 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyPump 1.0.0 documentation" href="../index.html" />
+    <link rel="next" title="Comment" href="comment.html" />
+    <link rel="prev" title="Posting a note" href="../gettingstarted/common.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="comment.html" title="Comment"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../gettingstarted/common.html" title="Posting a note"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">PyPump 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="note">
+<h1>Note<a class="headerlink" href="#note" title="Permalink to this headline">¶</a></h1>
+<p>This object represents pump.io&#8217;s notes, these are used to post text to a <cite>person</cite>&#8216;s inbox.</p>
+<dl class="class">
+<dt id="Note">
+<em class="property">class </em><tt class="descname">Note</tt><a class="headerlink" href="#Note" title="Permalink to this definition">¶</a></dt>
+<dd><p>This represents a note, short-form text message, these appear in the stream</p>
+<dl class="attribute">
+<dt id="Note.content">
+<tt class="descname">content</tt><a class="headerlink" href="#Note.content" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the content of the Note</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span> <span class="o">=</span> <span class="n">Note</span><span class="p">(</span><span class="s">&quot;I&#39;m posting on pump.io&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">content</span>
+<span class="go">&quot;I&#39;m posting on pump.io&quot;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Note.actor">
+<tt class="descname">actor</tt><a class="headerlink" href="#Note.actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is who posted the Note (Person object)</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span> <span class="o">=</span> <span class="n">Note</span><span class="p">(</span><span class="s">&quot;I&#39;m posting on pump.io&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">actor</span>
+<span class="go">&lt;Person: Tsyesika@pump.megworld.co.uk&gt;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Note.updated">
+<tt class="descname">updated</tt><a class="headerlink" href="#Note.updated" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is when it was last updated (posted, commented, etc.) this is a datetime.datetime object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">updated</span>
+<span class="go">datetime.datetime(2013, 6, 15, 12, 31, 22, 134180)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Note.published">
+<tt class="descname">published</tt><a class="headerlink" href="#Note.published" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is when the Note was first published, this is a datetime.datetime object</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">published</span>
+<span class="go">datetime.datetime(2013, 6, 15, 12, 31, 22, 134180)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Note.to">
+<tt class="descname">to</tt><a class="headerlink" href="#Note.to" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a list of person objects, who the Note was to</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">to</span>
+<span class="go">[&lt;Person: Tsyesika@pump.megworld.co.uk&gt;, &lt;Person: Tuteo@another.server.co.uk&gt;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="Note.cc">
+<tt class="descname">cc</tt><a class="headerlink" href="#Note.cc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a list of person objects, who was carbon copied into the Note</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">cc</span>
+<span class="go">[&lt;Person: someone@microca.st&gt;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="Note.comment">
+<tt class="descname">comment</tt><big>(</big><em>comment</em><big>)</big><a class="headerlink" href="#Note.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>This takes in a Comment object, this will send
+the comment to the remote server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Note.delete">
+<tt class="descname">delete</tt><big>(</big><big>)</big><a class="headerlink" href="#Note.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will delete the object.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="example">
+<h1>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
+<p>This shows making a new post</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">models.note</span> <span class="kn">import</span> <span class="n">Note</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span> <span class="o">=</span> <span class="n">Note</span><span class="p">(</span><span class="s">&quot;This is a new note!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You want to comment?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">models.comment</span> <span class="kn">import</span> <span class="n">Comment</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_comment</span> <span class="o">=</span> <span class="n">Comment</span><span class="p">(</span><span class="s">&quot;I&#39;m commenting on my note&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_note</span><span class="o">.</span><span class="n">comment</span><span class="p">(</span><span class="n">my_comment</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can like the note</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_comment</span><span class="o">.</span><span class="n">like</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Oh wait? you didn&#8217;t want to...</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_comment</span><span class="o">.</span><span class="n">unlike</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Oh you didn&#8217;t want to post the note?</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">my_comment</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_comment</span> <span class="o">=</span> <span class="bp">None</span> <span class="c"># we don&#39;t want to accidently try and use a deleted comment</span>
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Using a comment object after deletion will raise a DoesNotExist exception</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Note</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../gettingstarted/common.html"
+                        title="previous chapter">Posting a note</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="comment.html"
+                        title="next chapter">Comment</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/models/note.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="comment.html" title="Comment"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../gettingstarted/common.html" title="Posting a note"
+             >previous</a> |</li>
+        <li><a href="../index.html">PyPump 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jessica Tallon.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

@@ -27,6 +27,7 @@ class Note(object):
     # where to?
     to = []
     cc = []
+    likes = []
 
     def __init__(self, content, to, actor, published=None, updated=None):
         self.content = content
@@ -44,13 +45,19 @@ class Note(object):
             self.updated = self.published
     
     def comment(self, comment):
+        """ Posts a comment """
         pass
 
     def delete(self):
+        """ Delete's the note """
+        pass
+
+    def like(self):
+        """ Likes the Note """
         pass
 
     def __repr__(self):
-        return self.body
+        return self.content
    
     def __str__(self):
         return self.__repr__()

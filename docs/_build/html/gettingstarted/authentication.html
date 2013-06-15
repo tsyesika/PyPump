@@ -1,0 +1,144 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Intorudction &mdash; PyPump 1.0.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="PyPump 1.0.0 documentation" href="../index.html" />
+    <link rel="next" title="Posting a note" href="common.html" />
+    <link rel="prev" title="Welcome to PyPump’s documentation!" href="../index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="common.html" title="Posting a note"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to PyPump’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">PyPump 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="intorudction">
+<h1>Intorudction<a class="headerlink" href="#intorudction" title="Permalink to this headline">¶</a></h1>
+<p>Pump.io uses oauth 1.0 with dynamic client registration, this available through a lot of libraries, PyPump currently uses a modified version of <cite>Leah Culver &lt;https://github.com/leah/python-oauth/&gt;</cite>, the modified version is called <cite>oauth3000 &lt;https://github.com/xray7224/oauth3000&gt;</cite>. All of that is handled by PyPump however there are some things to know.</p>
+<p>Oauth works by exchanging a pre-established key and secret, you however have to provide those each time you make instantiate the PyPump object. You will have to provide a mechanism to store these so that you can you can provide them the next time.</p>
+</div>
+<div class="section" id="example">
+<h1>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h1>
+<p>The following will create (for the first time) a connection to a pump.io server for the user <a class="reference external" href="mailto:Tsyesika&#37;&#52;&#48;pump&#46;megworld&#46;co&#46;uk">Tsyesika<span>&#64;</span>pump<span>&#46;</span>megworld<span>&#46;</span>co<span>&#46;</span>uk</a> for my client named &#8220;Test.io&#8221;:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">PyPump.PyPump</span> <span class="kn">import</span> <span class="n">PyPump</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pump</span> <span class="o">=</span> <span class="n">PyPump</span><span class="p">(</span><span class="s">&quot;Tsyesika@pump.megowrld.co.uk&quot;</span><span class="p">,</span> <span class="n">client_name</span><span class="o">=</span><span class="s">&quot;Test.io&quot;</span><span class="p">,</span> <span class="n">secure</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client_credentials</span> <span class="o">=</span> <span class="n">pump</span><span class="o">.</span><span class="n">get_registration</span><span class="p">()</span> <span class="c"># will return [&lt;client key&gt;, &lt;client secret&gt;, &lt;expirey&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">client_tokens</span> <span class="o">=</span> <span class="n">pump</span><span class="o">.</span><span class="n">get_token</span><span class="p">()</span> <span class="c"># will return [&lt;token&gt;, &lt;secret&gt;]</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If you&#8217;re not using CLI you will need to override the <em>get_access</em> method on PyPump to ask for their varification token</p>
+</div>
+<p>An example of then connecting again (using the same variable names as above). This will produce a PyPump object which will use the same credentials as established above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">pump</span> <span class="o">=</span> <span class="n">PyPump</span><span class="p">(</span>
+<span class="gp">... </span>         <span class="s">&quot;pump.megworld.co.uk&quot;</span><span class="p">,</span>
+<span class="gp">... </span>         <span class="n">key</span><span class="o">=</span><span class="n">client_credentials</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="c"># the client key</span>
+<span class="gp">... </span>         <span class="n">secret</span><span class="o">=</span><span class="n">client_credentials</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c"># the client secret</span>
+<span class="gp">... </span>         <span class="n">token</span><span class="o">=</span><span class="n">client_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="c"># the token key</span>
+<span class="gp">... </span>         <span class="n">token_secret</span><span class="o">=</span><span class="n">client_tokens</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="c"># the token secret</span>
+<span class="gp">... </span>         <span class="n">secure</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="c"># for using HTTPS</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Intorudction</a></li>
+<li><a class="reference internal" href="#example">Example</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="../index.html"
+                        title="previous chapter">Welcome to PyPump&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="common.html"
+                        title="next chapter">Posting a note</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/gettingstarted/authentication.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="common.html" title="Posting a note"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="../index.html" title="Welcome to PyPump’s documentation!"
+             >previous</a> |</li>
+        <li><a href="../index.html">PyPump 1.0.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Jessica Tallon.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
