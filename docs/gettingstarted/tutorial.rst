@@ -119,3 +119,8 @@ he's said some interesting things?::
   >>> for messages in evan.inbox:
   >>>     print message.body
 
+.. Things missing:
+   - How to post to your public feed, as opposed to a list of specific
+     people?
+   - Show different types of activities
+   - Explain how to implement an activity subclass?
