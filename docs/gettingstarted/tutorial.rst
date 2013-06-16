@@ -49,3 +49,73 @@ PyPump!
 A quick example
 ---------------
 
+Let's assume you already have a user with the webfinger id of
+mizbunny@example.org.  We want to check what our latest messages
+are!  But before we can do that, we need to authenticate.  If this is
+your first time, you need to authenticate this client::
+
+  >>> from pypump import PyPump
+  >>> pump = PyPump("mizbunny@example.org", client_name="Test.io", secure=True)
+  # will return [<client key>, <client secret>, <expirey>]
+  >>> client_credentials = pump.get_registration()
+  # will return [<token>, <secret>]
+  >>> client_tokens = pump.get_token()
+
+(TODO: does this open a browser?  What's going on here?  How is
+the user authenticated?)
+
+You should store the client credentials somewhere.  You can now
+reconnect like so::
+
+  >>> pump = PyPump(
+  ...          "mizbunny@example.org",
+  ...          key=client_credentials[0], # the client key
+  ...          secret=client_credentials[1], # the client secret
+  ...          token=client_tokens[0], # the token key
+  ...          token_secret=client_tokens[1], # the token secret
+  ...          secure=True) # for using HTTPS
+
+Okay, we're connected!  Next up, we want to check out what our last 30
+messages are.  PyPump supports python-style index slicing::
+
+  >>> recent_messages = pump.inbox[:30]  # get last 30 messages
+
+We could print out each of the most recent messages like so::
+
+  >>> for message in recent_messages:
+  >>>     print message.body
+
+Maybe we're just looking at our most recent message, and see it's from
+our friend Evan.  It seems that he wants to invite us over for a
+dinner party::
+
+  >>> message = recent_messages[0]
+  >>> message
+  <Notice by evan at 04/05/2013>
+  >>> message.author
+  <User evan@e14n.com>
+  >>> message.body
+  "Yo, want to come over to dinner?  We're making asparagus!"
+
+We can compose a reply::
+
+  >>> from pypump.activities import Notice
+  >>> reply = Notice(
+  ...             pump,
+  ...             body="I'd love to!",
+  ...             reply_to=message.id,
+  ...             to=[message.author])
+  >>> pump.send()
+  
+(Since this Notice activity is being instantiated, it needs a
+reference to our PyPump class instance.  Objects that you get back and
+forth from the API themselves will try to keep track of their own
+parent PyPump object for you.)
+
+We can also check to see what our buddy's public feed is.  Maybe
+he's said some interesting things?::
+
+  >>> evan = message.author
+  >>> for messages in evan.inbox:
+  >>>     print message.body
+
