@@ -1,5 +1,5 @@
 
-Intorudction
+Introduction
 =============
 
 Pump.io uses oauth 1.0 with dynamic client registration, this available through a lot of libraries, PyPump currently uses a modified version of `Leah Culver <https://github.com/leah/python-oauth/>`, the modified version is called `oauth3000 <https://github.com/xray7224/oauth3000>`. All of that is handled by PyPump however there are some things to know.
