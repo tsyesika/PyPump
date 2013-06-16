@@ -101,10 +101,10 @@ We can compose a reply::
 
   >>> from pypump.activities import Notice
   >>> reply = Notice(
-  ...             pump,
-  ...             body="I'd love to!",
-  ...             reply_to=message.id,
-  ...             to=[message.author])
+  ...     pump,
+  ...     body="I'd love to!",
+  ...     reply_to=message.id,
+  ...     to=[message.author])
   >>> pump.send()
   
 (Since this Notice activity is being instantiated, it needs a
@@ -112,12 +112,68 @@ reference to our PyPump class instance.  Objects that you get back and
 forth from the API themselves will try to keep track of their own
 parent PyPump object for you.)
 
+We could even favorite the previous message::
+
+  >>> from pypump.activities import Favorite
+  >>> fave = Favorite(
+  ...     pump,
+  ...     subject=message.id)
+
+.. (Is this right?)
+
 We can also check to see what our buddy's public feed is.  Maybe
 he's said some interesting things?::
 
   >>> evan = message.author
   >>> for messages in evan.inbox:
   >>>     print message.body
+
+.. TODO: Put a photo, or subscription, or some other activity example
+   here...
+
+.. Maybe we took a picture, and we want to post that picture to our
+.. public feed so everyone can see it.  We can do this by posting it to
+.. our outbox:
+.. 
+..   >>> from pypump.activities import Photo
+..   >>> new_photo = Photo(
+..   ...     pump,
+..   ...     subject=
+
+Want to see what the activity actually looks like?
+All activities in pump.io have a .to_json() method::
+
+  >>> import json
+  >>> print message.to_json(indent=2)
+  {
+    "id": "http://coding.example/api/activity/bwkflwken",
+    "actor": {
+      "id": "acct:bwk@coding.example",
+      "objectType": "person",
+      "displayName": "Brian Kernighan"
+    },
+    "verb": "follow",
+    "to": [{
+      "id": "acct:ken@coding.example",
+      "objectType": "person"
+    }],
+    "object": {
+      "id": "acct:ken@coding.example",
+      "objectType": "person",
+      "displayName": "Ken Thompson"
+    },
+    "published": "1974-01-01T00:00:00",
+    "links": [
+        {"rel": "self", "href": "http://coding.example/api/activity/bwkflwken"}
+    ]
+  }
+
+(The indent attribute here is passed to json.to_json to give prettier output.)
+
+.. (Yes, that was stolen from the Pump API docs :))
+
+
+(similarly, all activity classes provide a from_json() class method).
 
 .. Things missing:
    - How to post to your public feed, as opposed to a list of specific
