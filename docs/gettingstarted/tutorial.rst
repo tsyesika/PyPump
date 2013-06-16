@@ -105,7 +105,7 @@ We can compose a reply::
   ...     body="I'd love to!",
   ...     reply_to=message.id,
   ...     to=[message.author])
-  >>> pump.send()
+  >>> reply.send()
   
 (Since this Notice activity is being instantiated, it needs a
 reference to our PyPump class instance.  Objects that you get back and
