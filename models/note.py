@@ -123,7 +123,7 @@ class Note(AbstractModel):
 
 
     def __repr__(self):
-        return self.content
+        return "<Note by %s at %s>" % (self.actor["displayName"], self.published.strftime("%Y/%m/%d"))
    
     def __str__(self):
         return self.__repr__()
