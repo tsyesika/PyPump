@@ -25,8 +25,7 @@ import json
 import oauth.oauth as oauth
 import loader
 
-class PyPumpException(Exception):
-    pass
+from exceptions import PyPumpException
 
 class PyPump(object):
 
@@ -91,6 +90,7 @@ class PyPump(object):
             self.token_secret = token_secret
         
         self.oauth_token = oauth.OAuthToken(self.token, self.token_secret)
+
 
     ##
     # getters to expose some data which might be useful

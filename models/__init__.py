@@ -27,7 +27,8 @@ class AbstractModel:
 
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
-        self._pump = pypump if pypump else self._pump
+        if pypump:
+            self._pump = pypump
 
     def serialize(self, *args, **kwargs):
         """ Changes it from obj -> JSON """
