@@ -22,7 +22,7 @@ class Loader(object):
         for klass in dir(model):
             klass_obj = getattr(model, klass)
             if isinstance(klass_obj, type) and issubclass(klass_obj, AbstractModel):
-                klass_obj.pump = self._pypump
+                klass_obj._pump = self._pypump
                 setattr(self._pypump, klass, klass_obj)
 
     def load_model(self, path):

@@ -19,6 +19,8 @@ import json
 from datetime import datetime
 
 from models import AbstractModel
+from models.person import Person
+from models.comment import Comment
 
 class Note(AbstractModel):
     
@@ -34,10 +36,16 @@ class Note(AbstractModel):
     # where to?
     to = []
     cc = []
-    likes = []
 
-    def __init__(self, content, to, actor, published=None, updated=None, *args, **kwargs):
+    _likes = [] # cache of likes
+    _comments = [] # cache of comemnts
+
+    _links = {}
+
+    def __init__(self, content, to, actor, published=None, updated=None, links=None, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
+
+        self._links = links if links else {}
 
         self.content = content
         self.to = to
@@ -52,6 +60,35 @@ class Note(AbstractModel):
             self.updated = updated
         else:
             self.updated = self.published
+
+    def _get_likes(self):
+        """ gets the likes """
+        if self._likes:
+            return self._likes
+
+        # gotta go get them.
+        endpoint = self._links["likes"]
+        likes = self._pypump.request(endpoint)
+        for k,v in likes["items"].items():
+            self._likes.append(Person.unserialize(v))
+
+        return self._likes
+
+    likes = property(fset=_get_likes)
+
+    def _get_comments(self): 
+        """ Gets the comments """
+        if self._comments:
+            return self._comments
+
+        endpoint = self._links["comments"]
+        comments = self._pump.request(endpoint)
+        for k,v in comments["items"].items():
+            self._comment.append(Comment.unserialize(v))
+
+        return self._comments
+
+    comments = property(fset=_get_comments)
 
     def send(self):
         """ Sends the post to the server """
@@ -104,15 +141,27 @@ class Note(AbstractModel):
         return json.dumps(query)
 
     @staticmethod
-    def unserialize(self, data):
+    def unserialize(data):
         """ Goes from JSON -> Note object """
-        query = json.loads(data)
+        obj = data["object"]        
+        
+        links = {}
+        if "proxy_url" in obj["likes"]:
+            links["likes"] = obj["likes"]["proxy_url"]
+        else:
+            links["likes"] = obj["likes"]["url"]
+
+        if "proxy_url" in obj["replies"]:
+            links["comments"] = obj["replies"]["proxy_url"]
+        else:
+            links["comments"] = obj["replies"]["url"]
+
         return Note(
-            content=data["content"],
-            to=data["to"], # todo: convert to person objects
-            #cc=data["cc"],
-            actor=data["author"]["preferredUsername"],
-            pypump=self.pump,
-            updated=datetime.strptime(data["updated"], self.TSFORMAT),
-            published=datetime.strptime(data["published"], self.TSFORMAT),
+            content=obj["content"],
+            to=[], # todo: yeh
+            cc=[], # todo: ^^
+            actor=data["actor"],
+            updated=datetime.strptime(data["updated"], Note.TSFORMAT),
+            published=datetime.strptime(data["published"], Note.TSFORMAT),
+            links=links,
         )
