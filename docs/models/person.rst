@@ -4,6 +4,8 @@ Person
 
 This object represents a user on pump.io. 
 
+.. note:: The pump variable is an instantiated PyPump class e.g. pump = PyPump("<webfinger>", client_name="<name>", etc...)
+
 .. py:class:: Person
 
     This represents a Person object, These are used in getting their inboxes, information on, etc...
@@ -106,7 +108,7 @@ Well, I don't want to follow them.
 
 You want to find yourfriend@pumpity.net
 
-    >>> my_friend = Person("yourfriend@pumpity.net")
+    >>> my_friend = pump.Person("yourfriend@pumpity.net")
     Traceback (most recent call last):
         blah blah
         you know the drill
@@ -114,5 +116,5 @@ You want to find yourfriend@pumpity.net
 
 Oh that's right they're on pump.megworld.co.uk
 
-    >>> my_friend = Person("myfriend@pump.megworld.co.uk")
+    >>> my_friend = pump.Person("myfriend@pump.megworld.co.uk")
     >>> # Awesome!
