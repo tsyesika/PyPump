@@ -19,10 +19,14 @@ class Image:
     
     TYPE = "image"
 
+    pump = None
+
     # we need some methods to go grab the image for us.
     url = ""
 
-    def __init__(self, url):
+    def __init__(self, url, pypump=None):
+        self.pump = pypump if pypump else self.pump
+
         self.url = url
 
     def __repr__(self):

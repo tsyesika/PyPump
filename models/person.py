@@ -20,6 +20,8 @@ from datetime import datetime
 class Person:
 
     TYPE = "person"
+
+    pump = None
     
     id = ""
     username = ""
@@ -35,7 +37,7 @@ class Person:
 
     def __init__(self, id, username, url, summery="", 
                  display_name="", image=None, published=None, 
-                 updated=None, location=None, me=None):
+                 updated=None, location=None, me=None, pypump=None):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
@@ -48,6 +50,7 @@ class Person:
         location - where the user resides (default: No location/None)
         me - you, used to set is_self, if not given it assumes this person _isn't_ you
         """
+        self.pump = pypump if pypump else self.pump
 
         self.id = id
         self.username = username

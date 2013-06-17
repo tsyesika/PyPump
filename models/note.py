@@ -24,6 +24,9 @@ class Note(object):
     VERB = "post"
     pump = None
 
+
+    pump = None
+
     content = ""
     actor = None # who posted.
     updated = None # last time this was updated
@@ -34,7 +37,9 @@ class Note(object):
     cc = []
     likes = []
 
-    def __init__(self, content, to, actor, published=None, updated=None):
+    def __init__(self, content, to, actor, published=None, updated=None, pypump=None):
+        self.pump = pypump if pypump else self.pump
+
         self.content = content
         self.to = to
         self.actor = actor

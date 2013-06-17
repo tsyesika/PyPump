@@ -20,6 +20,8 @@ from datetime import datetime
 class Comment:
 
     TYPE = "comment"
+
+    pump = None
     
     body = ""
     note = None # note it's a comment to
@@ -27,10 +29,11 @@ class Comment:
     published = None
     likes = []
 
-    def __init__(self, body, note, published=None, updated=None, likes=[]):
+    def __init__(self, body, note, published=None, updated=None, pypump=None):
+        self.pump = pypump if pypump else: self.pump
+
         body = body
         note = note
-        likes = likes
         
         if published:
             self.published = published 
