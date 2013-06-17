@@ -17,16 +17,19 @@ class Loader(object):
         """ Called before the load of a plugin """
         pass # nothing to do
 
-    def postload(self, model):
+    def postload(self, name, model):
         """ Called after loading a plugin with the models """
         for klass in dir(models):
             if type(klass) in [types.ClassType]:
-                klass.pump = self._pypump 
+                klsss.pump = self._pypump
+                setattr(self._pypump, name, klass)
 
     def load_model(self, path):
         """ Loads a model from a path """
         name = self.get_name(path)
+        self.preload(path)
         self._models[name] = imp.load_source(name, path)
+        self.postload(name, self._models[name])
 
     def get_name(self, path):
         """ Gets the name from the path """

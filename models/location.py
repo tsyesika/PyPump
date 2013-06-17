@@ -19,9 +19,13 @@ class Location:
 
     TYPE = "location"
 
+    pump = None
+
     name = ""
 
-    def __init__(self, name):
+    def __init__(self, name, pypump=None):
+        self.pump = pypump if pypump else self.pump
+
         self.name = name
 
     def __repr__(self):
