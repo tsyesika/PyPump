@@ -4,6 +4,8 @@ Comment
 
 This object represents pump.io's comments, these are posted on Notes and Images. 
 
+.. note:: The pump variable is an instantiated PyPump class e.g. pump = PyPump("<webfinger>", client_name="<name>", etc...)
+
 .. py:class:: Comment
 
     This represents a Comment object, These are used in reply to other others such as Images or Notes.
@@ -13,7 +15,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
         This is the content of the Comment (string)
 
-	    >>> my_comment = PyPump.Comment("This is a comment")
+	    >>> my_comment = pump.Comment("This is a comment")
             >>> my_comment.content
             "This is a comment" 
 
@@ -21,7 +23,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
         This is who posted the Comment (Person object)
 
-            >>> my_comment = PyPump.Comment("This is a comment")
+            >>> my_comment = pump.Comment("This is a comment")
             >>> my_comment.actor
             <Person: Tsyesika@pump.megworld.co.uk>
 

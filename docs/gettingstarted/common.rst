@@ -19,6 +19,6 @@ You need to create a Comment object and then use the comment method on the note
     <Note: "This is a note!">
     >>> my_comment = pump.Comment("This is a comment")
     >>> my_note.comment(my_comment)
-    >>> # done!3
+    >>> # done!
 
 

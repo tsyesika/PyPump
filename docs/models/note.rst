@@ -4,6 +4,8 @@ Note
 
 This object represents pump.io's notes, these are used to post text to a `person`'s inbox. 
 
+.. note:: The pump variable is an instantiated PyPump class e.g. pump = PyPump("<webfinger>", client_name="<name>", etc...)
+
 .. py:class:: Note
 
     This represents a note, short-form text message, these appear in the stream
@@ -13,7 +15,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
         This is the content of the Note
 
-	    >>> my_note = PyPump.Note("I'm posting on pump.io")
+	    >>> my_note = pump.Note("I'm posting on pump.io")
             >>> my_note.content
             "I'm posting on pump.io" 
 
@@ -21,7 +23,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
         This is who posted the Note (Person object)
 
-            >>> my_note = PyPump.Note("I'm posting on pump.io")
+            >>> my_note = pump.Note("I'm posting on pump.io")
             >>> my_note.actor
             <Person: Tsyesika@pump.megworld.co.uk>
 
