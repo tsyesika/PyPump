@@ -20,6 +20,7 @@
 import urllib.request
 import urllib.error
 import urllib.parse
+import json
 
 import oauth.oauth as oauth
 import loader
@@ -129,7 +130,7 @@ class PyPump(object):
         if data:
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
-        # make the oauth request
+
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, 
                                                                    http_method=method, http_url="%s%s/%s" % (
                                                                             self.proto, self.server, endpoint)
@@ -150,8 +151,8 @@ class PyPump(object):
                     request.add_header("Content-Type", "application/json")
                     request.data = data.encode()
                 return json.loads(self.pump.open(request).read().decode("utf-8"))
-            except:
-                attempts_done += 0
+            except Exception:
+                attempts_done += 1
 
         return '' # failed :(
 
