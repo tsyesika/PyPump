@@ -17,11 +17,12 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import urllib.request, urllib.error, urllib.parse
-import json
+import urllib.request
+import urllib.error
+import urllib.parse
 
 import oauth.oauth as oauth
-
+import loader
 
 class PyPumpException(Exception):
     pass
@@ -32,6 +33,8 @@ class PyPump(object):
     PARAM_TOKEN_SECRET = "oauth_token_secret"
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
+
+    loader = None
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="web", token=None, 
@@ -63,6 +66,8 @@ class PyPump(object):
         else:
             self.proto = "http://"
         
+        self.loader = loader.Loader(self)
+
         # oauthy stuff
         if not (key and secret):
             # okay we should assume then we're dynamically registrering a client
@@ -96,135 +101,6 @@ class PyPump(object):
     def get_token(self):
         """ This is for when we don't have a token but we've registered one (by asking the user) """
         return (self.token, self.token_secret)
-
-    ##
-    # pump.io specific stuff
-    ##
-    def get_note(self, pumpid, otype="note"):
-        """ Gets a note based upon an ID (at endpoint <server>/api/<type>/<pumpid> """
-        if not self.nickname:
-            raise PyPumpException("Please set the nickname (see PyPump.set_nickname(username)")
-        
-        # check they have stripped the ID identifiers off
-        pumpid = pumpid.split(":")[-1]
-
-        endpoint = "api/{type}/{oid}".format(type=otype, oid=pumpid)
-
-        data = self.request(endpoint)
-        return data
-
-    def inbox(self, inbox="", direct=False):
-        """ This uses the /api/user/<self.nickname>/inbox endpoint.
-        This is for reading posts sent to <self.nickname>
-        inbox = these values could be 'major' or 'minor'
-        direct = this selects the direct inbox (notes to 'to' or 'bto')
-        """
-        if not self.nickname:
-            raise PyPumpException("Please set the nickname (see PyPump.set_nickname(username)")
-
-        if not inbox in ["major", "minor"]:
-            raise PyPumpException("Invalid inbox %s.")
-
-        endpoint = "api/user/%s/inbox" % self.nickname
-
-        if direct:
-            endpoint += "/direct"
-
-        if inbox:
-            endpoint += "/%s" % inbox
-        
-        # make request and decode
-        data = self.request(endpoint)
-        return data
-
-    def follow(self, nickname):
-        """ This will use the api/user/<nickname>/feed endpoint to make a follow activity
-        nickname = the ID of the person you would like to follow. e.g. Tsyesika@microca.st
-        """
-        if not "@" in nickname:
-            # oh they didn't give a server (i.e. nick@server)
-            # lets add the current server as an assumption
-            nickname = "%s@%s" % (nickname, self.server)
-
-        # all id's for this need acct: prefix
-        if not nickname.startswith("acct:"):
-            nickname = "acct:%s" % nickname
-
-        post = {
-            "verb":"follow",
-            "object":{
-                "objectType":"person",
-                "id":nickname
-            }
-        }
-
-        try:
-            return self.feed(post)
-        except:
-            return None # probably already following them.
-
-    def unfollow(self, nickname):
-        """ This will use the api/user/<nickname>/feed endpoint to make a unfollow activity
-        This will unfollow a user if you're following them (returning a True if you have
-        unfollowed them successfully and a False if it failed (maybe because you're not following them))
-        """
-
-        if not "@" in nickname:
-            nickname = "%s@%s" % (nickname, self.server)
-
-        # all id's for this need the acct: prefix
-        if not nickname.startswith("acct:"):
-            nickname = "acct:%s" % nickname
-
-        post = {
-            "verb":"stop-following",
-            "object":{
-                "objectType":"person",
-                "id":nickname
-            }
-        }
-
-        try:
-            return self.feed(post)
-        except:
-            return None # probably weren't follwoing to start with.
-
-
-    def feed(self, data=""):
-        """ This uses the /api/user/<nickname>/feed endpoint.
-        This where you post new activities and where you can read other users activities
-        """
-
-        if not self.nickname:
-            raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
-
-        endpoint = "api/user/%s/feed" % self.nickname
-        data = self.request(endpoint, method="POST", data=data, attempts=1)
-        
-        return data
-
-
-
-    def post_note(self, note):
-        """ This will post a note for a user """
-
-        if not self.nickname:
-            raise PyPumpException("Please set the nickname (see PumpIO.set_nickname(username)")
-
-        if not note:
-            # oh someone tried to post a blank note, remove
-            raise PyPumpException("can't post blank note")
-
-        post = {
-            "verb":"post",
-            "object":{
-                "objectType":"note",
-                "content":note
-            }
-        }
-
-        return self.feed(post)
-
 
     def set_nickname(self, nickname):
         """ This sets the nickname being used """

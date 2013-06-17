@@ -18,6 +18,8 @@
 from datetime import datetime
 
 class Person:
+
+    TYPE = "person"
     
     id = ""
     username = ""

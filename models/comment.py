@@ -17,25 +17,23 @@
 
 from datetime import datetime
 
-class Note(object):
-    
-    content = ""
-    actor = None # who posted.
-    updated = None # last time this was updated
-    published = None # When this was published
+class Comment:
 
-    # where to?
-    to = []
-    cc = []
+    TYPE = "comment"
+    
+    body = ""
+    note = None # note it's a comment to
+    updated = None
+    published = None
     likes = []
 
-    def __init__(self, content, to, actor, published=None, updated=None):
-        self.content = content
-        self.to = to
-        self.actor = actor
-
+    def __init__(self, body, note, published=None, updated=None, likes=[]):
+        body = body
+        note = note
+        likes = likes
+        
         if published:
-            self.published = published
+            self.published = published 
         else:
             self.published = datetime.now()
 
@@ -43,21 +41,16 @@ class Note(object):
             self.updated = updated
         else:
             self.updated = self.published
-    
-    def comment(self, comment):
-        """ Posts a comment """
+
+    def like(self):
+        """ Will like the comment """
+        pass
+
+    def unlike(self):
+        """ If comment is liked, it will unlike it """
         pass
 
     def delete(self):
-        """ Delete's the note """
+        """ Will delete the comment if the comment is posted by you """
         pass
 
-    def like(self):
-        """ Likes the Note """
-        pass
-
-    def __repr__(self):
-        return self.content
-   
-    def __str__(self):
-        return self.__repr__()

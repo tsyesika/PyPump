@@ -15,17 +15,19 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-class Image:
-    
-    # we need some methods to go grab the image for us.
+class Location:
 
-    url = ""
+    TYPE = "location"
 
-    def __init__(self, url):
-        self.url = url
+    name = ""
+
+    def __init__(self, name):
+        self.name = name
 
     def __repr__(self):
-        return self.url
+        return self.name
 
     def __str__(self):
         return self.__repr__()
+
+    # more will come later, I'm thinking hooks with OSM?
