@@ -2,9 +2,7 @@
 Tutorial
 ========
 
-**NOTE:** This tutorial is prep for an API that does not yet actually
- exist... we're doing the documentation driven development route.  But
- this is what it should look like! ;)
+.. note:: This tutorial is prep for an API that does not yet actually exist... we're doing the documentation driven development route.  But this is what it should look like! ;)
 
 PyPump and the Pump API
 -----------------------
@@ -54,82 +52,74 @@ mizbunny@example.org.  We want to check what our latest messages
 are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
-  >>> from pypump import PyPump
-  >>> pump = PyPump("mizbunny@example.org", client_name="Test.io", secure=True)
-  # will return [<client key>, <client secret>, <expirey>]
-  >>> client_credentials = pump.get_registration()
-  # will return [<token>, <secret>]
-  >>> client_tokens = pump.get_token()
+      >>> from PyPump.PyPump import PyPump
+      >>> pump = PyPump("mizbunny@example.org", client_name="Test.io", secure=True)
+      >>> client_credentials = pump.get_registration()
+      # will return [<token>, <secret>]
+      >>> client_tokens = pump.get_token()
 
-(TODO: does this open a browser?  What's going on here?  How is
-the user authenticated?)
+The PyPump call will try to verify with oauth, You may wish to override how it asks for authentication.
+PyPump by default writes to standard out a URL for the user to click and reads in from standard in for a verification
+code presented by the webserver.
 
 You should store the client credentials somewhere.  You can now
 reconnect like so::
 
-  >>> pump = PyPump(
-  ...          "mizbunny@example.org",
-  ...          key=client_credentials[0], # the client key
-  ...          secret=client_credentials[1], # the client secret
-  ...          token=client_tokens[0], # the token key
-  ...          token_secret=client_tokens[1], # the token secret
-  ...          secure=True) # for using HTTPS
+    >>> pump = PyPump(
+    ...          "mizbunny@example.org",
+    ...          key=client_credentials[0], # the client key
+    ...          secret=client_credentials[1], # the client secret
+    ...          token=client_tokens[0], # the token key
+    ...          token_secret=client_tokens[1], # the token secret
+    ...          secure=True) # for using HTTPS
 
 Okay, we're connected!  Next up, we want to check out what our last 30
 messages are.  PyPump supports python-style index slicing::
 
-  >>> recent_messages = pump.inbox[:30]  # get last 30 messages
+    >>> recent_messages = pump.inbox[:30]  # get last 30 messages
 
 We could print out each of the most recent messages like so::
 
-  >>> for message in recent_messages:
-  >>>     print message.body
+    >>> for message in recent_messages:
+    >>>     print message.content
 
 Maybe we're just looking at our most recent message, and see it's from
 our friend Evan.  It seems that he wants to invite us over for a
 dinner party::
 
-  >>> message = recent_messages[0]
-  >>> message
-  <Notice by evan at 04/05/2013>
-  >>> message.author
-  <User evan@e14n.com>
-  >>> message.body
-  "Yo, want to come over to dinner?  We're making asparagus!"
+    >>> message = recent_messages[0]
+    >>> message
+    <Notice by evan at 04/05/2013>
+    >>> message.author
+    <User evan@e14n.com>
+    >>> message.content
+    "Yo, want to come over to dinner?  We're making asparagus!"
 
-We can compose a reply::
+We can comment on the message saying we'd love to::
 
-  >>> from pypump.activities import Notice
-  >>> reply = Notice(
-  ...     pump,
-  ...     body="I'd love to!",
-  ...     reply_to=message.id,
-  ...     to=[message.author])
-  >>> reply.send()
-  
-(Since this Notice activity is being instantiated, it needs a
+    >>> from PyPump.models.comemnt import Comment
+    >>> our_reply = Comment("I'd love to!")
+    >>> message.comment(our_reply) # this is evans message we got above!
+
+(Since this Note activity is being instantiated, it needs a
 reference to our PyPump class instance.  Objects that you get back and
 forth from the API themselves will try to keep track of their own
 parent PyPump object for you.)
 
-We could even favorite the previous message::
+We could even like/favourite the previous message::
 
-  >>> from pypump.activities import Favorite
-  >>> fave = Favorite(
-  ...     pump,
-  ...     subject=message.id)
-
-.. (Is this right?)
+    >>> message.like()
 
 We can also check to see what our buddy's public feed is.  Maybe
 he's said some interesting things?::
 
-  >>> evan = message.author
-  >>> for messages in evan.inbox:
-  >>>     print message.body
+    >>> evan = message.author
+    >>> for messages in evan.inbox:
+    >>>     print message.content
 
-.. TODO: Put a photo, or subscription, or some other activity example
-   here...
+Prehaps we want to know a bit about evan::
+
+    >>> print evan.summery  
 
 .. Maybe we took a picture, and we want to post that picture to our
 .. public feed so everyone can see it.  We can do this by posting it to
@@ -140,12 +130,11 @@ he's said some interesting things?::
 ..   ...     pump,
 ..   ...     subject=
 
-Want to see what the activity actually looks like?
-All activities in pump.io have a .to_json() method::
+Want to see what the model actually looks like?
+All activities in pump.io have a .seralize method::
 
-  >>> import json
-  >>> print message.to_json(indent=2)
-  {
+    >>> print message.to_json(indent=2)
+    {
     "id": "http://coding.example/api/activity/bwkflwken",
     "actor": {
       "id": "acct:bwk@coding.example",
@@ -166,14 +155,14 @@ All activities in pump.io have a .to_json() method::
     "links": [
         {"rel": "self", "href": "http://coding.example/api/activity/bwkflwken"}
     ]
-  }
+    }
 
-(The indent attribute here is passed to json.to_json to give prettier output.)
+(The indent attribute here is passed to  to give prettier output.)
 
 .. (Yes, that was stolen from the Pump API docs :))
 
 
-(similarly, all activity classes provide a from_json() class method).
+(similarly, all activity classes provide a unserialize class method).
 
 .. Things missing:
    - How to post to your public feed, as opposed to a list of specific
