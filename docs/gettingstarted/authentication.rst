@@ -11,7 +11,7 @@ Example
 
 The following will create (for the first time) a connection to a pump.io server for the user Tsyesika@pump.megworld.co.uk for my client named "Test.io"::
 
-    >>> from PyPump.PyPump import PyPump
+    >>> from pypump import PyPump
     >>> pump = PyPump("Tsyesika@pump.megowrld.co.uk", client_name="Test.io", secure=True)
     >>> client_credentials = pump.get_registration() # will return [<client key>, <client secret>, <expirey>]
     >>> client_tokens = pump.get_token() # will return [<token>, <secret>]

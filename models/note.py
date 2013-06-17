@@ -18,14 +18,13 @@
 import json
 from datetime import datetime
 
-class Note(object):
+from models import AbstractModel
+
+class Note(AbstractModel):
     
     TYPE = "note"
     VERB = "post"
-    pump = None
-
-
-    pump = None
+    TSFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
     content = ""
     actor = None # who posted.
@@ -37,8 +36,8 @@ class Note(object):
     cc = []
     likes = []
 
-    def __init__(self, content, to, actor, published=None, updated=None, pypump=None):
-        self.pump = pypump if pypump else self.pump
+    def __init__(self, content, to, actor, published=None, updated=None, *args, **kwargs):
+        super(Note, self).__init__(*args, **kwargs)
 
         self.content = content
         self.to = to
@@ -54,12 +53,15 @@ class Note(object):
         else:
             self.updated = self.published
 
+    def send(self):
+        """ Sends the post to the server """
         # post it!
         self.pump.request(self.ENDPOINT, method="POST", data=self.serialize())
     
     def comment(self, comment):
         """ Posts a comment """
-        pass
+        # get self.id?
+        comment.send()
 
     def delete(self):
         """ Delete's the note """
@@ -67,7 +69,21 @@ class Note(object):
 
     def like(self):
         """ Likes the Note """
+        pass    
+
+    def unlike(self):
+        """ Unlikes the Note """
         pass
+
+    # synonyms
+    def favorite(self, *args, **kwargs):
+        """ Maps to like """
+        return self.like(*args, **kwargs)
+
+    def unfavorite(self, *args, **kwargs):
+        """ Maps to unlike """
+        return self.unlike(*args, **kwargs)
+
 
     def __repr__(self):
         return self.content
@@ -86,3 +102,17 @@ class Note(object):
         }
 
         return json.dumps(query)
+
+    @staticmethod
+    def unserialize(self, data):
+        """ Goes from JSON -> Note object """
+        query = json.loads(data)
+        return Note(
+            content=data["content"],
+            to=data["to"], # todo: convert to person objects
+            #cc=data["cc"],
+            actor=data["author"]["preferredUsername"],
+            pypump=self.pump,
+            updated=datetime.strptime(data["updated"], self.TSFORMAT),
+            published=datetime.strptime(data["published"], self.TSFORMAT),
+        )

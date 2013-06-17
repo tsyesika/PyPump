@@ -17,19 +17,21 @@
 
 from models import AbstractModel
 
-class Image(AbstractModel):
-    
-    TYPE = "image"
+class Inbox(AbstractModel):
 
-    # we need some methods to go grab the image for us.
-    url = ""
+    TYPE = "inbox"
 
-    def __init__(self, url, *args, **kwargs):
-        super(Image, self).__init__(self, *args, **kwargs)
-        self.url = url
+    _inbox = []
+    _limit = []
 
-    def __repr__(self):
-        return self.url
+    def __getitem__(self, key):
+        """ Adds Inbox[<inbox>] """
+        return self._inbox[key]
 
-    def __str__(self):
-        return self.__repr__()
+    def __getslice__(self, start, end):
+        """ allows for a limit """
+        self._limit = [start, end]
+
+    def __len__(self):
+        """ Gives amount of items in the inbox """
+        return len(self._inbox)
