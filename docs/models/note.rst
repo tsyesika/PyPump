@@ -13,7 +13,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
         This is the content of the Note
 
-	    >>> my_note = Note("I'm posting on pump.io")
+	    >>> my_note = PyPump.Note("I'm posting on pump.io")
             >>> my_note.content
             "I'm posting on pump.io" 
 
@@ -21,7 +21,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
         This is who posted the Note (Person object)
 
-            >>> my_note = Note("I'm posting on pump.io")
+            >>> my_note = PyPump.Note("I'm posting on pump.io")
             >>> my_note.actor
             <Person: Tsyesika@pump.megworld.co.uk>
 
@@ -68,15 +68,13 @@ Example
 
 This shows making a new post
 
-    >>> from models.note import Note
-    >>> my_note = Note("This is a new note!")
+    >>> my_note = pump.Note("This is a new note!") # pump is instance of PyPump
 
 You want to comment?
 
 
 
-    >>> from models.comment import Comment
-    >>> my_comment = Comment("I'm commenting on my note")
+    >>> my_comment = pump.Comment("I'm commenting on my note")
     >>> my_note.comment(my_comment)
 
 

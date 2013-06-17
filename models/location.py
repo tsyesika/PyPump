@@ -15,17 +15,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-class Location:
+from models import AbstractModel
+
+class Location(AbstractModel):
 
     TYPE = "location"
 
-    pump = None
-
     name = ""
 
-    def __init__(self, name, pypump=None):
-        self.pump = pypump if pypump else self.pump
-
+    def __init__(self, name, *args, **kwargs):
+        super(Location, self).__init__(*args, **kwargs)
         self.name = name
 
     def __repr__(self):

@@ -17,20 +17,20 @@
 
 from datetime import datetime
 
-class Comment:
+from models import AbstractModel
+
+class Comment(AbstractModel):
 
     TYPE = "comment"
 
-    pump = None
-    
     body = ""
     note = None # note it's a comment to
     updated = None
     published = None
     likes = []
 
-    def __init__(self, body, note, published=None, updated=None, pypump=None):
-        self.pump = pypump if pypump else: self.pump
+    def __init__(self, body, note, published=None, updated=None, *args, **kwargs):
+        super(Comment, self).__init__(*args, **kwargs)
 
         body = body
         note = note

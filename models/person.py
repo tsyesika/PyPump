@@ -17,12 +17,12 @@
 
 from datetime import datetime
 
-class Person:
+from models import AbstractModel
+
+class Person(AbstractModel):
 
     TYPE = "person"
 
-    pump = None
-    
     id = ""
     username = ""
     display_name = ""
@@ -37,7 +37,7 @@ class Person:
 
     def __init__(self, id, username, url, summery="", 
                  display_name="", image=None, published=None, 
-                 updated=None, location=None, me=None, pypump=None):
+                 updated=None, location=None, me=None, *args, **kwargs):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
@@ -50,7 +50,7 @@ class Person:
         location - where the user resides (default: No location/None)
         me - you, used to set is_self, if not given it assumes this person _isn't_ you
         """
-        self.pump = pypump if pypump else self.pump
+        super(Person, self).__init__(*args, **kwargs)
 
         self.id = id
         self.username = username

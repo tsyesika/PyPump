@@ -1,6 +1,6 @@
+from models import AbstractModel
 import imp
 import glob
-import types
 
 class Loader(object):
     
@@ -19,10 +19,11 @@ class Loader(object):
 
     def postload(self, name, model):
         """ Called after loading a plugin with the models """
-        for klass in dir(models):
-            if type(klass) in [types.ClassType]:
-                klsss.pump = self._pypump
-                setattr(self._pypump, name, klass)
+        for klass in dir(model):
+            klass_obj = getattr(model, klass)
+            if isinstance(klass_obj, type) and issubclass(klass_obj, AbstractModel):
+                klass_obj.pump = self._pypump
+                setattr(self._pypump, klass, klass_obj)
 
     def load_model(self, path):
         """ Loads a model from a path """
@@ -35,5 +36,5 @@ class Loader(object):
         """ Gets the name from the path """
         # todo: make it work on non-unix systems
         name = path.split("/")[-1]
-        name.replace(".py", "")
+        name = name.replace(".py", "")
         return name

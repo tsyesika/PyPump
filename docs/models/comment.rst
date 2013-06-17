@@ -13,7 +13,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
         This is the content of the Comment (string)
 
-	    >>> my_comment = Comment("This is a comment")
+	    >>> my_comment = PyPump.Comment("This is a comment")
             >>> my_comment.content
             "This is a comment" 
 
@@ -21,7 +21,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
         This is who posted the Comment (Person object)
 
-            >>> my_comment = Comment("This is a comment")
+            >>> my_comment = PyPump.Comment("This is a comment")
             >>> my_comment.actor
             <Person: Tsyesika@pump.megworld.co.uk>
 
@@ -62,7 +62,7 @@ This shows making a comment on a note
 
     >>> my_note
     <Note: "This is a note">
-    >>> my_comment = Comment("Oh hey, i'm commenting with PyPump!")
+    >>> my_comment = pump.Comment("Oh hey, i'm commenting with PyPump!") # pump is instance of PyPump
     >>> my_note.comment(my_comment)
 
 You want to like the comment because you think PyPump is cool?
