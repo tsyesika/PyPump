@@ -26,7 +26,6 @@ class Note(AbstractModel):
     
     TYPE = "note"
     VERB = "post"
-    TSFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
     content = ""
     actor = None # who posted.
@@ -123,7 +122,7 @@ class Note(AbstractModel):
 
 
     def __repr__(self):
-        return "<Note by %s at %s>" % (self.actor["displayName"], self.published.strftime("%Y/%m/%d"))
+        return "<Note by %s at %s>" % (self.actor, self.published.strftime("%Y/%m/%d"))
    
     def __str__(self):
         return self.__repr__()
@@ -143,7 +142,7 @@ class Note(AbstractModel):
     @staticmethod
     def unserialize(data):
         """ Goes from JSON -> Note object """
-        obj = data["object"]        
+        obj = data["object"]
         
         links = {}
         if "proxy_url" in obj["likes"]:
@@ -160,7 +159,7 @@ class Note(AbstractModel):
             content=obj["content"],
             to=[], # todo: yeh
             cc=[], # todo: ^^
-            actor=data["actor"],
+            actor=Note._pump.Person.unserialize(data["actor"]),
             updated=datetime.strptime(data["updated"], Note.TSFORMAT),
             published=datetime.strptime(data["published"], Note.TSFORMAT),
             links=links,

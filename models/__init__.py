@@ -19,11 +19,14 @@ import json
 
 class AbstractModel:
 
-    __mapping = {
+    _mapping = {
         "objectType":"TYPE",
     }
 
     _pump = None
+
+    # constants
+    TSFORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
@@ -63,10 +66,10 @@ class AbstractModel:
 
     def remap(self, data):
         """ Remaps """
-        if data in self.__mapping.keys():
-            return self.__mappping[data]
+        if data in self._mapping.keys():
+            return self._mappping[data]
         elif data in self.__mapping.values():
-            for k, v in self.__mapping.items():
+            for k, v in self._mapping.items():
                 if data == v:
                     return k
 
