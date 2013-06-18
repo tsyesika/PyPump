@@ -21,6 +21,12 @@ from models import AbstractModel
 
 class Person(AbstractModel):
 
+    _mapping = {
+        "preferredUsername":"username",
+        "displayName":"display_name",
+    }
+
+
     TYPE = "person"
 
     id = ""
@@ -30,19 +36,19 @@ class Person(AbstractModel):
     updated = None # Last time this was updated
     published = None # when they joined (I think?)
     location = None # place item
-    summery = "" # lil bit about them =]    
+    summary = "" # lil bit about them =]    
     image = None # Image items
 
     is_self = False # is this you?
 
-    def __init__(self, id, username, url, summery="", 
+    def __init__(self, id="", username="", url="", summary="", 
                  display_name="", image=None, published=None, 
                  updated=None, location=None, me=None, *args, **kwargs):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
         url - url to profile
-        summery - summer of the user
+        summary - summary of the user
         display_name - what the user want's to show up (defualt: username)
         image - image of the user (default: No image/None)
         published - when the user joined pump (default: now)
@@ -55,7 +61,7 @@ class Person(AbstractModel):
         self.id = id
         self.username = username
         self.url = url
-        self.summery = summery
+        self.summary = summary
         self.image = image        
 
         if display_name:
@@ -85,7 +91,26 @@ class Person(AbstractModel):
         pass
 
     def __repr__(self):
-        return self.display_name
+        return self.id.lstrip("acct:")
 
     def __str__(self):
         return self.__repr__()
+
+    @staticmethod
+    def unserialize(data, obj=None):
+        """ Goes from JSON -> Person object """
+        self = Person() if obj is None else obj
+        
+        username = data["preferredUsername"]
+        display = data["displayName"]
+
+        self.id = "acct:%s@%s" % (username, self._pump.server)
+        self.username = username
+        self.display_name = display
+        self.url = data["links"]["self"]["href"]
+        self.summary = data["summary"]
+        self.published = datetime.strptime(data["published"], self.TSFORMAT)
+        self.updated = datetime.strptime(data["updated"], self.TSFORMAT)
+        self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
+
+        return self
