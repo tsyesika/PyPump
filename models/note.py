@@ -73,7 +73,7 @@ class Note(AbstractModel):
 
         return self._likes
 
-    likes = property(fset=_get_likes)
+    likes = property(fget=_get_likes)
 
     def _get_comments(self): 
         """ Gets the comments """
@@ -82,12 +82,12 @@ class Note(AbstractModel):
 
         endpoint = self._links["comments"]
         comments = self._pump.request(endpoint)
-        for k,v in comments["items"].items():
-            self._comment.append(Comment.unserialize(v))
+        for v in comments["items"]:
+            self._comments.append(Comment.unserialize(v))
 
         return self._comments
 
-    comments = property(fset=_get_comments)
+    comments = property(_get_comments)
 
     def send(self):
         """ Sends the post to the server """
@@ -150,8 +150,9 @@ class Note(AbstractModel):
         else:
             links["likes"] = obj["likes"]["url"]
 
-        if "proxy_url" in obj["replies"]:
-            links["comments"] = obj["replies"]["proxy_url"]
+        if "pump_io" in obj["replies"] and "proxyURL" in obj["replies"]["pump_io"]:
+            url = obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
+            links["comments"] = url.split("/", 1)[1]
         else:
             links["comments"] = obj["replies"]["url"]
 
