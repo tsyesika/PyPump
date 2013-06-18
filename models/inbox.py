@@ -25,48 +25,84 @@ class Inbox(AbstractModel):
     _inbox = []
     _count = None
     _offset = None
+    author = None
 
     def __getitem__(self, key):
         """ Adds Inbox[<inbox>] """
-        return self._inbox[key]
+        if isinstance(key, slice):
+            return self.__getslice__(key)
+        count = 1
+        offset = key
+        data = self.__request(offset=offset, count=count)
+        return self.unserialize(data, obj=self) 
 
-    def __getslice__(self, start=0, end=None):
+    def __getslice__(self, s):
         """ allows for a limit """
-        if end:
-            self._count = end - start
-        
-        self.offset = start
+        if s.start and s.stop:
+            count = s.stop - s.start
+            offset = s.start
+        elif s.stop:
+            count = s.stop
+            offset = None
+        elif s.start:
+            offset = s.start
+            count = None
 
-        self.__request()
+        data = self.__request(offset=offset, count=count)
+        obj = self.unserialize(data, obj=self)
+
+        if s.step:
+            return obj._inbox[::s.step]
+        else:
+            return obj._inbox
+
+    def __iter__(self):
+        """ Produces an iterator """
+        if self._inbox:
+            return self._inbox.__iter__()
+        
+        data = self.__request()
+        return self.unseralize(data, obj=self).__iter__()
 
     def __len__(self):
         """ Gives amount of items in the inbox """
         return len(self._inbox)
 
-    def __request(self):
+    def __request(self, offset=None, count=None):
         """ Makes a request """
         param = ""
 
-        if self._count:
-            param += "count=%s" % self._count
+        if count:
+            param += "count=%s" % count
 
-        if self._offset:
-            param = "%s+offset=%s" % (param, self._offset) if param else "offset=%s" % self._offset
+        if offset:
+            param = "%s&offset=%s" % (param, offset) if param else "offset=%s" % offset
 
         endpoint = self.ENDPOINT % self.author.preferredUsername
 
         if param:
-            endpoint = "%s&%s" % param
+            endpoint = "%s?%s" % (endpoint, param)
 
         data = self._pump.request(endpoint)
 
-        self.unserialize(data)
+        return data
 
     @staticmethod
-    def unserialize(data):
+    def unserialize(data, obj=None):
         """ Produces self._index from JSON data """
-        self = Inbox()
-        for v in data["items"]:
+        if obj is None:
+            self = Inbox()
+        else:
+            self = obj
+
+        if type(data) == list:
+            items = data
+        elif type(data) == dict:
+            items = data["items"]
+        else:
+            raise Exception("Unknown type: %s ('%s')" % (type(data), data))
+
+        for v in items:
             # do we know about it?
             obj_type = v["object"]["objectType"].capitalize()
 
