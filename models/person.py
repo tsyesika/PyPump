@@ -112,5 +112,6 @@ class Person(AbstractModel):
         self.updated = datetime.strptime(data["updated"], self.TSFORMAT)
         self.published = datetime.strptime(data["published"], self.TSFORMAT) if "published" in data else self.updated
         self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
+        self.location = self._pump.Location.unserialize(data["location"])
 
         return self

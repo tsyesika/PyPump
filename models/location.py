@@ -33,4 +33,13 @@ class Location(AbstractModel):
     def __str__(self):
         return self.__repr__()
 
+    @staticmethod
+    def unserialize(data, obj=None):
+        name = data["displayName"]
+        if obj is None:
+            return Location(name=name)
+        else:
+            obj.name = name
+            return obj
+
     # more will come later, I'm thinking hooks with OSM?
