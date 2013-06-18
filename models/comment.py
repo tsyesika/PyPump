@@ -23,18 +23,23 @@ class Comment(AbstractModel):
 
     TYPE = "comment"
 
-    body = ""
-    note = None # note it's a comment to
+    content = ""
+    summary = ""
+    note = None
     updated = None
+    actor = None
     published = None
     likes = []
 
-    def __init__(self, body, note, published=None, updated=None, *args, **kwargs):
+    def __init__(self, content, summary, actor, note=None,published=None, updated=None, *args, **kwargs):
         super(Comment, self).__init__(*args, **kwargs)
 
-        body = body
-        note = note
-        
+        self.content = content
+        self.summary = summary
+        self.note = note
+        self.actor = actor
+        self.author = self.actor
+
         if published:
             self.published = published 
         else:
@@ -44,6 +49,12 @@ class Comment(AbstractModel):
             self.updated = updated
         else:
             self.updated = self.published
+
+    def __repr__(self):
+        return "<Comment by %s at %s>" % (self.actor, self.published.strftime("%Y/%m/%d"))
+
+    def __str__(self):
+        return self.__repr__()
 
     def like(self):
         """ Will like the comment """
@@ -57,3 +68,30 @@ class Comment(AbstractModel):
         """ Will delete the comment if the comment is posted by you """
         pass
 
+
+    @staticmethod
+    def unserialize(data, obj=None):
+        """ from JSON -> Comment """
+        if "object" in data:
+            published = datetime.strptime(data["object"]["published"], Comment.TSFORMAT)
+            updated = datetime.strptime(data["object"]["updated"], Comment.TSFORMAT)
+            summary = data["content"]
+            content = data["object"]["content"]
+        else:
+            published = datetime.strptime(data["published"], Comment.TSFORMAT)
+            updated = datetime.strptime(data["updated"], Comment.TSFORMAT)
+            summary = ""
+            content = data["content"]
+
+        person = data["actor"] if "actor" in data else data["author"]
+        actor = Comment._pump.Person.unserialize(person)
+       
+        if obj is None:
+            return Comment(content=content, summary=summary, actor=actor, published=published, updated=updated)
+        
+        obj.content = content
+        obj.summary = summary
+        obj.published = published
+        obj.updated = updated
+        return obj
+        

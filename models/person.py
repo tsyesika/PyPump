@@ -109,8 +109,8 @@ class Person(AbstractModel):
         self.display_name = display
         self.url = data["links"]["self"]["href"]
         self.summary = data["summary"]
-        self.published = datetime.strptime(data["published"], self.TSFORMAT)
         self.updated = datetime.strptime(data["updated"], self.TSFORMAT)
+        self.published = datetime.strptime(data["published"], self.TSFORMAT) if "published" in data else self.updated
         self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
 
         return self
