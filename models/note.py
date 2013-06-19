@@ -18,6 +18,8 @@
 import json
 from datetime import datetime
 
+from exceptions.ImmutableException import ImmutableException
+
 from models import AbstractModel
 from models.person import Person
 from models.comment import Comment
@@ -26,6 +28,7 @@ class Note(AbstractModel):
     
     TYPE = "note"
     VERB = "post"
+    ENDPOINT = "/api/user/%s/feed"
 
     content = ""
     actor = None # who posted.
@@ -33,22 +36,24 @@ class Note(AbstractModel):
     published = None # When this was published
 
     # where to?
-    to = []
-    cc = []
+    _to = []
+    _cc = []
+    
 
     _likes = [] # cache of likes
     _comments = [] # cache of comemnts
 
     _links = {}
 
-    def __init__(self, content, to, actor, published=None, updated=None, links=None, *args, **kwargs):
+    def __init__(self, content, to=None, cc=None, actor=None, published=None, updated=None, links=None, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
 
         self.content = content
-        self.to = to
-        self.actor = actor
+        self._to = [] if to is None else to
+        self._cc = [] if cc is None else cc
+        self._actor = actor
 
         if published:
             self.published = published
@@ -89,11 +94,45 @@ class Note(AbstractModel):
 
     comments = property(_get_comments)
 
+    def set_to(self, people):
+        """ Allows you to set/change who it's to """
+        # check if it's been locked
+        if isinstance(self._to, tuple):
+            raise ImmutableError("people", self)
+
+        if isinstance(people, list):
+            self._to = people
+        elif isinstance(people, str):
+            self._to = [people]
+        else:
+            raise TypeError("Unknown type %s (%s)" % (type(people), people))
+
+    to = property(fset=set_to)
+
+    def set_cc(self, people):
+        """ Allows you to set/change who it's cc'ed to """
+        # check if it's been locked
+        if isinstance(self._cc, tuple):
+            raise ImmutableError("people", self)
+
+        if isinstance(people, list):
+            self._cc = people
+        elif isinstance(people, str):
+            self._cc = [people]
+        else:
+            raise TypeError("Unknown type %s (%s)" % (type(people), people))
+
+    cc = property(fset=set_cc, fget=_cc)
+
     def send(self):
         """ Sends the post to the server """
+        # lock the info in
+        self._to = tuple(self._to)
+        self._cc = tuple(self._cc)
+
         # post it!
-        self.pump.request(self.ENDPOINT, method="POST", data=self.serialize())
-    
+        data = self._pump.request(self.ENDPOINT % self._pump.nickname, method="POST", data=self.serialize())
+
     def comment(self, comment):
         """ Posts a comment """
         # get self.id?
@@ -158,8 +197,8 @@ class Note(AbstractModel):
 
         return Note(
             content=obj["content"],
-            to=[], # todo: yeh
-            cc=[], # todo: ^^
+            to=(), # todo still.
+            cc=(), # todo: ^^
             actor=Note._pump.Person.unserialize(data["actor"]),
             updated=datetime.strptime(data["updated"], Note.TSFORMAT),
             published=datetime.strptime(data["published"], Note.TSFORMAT),
