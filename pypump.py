@@ -127,10 +127,10 @@ class PyPump(object):
         if "/" == endpoint[0]:
             endpoint = endpoint[1:] # remove inital / as we add it
 
-        if data:
+        if data and isinstance(data, dict):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
-
+        
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, 
                                                                    http_method=method, http_url="%s%s/%s" % (
                                                                             self.proto, self.server, endpoint)
