@@ -20,14 +20,23 @@ from models import AbstractModel
 class Image(AbstractModel):
     
     TYPE = "image"
+    ENDPOINT = "/api/user/%s/feed"
 
     # we need some methods to go grab the image for us.
     _full_url = ""
     _thumb_url = ""
 
-    def __init__(self, full_url, thumb_url=None, width=None, height=None, *args, **kwargs):
+    actor = None
+    author = actor
+    summary = ""
+    id = None
+
+    def __init__(self, full_url, id, summary=None, actor=None, thumb_url=None, width=None, height=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
+        self.id = id
+        self.summary = summary
+        self.actor = actor
         self._full_url = full_url
         self._thumb_url = full_url if thumb_url is None else thumb_url
 
@@ -57,9 +66,66 @@ class Image(AbstractModel):
     
     thumb_url = property(__get_thumb_url)
 
+    def like(self, verb="like"):
+        """ This will like the image """
+        activity = {
+            "verb":verb,
+            "object":{
+                "id":"",
+                "objectType":self.TYPE,
+            },
+        }
+    
+        endpoint = self.ENDPOINT % self._pump.nickname
+
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if "error" in data:
+            raise PumpError(data["error"])
+        
+        return True
+
+    def favorite(self):
+        return self.like(verb="favorite")
+
+    def unlike(self, verb="unlike"):
+        activity = {
+            "verb":verb,
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            },
+        }
+
+        endpoint = self.ENDPOINT % self.nickname
+        
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if "error" in data:
+            raise PumpError(data["error"])
+
+        return True
+
+    def unfavorite(self):
+        return self.unlike(verb="unfavorite")
+
     @staticmethod
     def unserialize(data, obj=None):
         full_url = None
+
+        data = data.get("object", data)
+
+        iid = data["id"] if "id" in data else "" 
+
+        actor = data["author"] if "author" in data else None
+        author = data["actor"] if "actor" in data else actor
+
+        if "location" in data:
+            location = Image._pump.unserialize(data["location"])
+        else:
+            location = None
+
+        summary = data["summary"] if "summary" in data else ""
 
         if "fullImage" in data:
             full_obj = data["fullImage"]
@@ -72,11 +138,15 @@ class Image(AbstractModel):
         width = data["width"] if "width" in data else None
         height = data["height"] if "height" in data else None
 
+
         full_url = url if full_url is None else full_url
 
         if obj is None:
-            return Image(full_url=full_url, thumb_url=url, height=height, width=width)
+            return Image(id=iid, summary=summary, full_url=full_url, thumb_url=url, height=height, width=width, actor=actor)
         else:
+            obj.id = iid
+            obj.actor = actor
+            obj.summary = summary
             obj._full_url = full_url
             obj._thumb_url = url
             obj.height = height
