@@ -15,6 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+from exceptions import PyPumpException 
 from models import AbstractModel
 
 class Inbox(AbstractModel):
@@ -25,7 +26,20 @@ class Inbox(AbstractModel):
     _inbox = []
     _count = None
     _offset = None
-    author = None
+    actor = None
+    author = actor
+
+    def __init__(self, username=None, feed=None):
+        feed = "" if feed is None else "/%s" % feed
+        self.ENDPOINT += feed
+        
+        if isinstance(username, self._pump.Person):
+            self.actor = username
+            return
+
+        if username is not None:
+            self.actor = self._pump.Person(username)
+            return
 
     def __getitem__(self, key):
         """ Adds Inbox[<inbox>] """
@@ -84,7 +98,11 @@ class Inbox(AbstractModel):
         if offset:
             param = "%s&offset=%s" % (param, offset) if param else "offset=%s" % offset
 
-        endpoint = self.ENDPOINT % self.author.preferredUsername
+        if self.actor is None:
+            # oh dear, we gotta raise an error
+            raise PyPumpException("No actor defined on %s" % self)
+
+        endpoint = self.ENDPOINT % self.actor.username
 
         if param:
             endpoint = "%s?%s" % (endpoint, param)
@@ -94,12 +112,14 @@ class Inbox(AbstractModel):
         return data
 
     @staticmethod
-    def unserialize(data, obj=None):
+    def unserialize(data, obj=None, user=None):
         """ Produces self._index from JSON data """
         if obj is None:
             self = Inbox()
         else:
             self = obj
+
+        self.actor = user
 
         if type(data) == list:
             items = data

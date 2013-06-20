@@ -53,7 +53,7 @@ class Note(AbstractModel):
 
         self._links = links if links else {}
 
-        self.id if nid else None
+        self.id = nid if nid else None
         self.content = content
         self._to = [] if to is None else to
         self._cc = [] if cc is None else cc
@@ -146,7 +146,7 @@ class Note(AbstractModel):
 
     def comment(self, comment):
         """ Posts a comment """
-        # get self.id?
+        comment.note = self
         comment.send()
 
     def delete(self):
@@ -159,7 +159,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST")
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
         
         if "verb" in data and data["verb"] == activity["verb"]:
             self.deleted = True
@@ -177,7 +177,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, methods="POST")
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
 
     def unlike(self, verb="unlike"):
         """ Unlikes the Note """
@@ -189,7 +189,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST")
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
 
     # synonyms
     def favorite(self, *args, **kwargs):
@@ -239,7 +239,7 @@ class Note(AbstractModel):
             return Note.unserialize_to_deleted(date)
 
         obj = data["object"]
-        
+
         links = {}
         if "proxy_url" in obj["likes"]:
             links["likes"] = obj["likes"]["proxy_url"]
@@ -253,7 +253,7 @@ class Note(AbstractModel):
             links["comments"] = obj["replies"]["url"]
 
         return Note(
-            id=obj["id"],
+            nid=obj["id"],
             content=obj["content"],
             to=(), # todo still.
             cc=(), # todo: ^^

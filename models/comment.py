@@ -22,7 +22,10 @@ from models import AbstractModel
 class Comment(AbstractModel):
 
     TYPE = "comment"
+    VERB = "post"
+    ENDPOINT = "/api/user/%s/feed"
 
+    id = None
     content = ""
     summary = ""
     note = None
@@ -31,14 +34,14 @@ class Comment(AbstractModel):
     published = None
     likes = []
 
-    def __init__(self, content, summary, actor, note=None,published=None, updated=None, *args, **kwargs):
+    def __init__(self, content, cid=None, summary=None, note=None, published=None, updated=None, actor=None, *args, **kwargs):
         super(Comment, self).__init__(*args, **kwargs)
 
+        self.id = "" if cid is None else cid
         self.content = content
         self.summary = summary
         self.note = note
         self.actor = actor
-        self.author = self.actor
 
         if published:
             self.published = published 
@@ -56,18 +59,91 @@ class Comment(AbstractModel):
     def __str__(self):
         return self.__repr__()
 
-    def like(self):
+    def like(self, verb="like"):
         """ Will like the comment """
-        pass
+        activity = {
+            "verb":verb,
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            },
+        
+        }
 
-    def unlike(self):
+        endpoint = self.ENDPOINT % self._pump.nickname
+
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if not data:
+            return False        
+
+        if "error" in data:
+            raise PumpError(data["error"])
+
+        return True
+
+    def unlike(self, verb="unlike"):
         """ If comment is liked, it will unlike it """
-        pass
+        activity = {
+            "verb":verb,
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            },
+        }
+
+        if not data:
+            return False
+
+        if "error" in data:
+            raise PumpError(data["error"])
+
+        return True
 
     def delete(self):
         """ Will delete the comment if the comment is posted by you """
-        pass
+        activity = {
+            "verb":"delete",
+            "objecty":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            },
+        }
 
+        if not data:
+            return False
+
+        if "error" in data:
+            raise PumpError(data["error"])
+
+        return True
+
+    def send(self):
+        activity = {
+            "verb":self.VERB,
+            "object":{
+                "objectType":self.TYPE,
+                "content":self.content,
+                "inReplyTo":{
+                    "id":self.note.id,
+                    "objectType":self.note.TYPE,
+                },
+            },
+        }
+    
+        endpoint = self.ENDPOINT % self._pump.nickname
+
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if not data:
+            return False
+
+        if "error" in data:
+            raise PumpException(data["data"])
+
+        self.unserialize(data, obj=self)
+
+        return True
 
     @staticmethod
     def unserialize(data, obj=None):
@@ -87,8 +163,11 @@ class Comment(AbstractModel):
         actor = Comment._pump.Person.unserialize(person)
        
         if obj is None:
-            return Comment(content=content, summary=summary, actor=actor, published=published, updated=updated)
+            cid = data["id"] if "id" in data else ""
+            return Comment(content=content, cid=cid, actor=actor, summary=summary, published=published, updated=updated)
         
+        obj.id = data["id"] if "id" in data else ""
+        obj.actor = actor
         obj.content = content
         obj.summary = summary
         obj.published = published

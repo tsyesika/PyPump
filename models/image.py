@@ -129,7 +129,7 @@ class Image(AbstractModel):
 
         if "fullImage" in data:
             full_obj = data["fullImage"]
-            full_url = Image.unsrialize(full_obj)
+            full_url = Image.unserialize(full_obj)
         
         if "image" in data:
             data = data["image"]

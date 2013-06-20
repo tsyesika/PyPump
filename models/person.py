@@ -40,17 +40,19 @@ class Person(AbstractModel):
     location = None # place item
     summary = "" # lil bit about them =]    
     image = None # Image items
+    inbox = None
 
     is_self = False # is this you?
 
     def __init__(self, webfinger=None, id="", username="", url="", summary="", 
-                 display_name="", image=None, published=None, 
+                 inbox=None, display_name="", image=None, published=None, 
                  updated=None, location=None, me=None, *args, **kwargs):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
         url - url to profile
         summary - summary of the user
+        inbox - This is the persons inbox
         display_name - what the user want's to show up (defualt: username)
         image - image of the user (default: No image/None)
         published - when the user joined pump (default: now)
@@ -89,9 +91,11 @@ class Person(AbstractModel):
                 self.username = username
                 self.server = server
                 self.is_self = False
+                self.inbox = self._pump.Inbox("/api/user/%s/inbox" % username) if inbox is None else inbox
                 return 
 
         self.id = id
+        self.inbox = self._pump.Inbox(self) if inbox is None else inbox
         self.username = username
         self.url = url
         self.summary = summary
@@ -149,8 +153,6 @@ class Person(AbstractModel):
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
-        print("[DEBUG] %s" % data)
-
         if "error" in data:
             raise PumpException(data["error"])
 
@@ -166,6 +168,10 @@ class Person(AbstractModel):
     def unserialize(data, obj=None):
         """ Goes from JSON -> Person object """
         self = Person() if obj is None else obj
+
+        if "verb" in data and data["verb"] in ["follow", "unfollow"]:
+            return None
+
     
         username = data["preferredUsername"]
         display = data["displayName"]
