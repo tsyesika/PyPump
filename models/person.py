@@ -100,7 +100,7 @@ class Person(AbstractModel):
     def unserialize(data, obj=None):
         """ Goes from JSON -> Person object """
         self = Person() if obj is None else obj
-        
+    
         username = data["preferredUsername"]
         display = data["displayName"]
 
@@ -108,10 +108,10 @@ class Person(AbstractModel):
         self.username = username
         self.display_name = display
         self.url = data["links"]["self"]["href"]
-        self.summary = data["summary"]
-        self.updated = datetime.strptime(data["updated"], self.TSFORMAT)
+        self.summary = data["summary"] if "summary" in data else ""
+        self.updated = datetime.strptime(data["updated"], self.TSFORMAT) if "updated" in data else datetime.now()
         self.published = datetime.strptime(data["published"], self.TSFORMAT) if "published" in data else self.updated
         self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
-        self.location = self._pump.Location.unserialize(data["location"])
+        self.location = self._pump.Location.unserialize(data["location"]) if "location" in data else None
 
         return self

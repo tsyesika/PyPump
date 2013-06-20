@@ -34,6 +34,7 @@ class Note(AbstractModel):
     actor = None # who posted.
     updated = None # last time this was updated
     published = None # When this was published
+    deleted = False # has the note been deleted
 
     # where to?
     _to = []
@@ -45,7 +46,7 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, to=None, cc=None, actor=None, published=None, updated=None, links=None, *args, **kwargs):
+    def __init__(self, content, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
@@ -140,28 +141,58 @@ class Note(AbstractModel):
 
     def delete(self):
         """ Delete's the note """
-        pass
+        activity = {
+            "verb":"delete",
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            }
+        }
+
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST")
+        
+        if "verb" in data and data["verb"] == activity["verb"]:
+            self.deleted = True
+            return True
+
+        return False
 
     def like(self):
         """ Likes the Note """
-        pass    
+        activity = {
+            "verb":"like",
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            }
+        }
 
-    def unlike(self):
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, methods="POST")
+
+    def unlike(self, verb="unlike"):
         """ Unlikes the Note """
-        pass
+        activity = {
+            "verb":verb,
+            "object":{
+                "id":self.id,
+                "objectType":self.TYPE,
+            }
+        }
+
+        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST")
 
     # synonyms
     def favorite(self, *args, **kwargs):
         """ Maps to like """
-        return self.like(*args, **kwargs)
+        return self.like(verb="favorite", *args, **kwargs)
 
     def unfavorite(self, *args, **kwargs):
         """ Maps to unlike """
-        return self.unlike(*args, **kwargs)
-
+        return self.unlike(verb="unfavorite", *args, **kwargs)
 
     def __repr__(self):
-        return "<Note by %s at %s>" % (self.actor, self.published.strftime("%Y/%m/%d"))
+        note_type = "Deleted Note" if self.deleted else "Note"
+        return "<%s by %s at %s>" % (note_type, self.actor, self.published.strftime("%Y/%m/%d"))
    
     def __str__(self):
         return self.__repr__()
@@ -179,8 +210,23 @@ class Note(AbstractModel):
         return json.dumps(query)
 
     @staticmethod
+    def unserialize_to_deleted(data):
+        """ Unserializes to a deleted note """
+        deleted_note = Note("")
+        delete_note.delete = True
+
+        daleted_note.actor = self._pump.Person.unserialize(data["actor"])        
+        deleted_note.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
+        deleted_note.published = datetime.strptime(data["published"], Note.TSFORMAT)
+
+        return deleted_note
+
+    @staticmethod
     def unserialize(data):
         """ Goes from JSON -> Note object """
+        if data["verb"] == "delete":
+            return Note.unserialize_to_deleted(date)
+
         obj = data["object"]
         
         links = {}
