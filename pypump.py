@@ -114,7 +114,7 @@ class PyPump(object):
     ## 
     # server request stuff
     ##
-    def request(self, endpoint, method="GET", data="", attempts=10):
+    def request(self, endpoint, method="GET", data="", raw=False, attempts=10):
         """ This will make a request to <proto>//<self.server>/<endpoint> with oauth headers
         proto = self.proto (https or http)
         method = GET (default), POST or PUT
@@ -131,25 +131,26 @@ class PyPump(object):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
         
+        if raw is False:
+            endpoint = "%s%s/%s" % (self.proto, self.server, endpoint)
+
         oauth_request = oauth.OAuthRequest.from_consumer_and_token(self.consumer, token=self.oauth_token, 
-                                                                   http_method=method, http_url="%s%s/%s" % (
-                                                                            self.proto, self.server, endpoint)
-                                                                    )
+                                                                   http_method=method, http_url=endpoint)
 
         oauth_request.sign_request(oauth.OAuthSignatureMethod_HMAC_SHA1(), self.consumer, self.oauth_token)
         attempts_done = 0
 
         while attempts_done < attempts:
             try:
-                if "GET" == method:
-                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), 
-                                                                 headers=oauth_request.to_header('OAuth'))
-                else:
-                    request = urllib.request.Request("%s%s/%s" % (self.proto, self.server, endpoint), 
-                                                                 headers=oauth_request.to_header('OAuth'))
+                if method in ["PUT", "POST"]:
+                    request = urllib.request.Request(endpoint, headers=oauth_request.to_header('OAuth'))
 
                     request.add_header("Content-Type", "application/json")
                     request.data = data.encode()
+                
+                else:
+                    request = urllib.request.Request(endpoint, headers=oauth_request.to_header('OAuth'))
+                
                 return json.loads(self.pump.open(request).read().decode("utf-8"))
             except Exception:
                 attempts_done += 1

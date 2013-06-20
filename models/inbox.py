@@ -64,6 +64,12 @@ class Inbox(AbstractModel):
         data = self.__request()
         return self.unseralize(data, obj=self).__iter__()
 
+    def __repr__(self):
+        if self.author:
+            return "<%s Inbox of %s items>" % (self.author, len(self))
+        else:
+            return "<Inbox of %s items>" % len(self)
+
     def __len__(self):
         """ Gives amount of items in the inbox """
         return len(self._inbox)
