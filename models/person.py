@@ -17,6 +17,7 @@
 
 from datetime import datetime
 
+from exceptions.PumpException import PumpException
 from models import AbstractModel
 
 class Person(AbstractModel):
@@ -28,6 +29,7 @@ class Person(AbstractModel):
 
 
     TYPE = "person"
+    ENDPOINT = "/api/user/%s/feed"
 
     id = ""
     username = ""
@@ -41,7 +43,7 @@ class Person(AbstractModel):
 
     is_self = False # is this you?
 
-    def __init__(self, id="", username="", url="", summary="", 
+    def __init__(self, webfinger=None, id="", username="", url="", summary="", 
                  display_name="", image=None, published=None, 
                  updated=None, location=None, me=None, *args, **kwargs):
         """
@@ -57,6 +59,37 @@ class Person(AbstractModel):
         me - you, used to set is_self, if not given it assumes this person _isn't_ you
         """
         super(Person, self).__init__(*args, **kwargs)
+
+        # okay we need to check if the webfinger is being used
+        if type(webfinger) is str:
+            # first clean up
+            webfinger = webfinger.lstrip(" ").rstrip(" ")
+            # okay now we need to look if it's on our servers or not.
+            if "@" in webfinger:
+                username, server = webfinger.split("@")
+            else:
+                # they probably just gave a username, the assumption is it's on our server!
+                username, server = webfinger, self._pump.server
+            # now do some checking
+            if server == self._pump.server:
+                # cool we can get quite a bit of info.
+                data = self._pump.request(".well-known/webfinger?resource=acct:%s@%s" % (username, server))
+                
+                # now look through the data to find the self
+                for item in data["links"]:
+                    if "rel" in item and item["rel"] == "self":
+                        # yay!
+                        data = self._pump.request(item["href"], raw=True)
+                        self.unserialize(data, obj=self)
+                # lets hope we've found it
+                return
+            else:
+                # right not a huge amount we can do
+                self.id = "acct:%s@%s" % (username, server)
+                self.username = username
+                self.server = server
+                self.is_self = False
+                return 
 
         self.id = id
         self.username = username
@@ -84,11 +117,44 @@ class Person(AbstractModel):
 
     def follow(self): 
         """ You follow this user """
-        pass
+        activity = {
+            "verb":"follow",
+            "object":{
+                "id":self.id,
+                "objectType":"person",
+            }
+        }
+
+        endpoint = self.ENDPOINT % self._pump.nickname
+
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        self.unserialize(data, obj=self) 
+        return True
 
     def unfollow(self):
         """ Unfollow a user """
-        pass
+        activity = {
+            "verb":"unfollow",
+            "object":{
+                "id":self.id,
+                "objectType":"person",
+            }
+        }
+
+        endpoint = self.ENDPOINT % self._pump.nickname
+
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        print("[DEBUG] %s" % data)
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        # now to do something!
 
     def __repr__(self):
         return self.id.lstrip("acct:")

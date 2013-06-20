@@ -19,6 +19,7 @@ import json
 from datetime import datetime
 
 from exceptions.ImmutableException import ImmutableException
+from exceptions.PumpException import PumpException
 
 from models import AbstractModel
 from models.person import Person
@@ -30,6 +31,7 @@ class Note(AbstractModel):
     VERB = "post"
     ENDPOINT = "/api/user/%s/feed"
 
+    id = ""
     content = ""
     actor = None # who posted.
     updated = None # last time this was updated
@@ -46,15 +48,16 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
+    def __init__(self, content, nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
 
+        self.id if nid else None
         self.content = content
         self._to = [] if to is None else to
         self._cc = [] if cc is None else cc
-        self._actor = actor
+        self.actor = actor
 
         if published:
             self.published = published
@@ -133,6 +136,13 @@ class Note(AbstractModel):
 
         # post it!
         data = self._pump.request(self.ENDPOINT % self._pump.nickname, method="POST", data=self.serialize())
+
+        # we need to actually store the new note data the server has sent back
+        if "error" in data:
+            # oh dear, raise
+            raise PumpException(data["error"])
+         
+        self.unserialize(data["object"], obj=self)
 
     def comment(self, comment):
         """ Posts a comment """
@@ -215,7 +225,8 @@ class Note(AbstractModel):
         deleted_note = Note("")
         delete_note.delete = True
 
-        daleted_note.actor = self._pump.Person.unserialize(data["actor"])        
+        deleted_note.id = data["id"] if "id" in data else ""
+        deleted_note.actor = self._pump.Person.unserialize(data["actor"])        
         deleted_note.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
         deleted_note.published = datetime.strptime(data["published"], Note.TSFORMAT)
 
@@ -242,6 +253,7 @@ class Note(AbstractModel):
             links["comments"] = obj["replies"]["url"]
 
         return Note(
+            id=obj["id"],
             content=obj["content"],
             to=(), # todo still.
             cc=(), # todo: ^^
