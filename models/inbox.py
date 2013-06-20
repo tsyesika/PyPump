@@ -119,10 +119,11 @@ class Inbox(AbstractModel):
                 continue # what is this stange type of which you are?
             
             try:
-                self._inbox.append(obj.unserialize(v))
+                real_obj = obj.unserialize(v)
+                if real_obj is not None:
+                    self._inbox.append(real_obj)
             except TypeError:
                 # caused by missing out the self param, will fix tomorrow
-                print("[DEBUG] %s failed" % obj_type)
                 pass
 
         return self 
