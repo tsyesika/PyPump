@@ -13,7 +13,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
     .. py:attribute:: content
 
-        This is the content of the Comment (string)
+        This is the content of the Comment (string)::
 
 	    >>> my_comment = pump.Comment("This is a comment")
             >>> my_comment.content
@@ -21,7 +21,7 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 
     .. py:attribute:: actor
 
-        This is who posted the Comment (Person object)
+        This is who posted the Comment (Person object)::
 
             >>> my_comment = pump.Comment("This is a comment")
             >>> my_comment.actor
@@ -60,22 +60,22 @@ This object represents pump.io's comments, these are posted on Notes and Images.
 Example
 -------
 
-This shows making a comment on a note
+This shows making a comment on a note::
 
     >>> my_note
     <Note: "This is a note">
     >>> my_comment = pump.Comment("Oh hey, i'm commenting with PyPump!") # pump is instance of PyPump
     >>> my_note.comment(my_comment)
 
-You want to like the comment because you think PyPump is cool?
+You want to like the comment because you think PyPump is cool?::
 
     >>> my_comment.like()
     
-What's that, you don't think PyPump is cool? :(
+What's that, you don't think PyPump is cool? :(::
 
     >>> my_comment.unlike()
 
-And you want to delete your comment?
+And you want to delete your comment?::
 
     >>> my_comment.delete()
     >>> my_comment = None
