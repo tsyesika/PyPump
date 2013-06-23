@@ -75,7 +75,10 @@ class Person(AbstractModel):
             # now do some checking
             if server == self._pump.server:
                 # cool we can get quite a bit of info.
-                data = self._pump.request(".well-known/webfinger?resource=acct:%s@%s" % (username, server))
+                params = {
+                    "resource": "acct:{username}@{server}".format(username=username, server=server)
+                    }
+                data = self._pump.request(".well-known/webfinger", params=params)
                 
                 # now look through the data to find the self
                 for item in data["links"]:
