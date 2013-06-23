@@ -136,7 +136,7 @@ class PyPump(object):
         if endpoint.startswith("/"):
             endpoint = endpoint[1:] # remove inital / as we add it
 
-        if data and isinstance(data, (dict, list)):
+        if data and isinstance(data, dict):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
 
@@ -147,10 +147,9 @@ class PyPump(object):
                     endpoint=endpoint
                     )
         
-
         for attempt in range(attempts):
             if method == "POST":
-                request = requests.post(endpoint, auth=self.client, params=params, data=data)
+                request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
             elif method == "GET":
                 request = requests.get(endpoint, auth=self.client, params=params)
 

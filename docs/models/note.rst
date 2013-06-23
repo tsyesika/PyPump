@@ -13,7 +13,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
     .. py:attribute:: content
 
-        This is the content of the Note
+        This is the content of the Note::
 
 	    >>> my_note = pump.Note("I'm posting on pump.io")
             >>> my_note.content
@@ -21,7 +21,7 @@ This object represents pump.io's notes, these are used to post text to a `person
 
     .. py:attribute:: actor
 
-        This is who posted the Note (Person object)
+        This is who posted the Note (Person object)::
 
             >>> my_note = pump.Note("I'm posting on pump.io")
             >>> my_note.actor
@@ -43,14 +43,14 @@ This object represents pump.io's notes, these are used to post text to a `person
 
     .. py:attribute:: to
 
-        This is a list of person objects, who the Note was to
+        This is a list of person objects, who the Note was to::
 
             >>> my_note.to
             [<Person: Tsyesika@pump.megworld.co.uk>, <Person: Tuteo@another.server.co.uk>]
 
     .. py:attribute:: cc
 
-        This is a list of person objects, who was carbon copied into the Note
+        This is a list of person objects, who was carbon copied into the Note::
 
             >>> my_note.cc
             [<Person: someone@microca.st>]         
@@ -68,27 +68,25 @@ This object represents pump.io's notes, these are used to post text to a `person
 Example
 -------
 
-This shows making a new post
+This shows making a new post::
 
     >>> my_note = pump.Note("This is a new note!") # pump is instance of PyPump
 
-You want to comment?
-
-
+You want to comment?::
 
     >>> my_comment = pump.Comment("I'm commenting on my note")
     >>> my_note.comment(my_comment)
 
 
-You can like the note
+You can like the note::
 
     >>> my_comment.like()
 
-Oh wait? you didn't want to...
+Oh wait? you didn't want to...::
 
     >>> my_comment.unlike()
 
-Oh you didn't want to post the note?
+Oh you didn't want to post the note?::
 
     >>> my_comment.delete()
     >>> my_comment = None # we don't want to accidently try and use a deleted comment

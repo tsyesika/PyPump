@@ -220,9 +220,9 @@ class Note(AbstractModel):
         return json.dumps(query)
 
     @staticmethod
-    def unserialize_to_deleted(data):
+    def unserialize_to_deleted(data, obj=None):
         """ Unserializes to a deleted note """
-        deleted_note = Note("")
+        deleted_note = Note("") if obj is None else obj
         delete_note.delete = True
 
         deleted_note.id = data["id"] if "id" in data else ""
@@ -233,32 +233,40 @@ class Note(AbstractModel):
         return deleted_note
 
     @staticmethod
-    def unserialize(data):
+    def unserialize(data, obj=None):
         """ Goes from JSON -> Note object """
         if data["verb"] == "delete":
-            return Note.unserialize_to_deleted(date)
+            return Note.unserialize_to_deleted(date, obj=obj)
 
-        obj = data["object"]
+        data_obj = data["object"]
 
         links = {}
         if "proxy_url" in obj["likes"]:
-            links["likes"] = obj["likes"]["proxy_url"]
+            links["likes"] = data_obj["likes"]["proxy_url"]
         else:
-            links["likes"] = obj["likes"]["url"]
+            links["likes"] = data_obj["likes"]["url"]
 
-        if "pump_io" in obj["replies"] and "proxyURL" in obj["replies"]["pump_io"]:
-            url = obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
+        if "pump_io" in data_obj["replies"] and "proxyURL" in data_obj["replies"]["pump_io"]:
+            url = data_obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
             links["comments"] = url.split("/", 1)[1]
         else:
-            links["comments"] = obj["replies"]["url"]
+            links["comments"] = data_obj["replies"]["url"]
 
-        return Note(
-            nid=obj["id"],
-            content=obj["content"],
-            to=(), # todo still.
-            cc=(), # todo: ^^
-            actor=Note._pump.Person.unserialize(data["actor"]),
-            updated=datetime.strptime(data["updated"], Note.TSFORMAT),
-            published=datetime.strptime(data["published"], Note.TSFORMAT),
-            links=links,
-        )
+        if obj is None:
+            return Note(
+                    nid=obj["id"],
+                    content=obj["content"],
+                    to=(), # todo still.
+                    cc=(), # todo: ^^
+                    actor=Note._pump.Person.unserialize(data["actor"]),
+                    updated=datetime.strptime(data["updated"], Note.TSFORMAT),
+                    published=datetime.strptime(data["published"], Note.TSFORMAT),
+                    links=links,
+                    )
+        else:
+            obj = Note(content=obj["content"])
+            obj.id = obj["id"]
+            obj.actor = Note._pump.Person.unserialize(data["actor"])
+            obj.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
+            obj.published = datetime.strptime(data["published"], Note.TSFORMAT)
+            obj._links = links
