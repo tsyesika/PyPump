@@ -48,7 +48,8 @@ class Inbox(AbstractModel):
         count = 1
         offset = key
         data = self.__request(offset=offset, count=count)
-        return self.unserialize(data, obj=self) 
+        self.unserialize(data, obj=self) 
+        return self._inbox[0]
 
     def __getslice__(self, s):
         """ allows for a limit """
@@ -90,26 +91,26 @@ class Inbox(AbstractModel):
 
     def __request(self, offset=None, count=None):
         """ Makes a request """
-        param = ""
+        param = {}
 
         if count:
-            param += "count=%s" % count
+            param["count"] = count
 
         if offset:
-            param = "%s&offset=%s" % (param, offset) if param else "offset=%s" % offset
+            param["offset"] = offset
 
         if self.actor is None:
             # oh dear, we gotta raise an error
             raise PyPumpException("No actor defined on %s" % self)
 
         endpoint = self.ENDPOINT % self.actor.username
-
-        if param:
-            endpoint = "%s?%s" % (endpoint, param)
-
-        data = self._pump.request(endpoint)
+        data = self._pump.request(endpoint, params=param)
 
         return data
+
+    def clear(self):
+        """ Clears an inbox """
+        self._inbox = []
 
     @staticmethod
     def unserialize(data, obj=None, user=None):
@@ -118,6 +119,8 @@ class Inbox(AbstractModel):
             self = Inbox()
         else:
             self = obj
+
+        user = self.actor if user is None else user
 
         self.actor = user
 
