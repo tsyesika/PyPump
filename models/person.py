@@ -75,17 +75,8 @@ class Person(AbstractModel):
             # now do some checking
             if server == self._pump.server:
                 # cool we can get quite a bit of info.
-                params = {
-                    "resource": "acct:{username}@{server}".format(username=username, server=server)
-                    }
-                data = self._pump.request(".well-known/webfinger", params=params)
-                
-                # now look through the data to find the self
-                for item in data["links"]:
-                    if "rel" in item and item["rel"] == "self":
-                        # yay!
-                        data = self._pump.request(item["href"], raw=True)
-                        self.unserialize(data, obj=self)
+                data = self._pump.request("/api/user/%s/profile" % username)
+                self.unserialize(data, obj=self)
                 # lets hope we've found it
                 return
             else:
@@ -167,10 +158,30 @@ class Person(AbstractModel):
     def __str__(self):
         return self.__repr__()
 
-    @staticmethod
-    def unserialize(data, obj=None):
+    @classmethod
+    def unserialize_service(cls, data, obj):
+        """ Unserializes the data from a service """
+        id = data["id"]
+        display = data["displayName"]
+        updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
+        published = datetime.strptime(data["published"], cls.TSFORMAT) if "published" in data else updated
+
+        if obj is None:
+            obj = cls()
+
+        obj.id = id
+        obj.display = display
+        obj.updated = updated
+        obj.published = published
+        return obj
+
+    @classmethod
+    def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Person object """
-        self = Person() if obj is None else obj
+        if data.get("objectType", "") == "service":
+            return cls.unserialize_service(data, obj)
+
+        self = cls() if obj is None else obj
 
         if "verb" in data and data["verb"] in ["follow", "unfollow"]:
             return None
@@ -184,9 +195,10 @@ class Person(AbstractModel):
         self.display_name = display
         self.url = data["links"]["self"]["href"]
         self.summary = data["summary"] if "summary" in data else ""
-        self.updated = datetime.strptime(data["updated"], self.TSFORMAT) if "updated" in data else datetime.now()
-        self.published = datetime.strptime(data["published"], self.TSFORMAT) if "published" in data else self.updated
+        self.updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
+        self.published = datetime.strptime(data["published"], cls.TSFORMAT) if "published" in data else self.updated
         self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
         self.location = self._pump.Location.unserialize(data["location"]) if "location" in data else None
 
+        self.updated = datetime.strptime(data["updated"], self.TSFORMAT) if "updated" in data else datetime.now()
         return self

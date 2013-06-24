@@ -77,7 +77,7 @@ class Inbox(AbstractModel):
             return self._inbox.__iter__()
         
         data = self.__request()
-        return self.unseralize(data, obj=self).__iter__()
+        return self.unserialize(data, obj=self).__iter__()
 
     def __repr__(self):
         if self.author:
