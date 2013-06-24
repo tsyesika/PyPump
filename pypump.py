@@ -18,6 +18,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+import urllib.parse
 import urllib.request
 import json
 
@@ -30,9 +31,9 @@ from exceptions import PyPumpException
 
 class PyPump(object):
 
-    PARAM_VERIFER = "oauth_verifier"
-    PARAM_TOKEN = "oauth_token"
-    PARAM_TOKEN_SECRET = "oauth_token_secret"
+    PARAM_VERIFER = "oauth_verifier".encode()
+    PARAM_TOKEN = "oauth_token".encode()
+    PARAM_TOKEN_SECRET = "oauth_token_secret".encode()
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
@@ -118,7 +119,7 @@ class PyPump(object):
             raise Exception("Nickname can't be of length 0")
 
     ## 
-    # server request stuff
+    # server 
     ##
     def request(self, endpoint, method="GET", data="", raw=False, params=None, attempts=10):
         """ This will make a request to <proto>//<self.server>/<endpoint> with oauth headers
@@ -152,14 +153,13 @@ class PyPump(object):
                 request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
             elif method == "GET":
                 request = requests.get(endpoint, auth=self.client, params=params)
-
             if request.status_code == 200:
                 # huray!
-                return json.loads(request.content.decode("utf-8"))
+                return request.json()
             elif request.status_code in [400]:
                 # can't do much
                 raise PyPumpException("Recieved a 400 bad request error. This is likely due to an OAuth failure")
-
+            print(request)
         return '' # failed :(
 
 
@@ -172,8 +172,8 @@ class PyPump(object):
         server_token = self.request_token()
         
         # now we need the user to authorize me to use their pump.io account
-        server_token[self.PARAM_VERIFER] = self.get_access(tokens[self.PARAM_TOKEN])
-        access = self.request_access(tokens[self.PARAM_TOKEN], tokens[self.PARAM_TOKEN_SECRET], tokens[self.PARAM_VERIFIER]) 
+        server_token['verifier'] = self.get_access(server_token['token'])
+        access = self.request_access(**server_token) 
     
     def get_access(self, token):
         """ this asks the user to let us use their account """
@@ -182,10 +182,10 @@ class PyPump(object):
         print("{proto}://{server}/oauth/authorize?oauth_token={token}".format(
                 proto=self.proto,
                 server=self.server,
-                token=token
+                token=token.decode("utf-8")
                 ))
         
-        code = input("Verifier Code: ").lstrp(" ").rstrip(" ")
+        code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
         return code
 
     def request_token(self):
@@ -204,22 +204,22 @@ class PyPump(object):
                 auth=client
                 )
         
-        data = urllib.request.parse_qs(r.content)
+        data = urllib.parse.parse_qs(req.content)
         data = {
-            "oauth_token": data[self.PARAM_TOKEN][0],
-            "oauth_token_secret": data[self.PARAM_TOKEN_SECRET][0]
+            'token': data[self.PARAM_TOKEN][0],
+            'token_secret': data[self.PARAM_TOKEN_SECRET][0]
         }
 
         return data
 
-    def request_access(self, token, token_secret, code):
+    def request_access(self, **auth_info):
         """ This is for when we've got the user's access value and we're asking the server for our access token """
         client = OAuth1(
                 client_key=self.consumer.key,
                 client_secret=self.consumer.secret,
-                resource_owner_key=token,   
-                resource_owner_secret=token_secret,
-                verifier=code
+                resource_owner_key=auth_info['token'],
+                resource_owner_secret=auth_info['token_secret'],
+                verifier=auth_info['verifier']
                 )
 
         req = requests.post("{proto}://{server}/oauth/access_token".format(
@@ -228,7 +228,7 @@ class PyPump(object):
                         ),
                 auth=client)
         
-        data = urllib.request.parse_qs(req.content)
+        data = urllib.parse.parse_qs(req.content)
 
         self.token = data[self.PARAM_TOKEN]
         self.token_secret = data[self.PARAM_TOKEN_SECRET]

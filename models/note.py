@@ -76,7 +76,7 @@ class Note(AbstractModel):
 
         # gotta go get them.
         endpoint = self._links["likes"]
-        likes = self._pypump.request(endpoint)
+        likes = self._pump.request(endpoint, raw=True)
         for k,v in likes["items"].items():
             self._likes.append(Person.unserialize(v))
 
@@ -90,8 +90,8 @@ class Note(AbstractModel):
             return self._comments
 
         endpoint = self._links["comments"]
-        comments = self._pump.request(endpoint)
-        for v in comments["items"]:
+        comments = self._pump.request(endpoint, raw=True)
+        for v in comments.get("items", []):
             self._comments.append(Comment.unserialize(v))
 
         return self._comments
@@ -161,7 +161,7 @@ class Note(AbstractModel):
 
         data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
         
-        if "verb" in data and data["verb"] == activity["verb"]:
+        if data.get("verb", None) == activity["verb"]:
             self.deleted = True
             return True
 
@@ -235,27 +235,27 @@ class Note(AbstractModel):
     @staticmethod
     def unserialize(data, obj=None):
         """ Goes from JSON -> Note object """
-        if data["verb"] == "delete":
+        if data.get("verb", "") == "delete":
             return Note.unserialize_to_deleted(date, obj=obj)
 
-        data_obj = data["object"]
-
         links = {}
-        if "proxy_url" in obj["likes"]:
-            links["likes"] = data_obj["likes"]["proxy_url"]
-        else:
-            links["likes"] = data_obj["likes"]["url"]
+        if "object" in data:
+            data_obj = data["object"]
+            if "proxy_url" in data_obj.get("likes", []):
+                links["likes"] = data_obj["likes"]["proxy_url"]
+            elif "likes" in data_obj:
+                links["likes"] = data_obj["likes"]["url"]
 
-        if "pump_io" in data_obj["replies"] and "proxyURL" in data_obj["replies"]["pump_io"]:
-            url = data_obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
-            links["comments"] = url.split("/", 1)[1]
-        else:
-            links["comments"] = data_obj["replies"]["url"]
+            if "pump_io" in data_obj.get("replies", {}) and "proxyURL" in data_obj.get["replies"].get("pump_io", {}):
+                url = data_obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
+                links["comments"] = url.split("/", 1)[1]
+            elif links.get("comments", []):
+                links["comments"] = data_obj["replies"]["url"]
 
         if obj is None:
             return Note(
-                    nid=obj["id"],
-                    content=obj["content"],
+                    nid=data["id"],
+                    content=data["content"],
                     to=(), # todo still.
                     cc=(), # todo: ^^
                     actor=Note._pump.Person.unserialize(data["actor"]),
@@ -264,9 +264,10 @@ class Note(AbstractModel):
                     links=links,
                     )
         else:
-            obj = Note(content=obj["content"])
-            obj.id = obj["id"]
-            obj.actor = Note._pump.Person.unserialize(data["actor"])
+            obj = Note(content=data["content"])
+            obj.id = data["id"]
+            obj.actor = Note._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
             obj.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
             obj.published = datetime.strptime(data["published"], Note.TSFORMAT)
             obj._links = links
+            return obj
