@@ -17,9 +17,11 @@
 
 from datetime import datetime
 
-from exceptions.PumpException import PumpException
+from exception.PumpException import PumpException
 from models import AbstractModel
+from compatability import *
 
+@implement_to_string
 class Person(AbstractModel):
 
     _mapping = {
@@ -63,7 +65,7 @@ class Person(AbstractModel):
         super(Person, self).__init__(*args, **kwargs)
 
         # okay we need to check if the webfinger is being used
-        if type(webfinger) is str:
+        if isinstance(webfinger, string_types):
             # first clean up
             webfinger = webfinger.lstrip(" ").rstrip(" ")
             # okay now we need to look if it's on our servers or not.

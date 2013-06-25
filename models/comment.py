@@ -18,7 +18,9 @@
 from datetime import datetime
 
 from models import AbstractModel
+from compatability import *
 
+@implement_to_string
 class Comment(AbstractModel):
 
     TYPE = "comment"

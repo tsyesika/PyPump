@@ -18,8 +18,6 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import urllib.parse
-import urllib.request
 import json
 
 import requests
@@ -27,13 +25,14 @@ from requests_oauthlib import OAuth1
 import openid
 import loader
 
-from exceptions import PyPumpException
+from compatability import *
+from exception import PyPumpException
 
 class PyPump(object):
 
-    PARAM_VERIFER = "oauth_verifier".encode()
-    PARAM_TOKEN = "oauth_token".encode()
-    PARAM_TOKEN_SECRET = "oauth_token_secret".encode()
+    PARAM_VERIFER = to_bytes("oauth_verifier")
+    PARAM_TOKEN = to_bytes("oauth_token")
+    PARAM_TOKEN_SECRET = to_bytes("oauth_token_secret")
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
@@ -42,19 +41,11 @@ class PyPump(object):
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
                 token_secret=None, save_token=None, secure = False):
-        """ This will initate the pump.io library 
-        == required ==
-        server = this is the server you're going to connect to (microca.st, pumpity.net, etc...)
-        
-        == optional ==
-        key = This is your client key
-        secret = this is the client secret
-        client_name = this is the name of the client
-        client_type = the type of your client (defaults to 'web')
-        token = This is the token if you've already authenticated by oauth before (default None)
-        token_secret = this is your token secret if you've already athenticated before (default None)
-        save_token = this is a callback (func/method) which is called to save token and token_secret when they've been got (default None)
-        secure = Use https or not
+        """
+            This is the main pump instance, this handles the oauth,
+            this also holds the models.
+
+            Don't forget if you want to use https ensure the secure flag is True
         """
 
         if "@" in server:
@@ -93,10 +84,10 @@ class PyPump(object):
             self.token_secret = token_secret
 
         self.client = OAuth1(
-                client_key=self.consumer.key,
-                client_secret=self.consumer.secret,
-                resource_owner_key=self.token,
-                resource_owner_secret=self.token_secret
+                client_key=to_unicode(self.consumer.key),
+                client_secret=to_unicode(self.consumer.secret),
+                resource_owner_key=to_unicode(self.token[0]),
+                resource_owner_secret=to_unicode(self.token_secret[0])
                 )        
 
     ##
@@ -141,13 +132,14 @@ class PyPump(object):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
 
+        data = to_unicode(data)
+
         if raw is False:
             endpoint = "{proto}://{server}/{endpoint}".format(
                     proto=self.proto,
                     server=self.server,
                     endpoint=endpoint
                     )
-        
         for attempt in range(attempts):
             if method == "POST":
                 request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
@@ -159,7 +151,6 @@ class PyPump(object):
             elif request.status_code in [400]:
                 # can't do much
                 raise PyPumpException("Recieved a 400 bad request error. This is likely due to an OAuth failure")
-            print(request)
         return '' # failed :(
 
 
@@ -185,7 +176,7 @@ class PyPump(object):
                 token=token.decode("utf-8")
                 ))
         
-        code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
+        code = raw_input("Verifier Code: ").lstrip(" ").rstrip(" ")
         return code
 
     def request_token(self):
@@ -204,7 +195,7 @@ class PyPump(object):
                 auth=client
                 )
         
-        data = urllib.parse.parse_qs(req.content)
+        data = parse_qs(req.content)
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
@@ -228,7 +219,7 @@ class PyPump(object):
                         ),
                 auth=client)
         
-        data = urllib.parse.parse_qs(req.content)
+        data = parse_qs(req.content)
 
         self.token = data[self.PARAM_TOKEN]
         self.token_secret = data[self.PARAM_TOKEN_SECRET]

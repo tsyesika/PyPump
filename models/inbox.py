@@ -15,9 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from exceptions import PyPumpException 
+from compatability import *
+from exception import PyPumpException 
 from models import AbstractModel
 
+@implement_to_string
 class Inbox(AbstractModel):
 
     TYPE = "inbox"
@@ -84,6 +86,9 @@ class Inbox(AbstractModel):
             return "<%s Inbox of %s items>" % (self.author, len(self))
         else:
             return "<Inbox of %s items>" % len(self)
+
+    def __str__(self):
+        return self.__repr__()
 
     def __len__(self):
         """ Gives amount of items in the inbox """

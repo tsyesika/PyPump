@@ -17,7 +17,7 @@
 
 import json
 
-class AbstractModel:
+class AbstractModel(object):
 
     _mapping = {
         "objectType":"TYPE",
