@@ -18,13 +18,16 @@
 import json
 from datetime import datetime
 
-from exceptions.ImmutableException import ImmutableException
-from exceptions.PumpException import PumpException
+from exception.ImmutableException import ImmutableException
+from exception.PumpException import PumpException
+
+from compatability import *
 
 from models import AbstractModel
 from models.person import Person
 from models.comment import Comment
 
+@implement_to_string
 class Note(AbstractModel):
     
     TYPE = "note"

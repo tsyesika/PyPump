@@ -16,7 +16,7 @@
 ##
 
 import json
-import urllib.request
+import requests
 
 class OpenIDException(Exception):
     pass
@@ -48,8 +48,6 @@ class OpenID(object):
 
 
     def __init__(self, protocol, server, client_name, application_type):
-        self.request = urllib.request.build_opener()
-
         self.server = server
 
         if type(protocol) is bool:
@@ -62,13 +60,13 @@ class OpenID(object):
 
     def register_client(self):
         """ Sends a client registration request """
-        data = [
-            "client_name={name}".format(name=self.name),
-            "type=client_associate",
-            "application_type={type}".format(type=self.type),
-        ]
+        data = {
+            "client_name":self.name,
+            "type":"client_associate",
+            "application_type":self.type,
+        }
 
-        data = "&".join(data)
+        data = json.dumps(data)
 
         if self.server is None:
             raise OpenIDException("Server must be set")
@@ -78,12 +76,11 @@ class OpenID(object):
                 server=self.server
                 )
 
-        request = urllib.request.Request(endpoint)
-        request.data = data.encode()
-        request = self.request.open(request)
-        
-        server_data = request.read().decode("utf-8")
-        server_data = json.loads(server_data)
+        request = requests.post(endpoint, headers={'Content-Type': 'application/json'}, data=data)
+        server_data = request.json()
+
+        if "error" in server_data:
+            raise OpenIDException(server_data["error"])
 
         consumer = Consumer()
         consumer.key = server_data["client_id"]

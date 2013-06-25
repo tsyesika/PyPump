@@ -16,7 +16,9 @@
 ##
 
 from models import AbstractModel
+from compatability import *
 
+@implement_to_string
 class Location(AbstractModel):
 
     TYPE = "location"

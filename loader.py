@@ -1,3 +1,4 @@
+from  compatability import *
 from models import AbstractModel
 import imp
 import glob
@@ -21,7 +22,7 @@ class Loader(object):
         """ Called after loading a plugin with the models """
         for klass in dir(model):
             klass_obj = getattr(model, klass)
-            if isinstance(klass_obj, type) and issubclass(klass_obj, AbstractModel):
+            if is_class(klass_obj) and issubclass(klass_obj, AbstractModel):
                 klass_obj._pump = self._pypump
                 setattr(self._pypump, klass, klass_obj)
 
