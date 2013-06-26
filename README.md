@@ -3,10 +3,6 @@ This library has been written for python 3000 (python 3.x). This will allow you 
 
 Updates will be coming soon.
 
-## Requirements
-My pyoauth3000 repo (drop it into the PyPump folder for now)
-Python3000 (testing on python 3.3)
-
 ## Documentation
 You can read about how to use the library at:
 https://pypump.readthedocs.org/en/latest/index.html
