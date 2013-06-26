@@ -74,6 +74,7 @@ class Person(AbstractModel):
             else:
                 # they probably just gave a username, the assumption is it's on our server!
                 username, server = webfinger, self._pump.server
+            self.inbox = self._pump.Inbox(username=self)
             # now do some checking
             if server == self._pump.server:
                 # cool we can get quite a bit of info.

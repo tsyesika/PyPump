@@ -35,6 +35,7 @@ class Note(AbstractModel):
     ENDPOINT = "/api/user/%s/feed"
 
     id = ""
+    summary = ""
     content = ""
     actor = None # who posted.
     updated = None # last time this was updated
@@ -51,12 +52,13 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
+    def __init__(self, content, summary=None nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
 
         self.id = nid if nid else None
+        self.summary = "" if summary is None else summary
         self.content = content
         self._to = [] if to is None else to
         self._cc = [] if cc is None else cc
