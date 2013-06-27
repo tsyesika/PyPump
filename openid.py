@@ -17,6 +17,7 @@
 
 import json
 import requests
+from compatability import *
 
 class OpenIDException(Exception):
     pass
@@ -43,11 +44,12 @@ class OpenID(object):
     protocol = "https" 
     request = None
     type = None
+    logo_url = None
 
     consumer = None
 
 
-    def __init__(self, protocol, server, client_name, application_type):
+    def __init__(self, protocol, server, client_name, application_type, logo_url=None):
         self.server = server
 
         if type(protocol) is bool:
@@ -57,6 +59,7 @@ class OpenID(object):
 
         self.name = client_name = client_name
         self.type = application_type
+        self.logo_url = self.logo_url if logo_url is not None else logo_url
 
     def register_client(self):
         """ Sends a client registration request """
@@ -65,6 +68,9 @@ class OpenID(object):
             "type":"client_associate",
             "application_type":self.type,
         }
+
+        if self.logo_url:
+            data["logo_url"] = self.logo_url
 
         data = json.dumps(data)
 
@@ -76,8 +82,12 @@ class OpenID(object):
                 server=self.server
                 )
 
+        endpoint = to_unicode(endpoint)
         request = requests.post(endpoint, headers={'Content-Type': 'application/json'}, data=data)
-        server_data = request.json()
+        try:
+            server_data = request.json()
+        except ValueError:
+            raise OpenIDException(request.content)
 
         if "error" in server_data:
             raise OpenIDException(server_data["error"])

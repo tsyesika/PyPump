@@ -52,7 +52,7 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, summary=None nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
+    def __init__(self, content, summary=None, nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
@@ -246,6 +246,8 @@ class Note(AbstractModel):
         links = {}
         if "object" in data:
             data_obj = data["object"]
+            content = data["object"]["content"]
+            summary = data["content"]
             if "proxy_url" in data_obj.get("likes", []):
                 links["likes"] = data_obj["likes"]["proxy_url"]
             elif "likes" in data_obj:
@@ -256,11 +258,13 @@ class Note(AbstractModel):
                 links["comments"] = url.split("/", 1)[1]
             elif links.get("comments", []):
                 links["comments"] = data_obj["replies"]["url"]
-
+        else:
+            content = data["content"]
         if obj is None:
             return Note(
                     nid=data["id"],
-                    content=data["content"],
+                    content=content,
+                    summary=summary,
                     to=(), # todo still.
                     cc=(), # todo: ^^
                     actor=Note._pump.Person.unserialize(data["actor"]),
@@ -269,7 +273,8 @@ class Note(AbstractModel):
                     links=links,
                     )
         else:
-            obj = Note(content=data["content"])
+            obj = Note(content=content)
+            obj.summary = summary
             obj.id = data["id"]
             obj.actor = Note._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
             obj.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
