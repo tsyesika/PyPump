@@ -86,8 +86,8 @@ class PyPump(object):
         self.client = OAuth1(
                 client_key=to_unicode(self.consumer.key),
                 client_secret=to_unicode(self.consumer.secret),
-                resource_owner_key=to_unicode(self.token[0]),
-                resource_owner_secret=to_unicode(self.token_secret[0])
+                resource_owner_key=to_unicode(self.token),
+                resource_owner_secret=to_unicode(self.token_secret)
                 )        
 
     ##
@@ -221,7 +221,7 @@ class PyPump(object):
         
         data = parse_qs(req.content)
 
-        self.token = data[self.PARAM_TOKEN]
-        self.token_secret = data[self.PARAM_TOKEN_SECRET]
+        self.token = data[self.PARAM_TOKEN][0]
+        self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
         
         

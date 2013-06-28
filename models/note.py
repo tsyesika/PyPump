@@ -243,6 +243,7 @@ class Note(AbstractModel):
         if data.get("verb", "") == "delete":
             return Note.unserialize_to_deleted(date, obj=obj)
 
+        summary = None
         links = {}
         if "object" in data:
             data_obj = data["object"]
