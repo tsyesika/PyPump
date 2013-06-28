@@ -50,7 +50,11 @@ class OpenID(object):
 
 
     def __init__(self, protocol, server, client_name, application_type, logo_url=None):
-        self.server = server
+        # we don't want the webfinger just the server
+        if "@" in server:
+            self.server = server.split("@", 1)[1]
+        else:
+            self.server = server
 
         if type(protocol) is bool:
             self.protocol = "https" if protocol else "http"
@@ -64,8 +68,8 @@ class OpenID(object):
     def register_client(self):
         """ Sends a client registration request """
         data = {
-            "client_name":self.name,
-            "type":"client_associate",
+            "type":"client_associate", 
+            "application_name":self.name,
             "application_type":self.type,
         }
 
@@ -82,7 +86,6 @@ class OpenID(object):
                 server=self.server
                 )
 
-        endpoint = to_unicode(endpoint)
         request = requests.post(endpoint, headers={'Content-Type': 'application/json'}, data=data)
         try:
             server_data = request.json()
