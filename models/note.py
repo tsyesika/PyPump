@@ -228,10 +228,10 @@ class Note(AbstractModel):
     def unserialize_to_deleted(data, obj=None):
         """ Unserializes to a deleted note """
         deleted_note = Note("") if obj is None else obj
-        delete_note.delete = True
+        deleted_note.deleted = True
 
         deleted_note.id = data["id"] if "id" in data else ""
-        deleted_note.actor = self._pump.Person.unserialize(data["actor"])        
+        deleted_note.actor = deleted_note._pump.Person.unserialize(data["actor"])        
         deleted_note.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
         deleted_note.published = datetime.strptime(data["published"], Note.TSFORMAT)
 
@@ -241,13 +241,15 @@ class Note(AbstractModel):
     def unserialize(data, obj=None):
         """ Goes from JSON -> Note object """
         if data.get("verb", "") == "delete":
-            return Note.unserialize_to_deleted(date, obj=obj)
+            return Note.unserialize_to_deleted(data, obj=obj)
 
         summary = None
+        nid = data.get("id", None)
         links = {}
         if "object" in data:
+            nid = data["object"].get("id", None)
             data_obj = data["object"]
-            content = data["object"]["content"]
+            content = data["object"].get("content", u"")
             summary = data["content"]
             if "proxy_url" in data_obj.get("likes", []):
                 links["likes"] = data_obj["likes"]["proxy_url"]
@@ -263,7 +265,7 @@ class Note(AbstractModel):
             content = data["content"]
         if obj is None:
             return Note(
-                    nid=data["id"],
+                    nid=nid,
                     content=content,
                     summary=summary,
                     to=(), # todo still.
@@ -276,7 +278,7 @@ class Note(AbstractModel):
         else:
             obj = Note(content=content)
             obj.summary = summary
-            obj.id = data["id"]
+            obj.id = nid
             obj.actor = Note._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
             obj.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
             obj.published = datetime.strptime(data["published"], Note.TSFORMAT)
