@@ -34,7 +34,7 @@ Documentation
 
 PyPump is documented. They are currently hosted on Read The Docs:
 
-.. _`latest docs`: https://pypump.readthedocs.org/en/latest/
+`latest docs <https://pypump.readthedocs.org/en/latest/>`_
 
 Installation
 ============
