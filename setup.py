@@ -1,5 +1,7 @@
-from distutils.core import setup
-
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 setup(
         name="PyPump",
@@ -10,7 +12,7 @@ setup(
         author_email="tfmyz@inboxen.org",
         url="https://github.com/xray7224/PyPump",
         packages=["pypump"],
-        licence="GPLv3",
+        license="GPLv3",
         install_requires=[
                 "oauthlib-requests>=0.3.0",
                 "requests>=1.2.0",
