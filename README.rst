@@ -27,7 +27,7 @@ PyPump works with:
 - requests-oauthlib 0.3.0+
 - requests 1.2.0+
 
-_We provide a unified version which works with both the python 2 and python 3 versions._
+*We provide a unified version which works with both the python 2 and python 3 versions.*
 
 Documentation
 =============
