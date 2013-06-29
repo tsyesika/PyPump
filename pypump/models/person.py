@@ -17,9 +17,9 @@
 
 from datetime import datetime
 
-from exception.PumpException import PumpException
-from models import AbstractModel
-from compatability import *
+from pypump.exception.PumpException import PumpException
+from pypump.models import AbstractModel
+from pypump.compatability import *
 
 @implement_to_string
 class Person(AbstractModel):

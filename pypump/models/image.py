@@ -15,8 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from compatability import *
-from models import AbstractModel
+from pypump.compatability import *
+from pypump.models import AbstractModel
 
 @implement_to_string
 class Image(AbstractModel):

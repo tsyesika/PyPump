@@ -18,14 +18,14 @@
 import json
 from datetime import datetime
 
-from exception.ImmutableException import ImmutableException
-from exception.PumpException import PumpException
+from pypump.exception.ImmutableException import ImmutableException
+from pypump.exception.PumpException import PumpException
 
-from compatability import *
+from pypump.compatability import *
 
-from models import AbstractModel
-from models.person import Person
-from models.comment import Comment
+from pypump.models import AbstractModel
+from pypump.models.person import Person
+from pypump.models.comment import Comment
 
 @implement_to_string
 class Note(AbstractModel):

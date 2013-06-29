@@ -23,10 +23,17 @@ import json
 import requests
 from requests_oauthlib import OAuth1
 import openid
-import loader
 
 from compatability import *
 from exception import PyPumpException
+
+# load models
+from models.note import Note
+from models.comment import Comment
+from models.person import Person
+from models.image import Image
+from models.inbox import Inbox
+from models.location import Location
 
 class PyPump(object):
 
@@ -60,7 +67,8 @@ class PyPump(object):
         else:
             self.proto = "http"
         
-        self.loader = loader.Loader(self)
+        self.populate_models()
+        #self.loader = loader.Loader(self)
 
         # first, if we need to register our client
         if not (key or secret):
@@ -89,6 +97,26 @@ class PyPump(object):
                 resource_owner_key=to_unicode(self.token),
                 resource_owner_secret=to_unicode(self.token_secret)
                 )        
+
+    def populate_models(self):
+        # todo: change me
+        self.Note = Note
+        self.Note._pump = self
+
+        self.Comment = Comment
+        self.Comment._pump = self
+        
+        self.Inbox = Inbox
+        self.Inbox._pump = self
+
+        self.Image = Image
+        self.Image._pump = self
+
+        self.Person = Person
+        self.Person._pump = self
+
+        self.Location = Person
+        self.Location._pump = self
 
     ##
     # getters to expose some data which might be useful

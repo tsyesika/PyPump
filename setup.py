@@ -14,7 +14,7 @@ setup(
         packages=["pypump"],
         license="GPLv3",
         install_requires=[
-                "oauthlib-requests>=0.3.0",
+                "requests-oauthlib>=0.3.0",
                 "requests>=1.2.0",
                 ],
         classifiers=[

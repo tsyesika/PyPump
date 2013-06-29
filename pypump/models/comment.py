@@ -17,8 +17,8 @@
 
 from datetime import datetime
 
-from models import AbstractModel
-from compatability import *
+from pypump.models import AbstractModel
+from pypump.compatability import *
 
 @implement_to_string
 class Comment(AbstractModel):
