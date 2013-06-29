@@ -6,8 +6,6 @@ PyPump - Python Pump.io Library
 :Web: https://github.com/xray7224/PyPump/
 :Keywords: pump.io, library, social, federated
 
---
-
 What is pump?
 ==============
 
