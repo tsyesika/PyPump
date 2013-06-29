@@ -140,8 +140,12 @@ class PyPump(object):
                     server=self.server,
                     endpoint=endpoint
                     )
+
         for attempt in range(attempts):
             if method == "POST":
+                print(endpoint)
+                print(params)
+                print(data)
                 request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
             elif method == "GET":
                 request = requests.get(endpoint, auth=self.client, params=params)
