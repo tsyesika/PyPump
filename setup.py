@@ -5,7 +5,7 @@ except ImportError:
 
 setup(
         name="PyPump",
-        version="0.1a",
+        version="0.1.1a",
         description="Python Pump.io library",
         long_description=open("README.rst").read(),
         author="Jessica Tallon",
