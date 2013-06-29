@@ -2,5 +2,6 @@ include *.py
 include README.rst
 include COPYING
 include AUTHORS.md
+include VERSION
 recursive-include docs *
 recursive-include pypump *.py

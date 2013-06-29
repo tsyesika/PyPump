@@ -5,13 +5,13 @@ except ImportError:
 
 setup(
         name="PyPump",
-        version="0.1.1a",
+        version=open("VERSION").read(),
         description="Python Pump.io library",
         long_description=open("README.rst").read(),
         author="Jessica Tallon",
         author_email="tfmyz@inboxen.org",
         url="https://github.com/xray7224/PyPump",
-        packages=["pypump"],
+        packages=["pypump", "pypump.exception", "pypump.models"],
         license="GPLv3",
         install_requires=[
                 "requests-oauthlib>=0.3.0",
