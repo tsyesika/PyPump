@@ -115,7 +115,7 @@ class PyPump(object):
         self.Person = Person
         self.Person._pump = self
 
-        self.Location = Person
+        self.Location = Location
         self.Location._pump = self
 
     ##
