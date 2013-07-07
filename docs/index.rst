@@ -10,6 +10,7 @@ Welcome to PyPump's documentation!
    :maxdepth: 1
 
    gettingstarted/installing
+   gettingstarted/qnd
    gettingstarted/tutorial
    gettingstarted/authentication
    gettingstarted/common
