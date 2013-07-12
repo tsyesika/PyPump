@@ -146,10 +146,6 @@ class PyPump(object):
 
         params = {} if params is None else params
 
-        if not (self.token and self.token_secret):
-            # this shouldn't happen but just incase
-            raise PyPumpException('Need to initiate oauth')
-
         if endpoint.startswith("/"):
             endpoint = endpoint[1:] # remove inital / as we add it
 
@@ -199,7 +195,18 @@ class PyPump(object):
                 return request.json()
             elif request.status_code in [400]:
                 # can't do much
-                raise PyPumpException("Recieved a 400 bad request error. This is likely due to an OAuth failure")
+                try:
+                    try:
+                        data = request.json()
+                        error = data["error"]
+                    except ValueError:
+                        error = request.content
+                    
+                    if not error:
+                        raise IndexError # yesss i know.
+                except IndexError:
+                    error = "Recieved a 400 bad request error. This is likely due to an OAuth failure"
+                raise PyPumpException(error)
         return '' # failed :(
 
     def set_https(self):
