@@ -44,6 +44,7 @@ class PyPump(object):
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
     loader = None
+    protocol = "https"
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
@@ -138,7 +139,7 @@ class PyPump(object):
     # server 
     ##
     def request(self, endpoint, method="GET", data="", raw=False, params=None, attempts=10):
-        """ This will make a request to http://<self.server>/<endpoint> with oauth headers
+        """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
         """
@@ -159,31 +160,40 @@ class PyPump(object):
         data = to_unicode(data)
 
         if raw is False:
-            endpoint = "http://{server}/{endpoint}".format(
+            url = "{protocol}://{server}/{endpoint}".format(
+                    protocol=self.protocol,
                     server=self.server,
                     endpoint=endpoint
                     )
+        else:
+            url = endpoint
 
         for attempt in range(attempts):
             if method == "POST":
                 try:
-                    request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
+                    request = requests.post(
+                            url,
+                            auth=self.client,
+                            headers={'Content-Type': 'application/json'},
+                            params=params,
+                            data=data
+                            )
                 except requests.exceptions.ConnectionError:
                     # this is likely due HTTP not redirecting to HTTPS
-                    if endpoint.statswith("https://"):
+                    if url.statswith("http://"):
                         raise # looks like this was genuine
-                    self.set_https()
-                    continue
+                    self.set_http()
+                    return self.request(endpoint, method, data, raw, params, attempts-1)
    
             elif method == "GET":
                 try:
-                    request = requests.get(endpoint, auth=self.client, params=params)
+                    request = requests.get(url, auth=self.client, params=params)
                 except requests.exceptions.ConnectionError:
                     # this is likely due to HTTP not redirecting to HTTPS
-                    if endpoint.startswith("https://"):
+                    if url.startswith("http://"):
                         raise # looks like this was genuine
                     self.set_http()
-                    continue
+                    return self.request(endpoint, method, data, raw, params, attempts-1)
             if request.status_code == 200:
                 # huray!
                 return request.json()
@@ -194,13 +204,11 @@ class PyPump(object):
 
     def set_https(self):
         """ Enforces protocol to be https """
-        if self.server.startswith("http://"):
-            self.server = "https://" + self.server.lstrp("http://")
+        self.protocol = "https"
 
     def set_http(self):
         """ Sets protocol to be http """
-        if self.server.startswith("https://"):
-            self.server = "http://" + self.server.lstrip("https://")
+        self.protocol = "http"
 
     ##
     # OAuth specific stuff
@@ -218,7 +226,8 @@ class PyPump(object):
         """ this asks the user to let us use their account """
 
         print("To allow us to use your pump.io please follow the instructions at:")
-        print("http://{server}/oauth/authorize?oauth_token={token}".format(
+        print("{protocol}://{server}/oauth/authorize?oauth_token={token}".format(
+                protocol=self.protocol,
                 server=self.server,
                 token=token.decode("utf-8")
                 ))
@@ -235,7 +244,8 @@ class PyPump(object):
                 )
         
         req = requests.post(
-                "http://{server}/oauth/request_token".format(
+                "{protocol}://{server}/oauth/request_token".format(
+                        protocol=self.protocol,
                         server=self.server
                         ),
                 auth=client
@@ -260,7 +270,10 @@ class PyPump(object):
                 )
 
         req = requests.post(
-                "http://{server}/oauth/access_token".format(server=self.server),
+                "{protocol}://{server}/oauth/access_token".format(
+                        protocol=self.protocol,
+                        server=self.server
+                        ),
                 auth=client
                 )
         

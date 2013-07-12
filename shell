@@ -75,11 +75,10 @@ def save_database(db, path):
 
     return db
 
-
 if __name__ == "__main__":
     if "-h" in sys.argv or "--help" in sys.argv:
         print("Usage:")
-        print("     {0} <webfinger> <client_name>".format(sys.argv[0]))
+        print("     {0} <webfinger> [client_name]".format(sys.argv[0]))
         sys.exit(0)
 
     if "-v" in sys.argv or "--version" in sys.argv:
@@ -130,7 +129,7 @@ if __name__ == "__main__":
         client_name = sys.argv[2]
         db["client_name"] = client_name
 
-    print("-> Setting up PyPump "),
+    print("-> Setting up PyPump  "),
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
     pump = PyPump(
             webfinger,
@@ -141,6 +140,7 @@ if __name__ == "__main__":
             token=db.get("token", None),
             token_secret=db.get("token_secret", None),
             )
+    
 
     # save client name and webfinger
     db["webfinger"] = webfinger
