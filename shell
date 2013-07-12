@@ -31,8 +31,7 @@ except ImportError:
 store_path = os.path.expanduser("~/.pypump_test")
 
 
-welcome_banner = """
-Welcome to the PyPump testing shell,
+welcome_banner = """Welcome to the PyPump testing shell,
 We have setup some useful objects for you:
 
 {table}
@@ -186,7 +185,7 @@ if __name__ == "__main__":
         client_name = sys.argv[2]
         db["client_name"] = client_name
 
-    print("-> Setting up PyPump  "),
+    sys.stdout.write("-> Setting up PyPump  ")
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
     pump = PyPump(
             webfinger,
@@ -218,7 +217,7 @@ if __name__ == "__main__":
     me = pump.Person(webfinger)
 
     # bring curser back so banner walks over the setup message
-    print("\r")
+    sys.stdout.write("\r")
 
     # drop them into a shell
     cfg = Config()
