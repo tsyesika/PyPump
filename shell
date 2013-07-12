@@ -33,16 +33,73 @@ store_path = os.path.expanduser("~/.pypump_test")
 
 welcome_banner = """
 Welcome to the PyPump testing shell,
-We have setup the PyPump object for you:
+We have setup some useful objects for you:
 
-pump = {pypump}
-me   = {me}
+{table}
 
 If you need help please visit our docs:
 https://pypump.readthedocs.org/en/latest
 
 Enjoy!
 """
+
+def ascii_table(headings, data):
+    """ Draws an ascii table """
+    # first we need to work out how long each column should be
+    columns = {}
+    for heading in headings:
+        columns[heading] = len(heading)+1 # plus one for the extra padding
+
+    # data could also overspill
+    for record in data:
+        for heading, d in record.items():
+            dlen = len(d)+1
+            if dlen > columns[heading]:
+                columns[heading] = dlen
+
+
+    table = {}
+    # okay now we need to pad the headers readying for drawing
+    for column, width in columns.items():
+        table[column] = "{name}{padding}".format(
+                name=column, padding=" "*(width-len(column))
+                )
+
+    heading = "| "
+    for column in table.values():
+        heading += column
+        heading += "| "
+
+    # now for the data
+    table = {}
+    for i, record in enumerate(data):
+        table[i] = "| "
+        for column, cdata in record.items():
+            table[i] += "{data}{padding} | ".format(
+                    data=cdata, padding=" "*(columns[column]-len(cdata)-1)
+                    )
+
+    # make the helper function which will draw the seporators
+    def draw_sep(columns):
+        """ Draws +----+--- etc... """
+        sep = "+"
+        for width in columns:
+            sep += "-"*(width+1)
+            sep += "+"
+
+        return sep + "\r\n"
+
+    sepper = lambda :draw_sep(columns.values())
+    stable = sepper()
+    stable += heading + "\r\n"
+    stable += sepper()
+    for value in table.values():
+        stable += value + "\r\n"
+    
+    stable += sepper()
+    return stable # few, glad that's over
+
+    
 
 def open_database(path):
     if os.path.exists(path):
@@ -166,12 +223,30 @@ if __name__ == "__main__":
     # drop them into a shell
     cfg = Config()
     cfg.InteractiveShell.confirm_exit = False
+    
+    # prep the welcome banner
+    welcome_banner = welcome_banner.format(
+            table=ascii_table(
+                    ["Variable", "Representation", "Type"],
+                    [
+                        {
+                            "Variable": "pump",
+                            "Representation": str(repr(pump)),
+                            "Type": type(pump).__name__,
+                        },
+                        {
+                            "Variable": "me",
+                            "Representation": str(repr(me)),
+                            "Type": type(me).__name__,
+                        }
+                    ]
+            )
+    )
+                    
+
     shell = InteractiveShellEmbed(
             config=cfg,
-            banner1=welcome_banner.format(
-                    pypump=str(pump),
-                    me=str(me)
-                    ),
+            banner1=welcome_banner,
             exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues"
             )
 
