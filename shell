@@ -160,7 +160,7 @@ if __name__ == "__main__":
     # go find the client info if it exists
     db = open_database(store_path)
 
-    webfinger = None if len(sys.argv) <= 1 else sys.argv[1]
+    webfinger = "" if len(sys.argv) <= 1 else sys.argv[1]
 
     if db == dict() and webfinger is None:
         print("You must specify a webfinger")
@@ -185,8 +185,8 @@ if __name__ == "__main__":
                 }
 
     else:
-        client_name = db["webfinger"].get("client_name", "PyPump")
-        db["webfinger"]["client_name"] = client_name
+        client_name = db[webfinger].get("client_name", "PyPump")
+        db[webfinger]["client_name"] = client_name
 
     
     sys.stdout.write("-> Setting up PyPump  ")
