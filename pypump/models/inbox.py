@@ -54,8 +54,11 @@ class Inbox(AbstractModel):
         self.unserialize(data, obj=self) 
         return self._inbox[0]
 
-    def __getslice__(self, s):
-        """ allows for a limit """
+    def __getslice__(self, s, e=None):
+        """ Grab multiple items from inbox """
+        if type(s) is not slice:
+            s = slice(s,e)
+
         if s.start and s.stop:
             count = s.stop - s.start
             offset = s.start
