@@ -31,17 +31,18 @@ class Inbox(AbstractModel):
     actor = None
     author = actor
 
-    def __init__(self, username=None, feed=None):
-        feed = "" if feed is None else "/%s" % feed
-        self.ENDPOINT += feed
+    def __init__(self, username=None):
         
         if isinstance(username, self._pump.Person):
             self.actor = username
             return
 
-        if username is not None:
-            self.actor = self._pump.Person(username)
+        print username
+
+        if username is None:
             return
+
+        self.actor = self._pump.Person(username)
 
     def __getitem__(self, key):
         """ Adds Inbox[<inbox>] """

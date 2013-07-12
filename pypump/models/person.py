@@ -88,7 +88,7 @@ class Person(AbstractModel):
                 self.username = username
                 self.server = server
                 self.is_self = False
-                self.inbox = self._pump.Inbox("/api/user/%s/inbox" % username) if inbox is None else inbox
+                self.inbox = self._pump.Inbox(self) if inbox is None else inbox
                 return 
 
         self.id = id

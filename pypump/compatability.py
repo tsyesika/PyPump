@@ -75,7 +75,7 @@ if py_version == 2:
     string_types = (str, unicode)
 elif py_version == 3:
     text_type = str
-    string_types = (str,)
+    string_types = (str, bytes)
 
 # add decorators
 if py_version == 2:

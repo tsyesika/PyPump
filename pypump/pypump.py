@@ -171,9 +171,6 @@ class PyPump(object):
 
         for attempt in range(attempts):
             if method == "POST":
-                print(endpoint)
-                print(params)
-                print(data)
                 request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
             elif method == "GET":
                 request = requests.get(endpoint, auth=self.client, params=params)
@@ -226,7 +223,7 @@ class PyPump(object):
                         ),
                 auth=client
                 )
-        
+       
         data = parse_qs(req.content)
         data = {
             'token': data[self.PARAM_TOKEN][0],
