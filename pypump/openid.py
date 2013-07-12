@@ -38,8 +38,9 @@ class Consumer(object):
 
 class OpenID(object):
 
-    ENDPOINT = "http://{server}/api/client/register"
+    ENDPOINT = "api/client/register"
 
+    pypump = None
     server = None
     request = None
     type = None
@@ -75,15 +76,17 @@ class OpenID(object):
         if self.server is None:
             raise OpenIDException("Server must be set")
 
-        endpoint = self.ENDPOINT.format(
-                server=self.server
-                )
+        request = {
+                "headers": {"Content-Type": "application/json"},
+                "data": data
+                }
 
-        request = requests.post(endpoint, headers={'Content-Type': 'application/json'}, data=data)
+        response = self.pypump._requester(requests.post, self.ENDPOINT, **request)
+        
         try:
-            server_data = request.json()
+            server_data = response.json()
         except ValueError:
-            raise OpenIDException(request.content)
+            raise OpenIDException(response.content)
 
         if "error" in server_data:
             raise OpenIDException(server_data["error"])

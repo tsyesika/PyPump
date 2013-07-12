@@ -55,6 +55,7 @@ class PyPump(object):
 
             Don't forget if you want to use https ensure the secure flag is True
         """
+        openid.OpenID.pypump = self # pypump uses PyPump.requester.
 
         if "@" in server:
             # it's a web fingerprint!
@@ -156,7 +157,7 @@ class PyPump(object):
         data = to_unicode(data)
 
         if raw is False:
-            url = "{protocol}://{server}/{endpoint}".format(
+            url = "{protocol}{server}/{endpoint}".format(
                     protocol=self.protocol,
                     server=self.server,
                     endpoint=endpoint
@@ -166,34 +167,25 @@ class PyPump(object):
 
         for attempt in range(attempts):
             if method == "POST":
-                try:
-                    request = requests.post(
-                            url,
-                            auth=self.client,
-                            headers={'Content-Type': 'application/json'},
-                            params=params,
-                            data=data
-                            )
-                except requests.exceptions.ConnectionError:
-                    # this is likely due HTTP not redirecting to HTTPS
-                    if url.statswith("http://"):
-                        raise # looks like this was genuine
-                    self.set_http()
-                    return self.request(endpoint, method, data, raw, params, attempts-1)
-   
+                request = {
+                        "auth": self.auth,
+                        "headers": {"Content-Type": "application/json"},
+                        "params": params,
+                        "data": data,
+                        }
+                response = self._requester(requests.post, endpoint, raw, **request)
             elif method == "GET":
-                try:
-                    request = requests.get(url, auth=self.client, params=params)
-                except requests.exceptions.ConnectionError:
-                    # this is likely due to HTTP not redirecting to HTTPS
-                    if url.startswith("http://"):
-                        raise # looks like this was genuine
-                    self.set_http()
-                    return self.request(endpoint, method, data, raw, params, attempts-1)
-            if request.status_code == 200:
+                request = {
+                        "params": params,
+                        "auth": auth,
+                        }
+  
+                response = self._requester(requests.get, endpoint, raw, **request)
+
+            if response.status_code == 200:
                 # huray!
-                return request.json()
-            elif request.status_code in [400]:
+                return response.json()
+            elif response.status_code in [400]:
                 # can't do much
                 try:
                     try:
@@ -207,7 +199,28 @@ class PyPump(object):
                 except IndexError:
                     error = "Recieved a 400 bad request error. This is likely due to an OAuth failure"
                 raise PyPumpException(error)
-        return '' # failed :(
+        
+        # failed, oh no!
+        error = "Failed to make request to {0} ({1} {2})".format(url, method, data)
+        raise PyPumpException(error)
+    def _requester(self, fnc, endpoint, raw=False, **kwargs):
+        if not raw:
+            url = "{protocol}://{server}/{endpoint}".format(
+                    protocol=self.protocol,
+                    server=self.server,
+                    endpoint=endpoint
+                    )
+        else:
+            url = raw
+
+        try:
+            response = fnc(url, **kwargs)
+            return response
+        except requests.exceptions.ConnectionError:
+            if self.protocol == "http":
+                raise # shoot this seems real.
+            self.set_http()
+            return self._requester(fnc, endpoint, raw, **kwargs)
 
     def set_https(self):
         """ Enforces protocol to be https """
@@ -250,15 +263,9 @@ class PyPump(object):
                 callback_uri="oob"
                 )
         
-        req = requests.post(
-                "{protocol}://{server}/oauth/request_token".format(
-                        protocol=self.protocol,
-                        server=self.server
-                        ),
-                auth=client
-                )
-       
-        data = parse_qs(req.content)
+        request = {"auth": client}
+        response = self._requester(requests.post, "oauth/request_token", **request)
+        data = parse_qs(response.content)
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
@@ -276,15 +283,9 @@ class PyPump(object):
                 verifier=auth_info['verifier']
                 )
 
-        req = requests.post(
-                "{protocol}://{server}/oauth/access_token".format(
-                        protocol=self.protocol,
-                        server=self.server
-                        ),
-                auth=client
-                )
-        
-        data = parse_qs(req.content)
+        request = {"auth": cleint}
+        response = self._requester(requests.post, "oauth/access_token", **request)        
+        data = parse_qs(response.content)
 
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
