@@ -283,7 +283,7 @@ class PyPump(object):
                 verifier=auth_info['verifier']
                 )
 
-        request = {"auth": cleint}
+        request = {"auth": client}
         response = self._requester(requests.post, "oauth/access_token", **request)        
         data = parse_qs(response.content)
 
