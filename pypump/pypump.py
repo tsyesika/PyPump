@@ -62,6 +62,10 @@ class PyPump(object):
             self.server = server
             self.nickname = None # should be set with <instance>.set_nickname(<nickname>)
 
+        # Fix #24 by checking
+        if (key is None or secret is None) and (token or token_secret):
+            raise Exception("If token and/or token_secret are supplied you must supply key and secret too")
+
         self.populate_models()
 
         # first, if we need to register our client
