@@ -168,7 +168,7 @@ class PyPump(object):
         for attempt in range(attempts):
             if method == "POST":
                 request = {
-                        "auth": self.auth,
+                        "auth": self.client,
                         "headers": {"Content-Type": "application/json"},
                         "params": params,
                         "data": data,
@@ -177,7 +177,7 @@ class PyPump(object):
             elif method == "GET":
                 request = {
                         "params": params,
-                        "auth": auth,
+                        "auth": self.client,
                         }
   
                 response = self._requester(requests.get, endpoint, raw, **request)
