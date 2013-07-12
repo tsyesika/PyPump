@@ -12,7 +12,7 @@ Example
 The following will create (for the first time) a connection to a pump.io server for the user Tsyesika@pump.megworld.co.uk for my client named "Test.io"::
 
     >>> from pypump import PyPump
-    >>> pump = PyPump("Tsyesika@pump.megowrld.co.uk", client_name="Test.io", secure=True)
+    >>> pump = PyPump("Tsyesika@pump.megowrld.co.uk", client_name="Test.io")
     >>> client_credentials = pump.get_registration() # will return [<client key>, <client secret>, <expirey>]
     >>> client_tokens = pump.get_token() # will return [<token>, <secret>]
 
@@ -26,6 +26,5 @@ An example of then connecting again (using the same variable names as above). Th
     ...          secret=client_credentials[1], # the client secret
     ...          token=client_tokens[0], # the token key
     ...          token_secret=client_tokens[1], # the token secret
-    ...          secure=True) # for using HTTPS
-
+    ...          )
  

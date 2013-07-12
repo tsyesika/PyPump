@@ -38,10 +38,9 @@ class Consumer(object):
 
 class OpenID(object):
 
-    ENDPOINT = "{proto}://{server}/api/client/register"
+    ENDPOINT = "http://{server}/api/client/register"
 
     server = None
-    protocol = "https" 
     request = None
     type = None
     logo_url = None
@@ -49,17 +48,12 @@ class OpenID(object):
     consumer = None
 
 
-    def __init__(self, protocol, server, client_name, application_type, logo_url=None):
+    def __init__(self, server, client_name, application_type, logo_url=None):
         # we don't want the webfinger just the server
         if "@" in server:
             self.server = server.split("@", 1)[1]
         else:
             self.server = server
-
-        if type(protocol) is bool:
-            self.protocol = "https" if protocol else "http"
-        else:
-            self.protocol = protocol
 
         self.name = client_name = client_name
         self.type = application_type
@@ -82,7 +76,6 @@ class OpenID(object):
             raise OpenIDException("Server must be set")
 
         endpoint = self.ENDPOINT.format(
-                proto=self.protocol,
                 server=self.server
                 )
 

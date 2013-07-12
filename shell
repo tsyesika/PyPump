@@ -36,6 +36,7 @@ Welcome to the PyPump testing shell,
 We have setup the PyPump object for you:
 
 pump = {pypump}
+me   = {me}
 
 If you need help please visit our docs:
 https://pypump.readthedocs.org/en/latest
@@ -129,6 +130,8 @@ if __name__ == "__main__":
         client_name = sys.argv[2]
         db["client_name"] = client_name
 
+    print("-> Setting up PyPump "),
+    sys.stdout.flush() # actually get it on the screen - most terms wait for \n
     pump = PyPump(
             webfinger,
             client_name=client_name,
@@ -137,7 +140,6 @@ if __name__ == "__main__":
             client_type=db.get("client_type", "native"),
             token=db.get("token", None),
             token_secret=db.get("token_secret", None),
-            secure=db.get("secure", False)
             )
 
     # save client name and webfinger
@@ -155,12 +157,21 @@ if __name__ == "__main__":
     
     save_database(db, store_path)
 
+    # setup other variables for user. 
+    me = pump.Person(webfinger)
+
+    # bring curser back so banner walks over the setup message
+    print("\r")
+
     # drop them into a shell
     cfg = Config()
     cfg.InteractiveShell.confirm_exit = False
     shell = InteractiveShellEmbed(
             config=cfg,
-            banner1=welcome_banner.format(pypump=str(pump)),
+            banner1=welcome_banner.format(
+                    pypump=str(pump),
+                    me=str(me)
+                    ),
             exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues"
             )
 

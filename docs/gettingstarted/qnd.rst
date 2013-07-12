@@ -19,9 +19,7 @@ So we need to get started::
 
 First time lets do all the oauth stuff::
 
-    >>> pump = PyPump(webfinger, client_name="Quick 'n dirty", secure=True)
-
-.. note:: Use *secure=True* if you need SSL
+    >>> pump = PyPump(webfinger, client_name="Quick 'n dirty")
 
 Super, next, I wanna see my inbox::
 

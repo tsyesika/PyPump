@@ -47,7 +47,7 @@ class PyPump(object):
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
-                token_secret=None, save_token=None, secure = False):
+                token_secret=None):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -62,18 +62,11 @@ class PyPump(object):
             self.server = server
             self.nickname = None # should be set with <instance>.set_nickname(<nickname>)
 
-        if secure:
-            self.proto = "https"
-        else:
-            self.proto = "http"
-        
         self.populate_models()
-        #self.loader = loader.Loader(self)
 
         # first, if we need to register our client
         if not (key or secret):
             oid = openid.OpenID(
-                    protocol=secure,
                     server=server,
                     client_name=client_name,
                     application_type=client_type
@@ -141,8 +134,7 @@ class PyPump(object):
     # server 
     ##
     def request(self, endpoint, method="GET", data="", raw=False, params=None, attempts=10):
-        """ This will make a request to <proto>//<self.server>/<endpoint> with oauth headers
-        proto = self.proto (https or http)
+        """ This will make a request to http://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
         """
@@ -163,17 +155,31 @@ class PyPump(object):
         data = to_unicode(data)
 
         if raw is False:
-            endpoint = "{proto}://{server}/{endpoint}".format(
-                    proto=self.proto,
+            endpoint = "http://{server}/{endpoint}".format(
                     server=self.server,
                     endpoint=endpoint
                     )
 
         for attempt in range(attempts):
             if method == "POST":
-                request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
+                try:
+                    request = requests.post(endpoint, auth=self.client, headers={'Content-Type': 'application/json'}, params=params, data=data)
+                except requests.exceptions.ConnectionError:
+                    # this is likely due HTTP not redirecting to HTTPS
+                    if endpoint.statswith("https://"):
+                        raise # looks like this was genuine
+                    self.set_https()
+                    continue
+   
             elif method == "GET":
-                request = requests.get(endpoint, auth=self.client, params=params)
+                try:
+                    request = requests.get(endpoint, auth=self.client, params=params)
+                except requests.exceptions.ConnectionError:
+                    # this is likely due to HTTP not redirecting to HTTPS
+                    if endpoint.startswith("https://"):
+                        raise # looks like this was genuine
+                    self.set_http()
+                    continue
             if request.status_code == 200:
                 # huray!
                 return request.json()
@@ -182,6 +188,15 @@ class PyPump(object):
                 raise PyPumpException("Recieved a 400 bad request error. This is likely due to an OAuth failure")
         return '' # failed :(
 
+    def set_https(self):
+        """ Enforces protocol to be https """
+        if self.server.startswith("http://"):
+            self.server = "https://" + self.server.lstrp("http://")
+
+    def set_http(self):
+        """ Sets protocol to be http """
+        if self.server.startswith("https://"):
+            self.server = "http://" + self.server.lstrip("https://")
 
     ##
     # OAuth specific stuff
@@ -199,8 +214,7 @@ class PyPump(object):
         """ this asks the user to let us use their account """
 
         print("To allow us to use your pump.io please follow the instructions at:")
-        print("{proto}://{server}/oauth/authorize?oauth_token={token}".format(
-                proto=self.proto,
+        print("http://{server}/oauth/authorize?oauth_token={token}".format(
                 server=self.server,
                 token=token.decode("utf-8")
                 ))
@@ -217,8 +231,7 @@ class PyPump(object):
                 )
         
         req = requests.post(
-                "{proto}://{server}/oauth/request_token".format(
-                        proto=self.proto,
+                "http://{server}/oauth/request_token".format(
                         server=self.server
                         ),
                 auth=client
@@ -228,7 +241,7 @@ class PyPump(object):
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
-        }
+            }
 
         return data
 
@@ -242,11 +255,10 @@ class PyPump(object):
                 verifier=auth_info['verifier']
                 )
 
-        req = requests.post("{proto}://{server}/oauth/access_token".format(
-                        proto=self.proto,
-                        server=self.server,
-                        ),
-                auth=client)
+        req = requests.post(
+                "http://{server}/oauth/access_token".format(server=self.server),
+                auth=client
+                )
         
         data = parse_qs(req.content)
 

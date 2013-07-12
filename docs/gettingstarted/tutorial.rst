@@ -53,7 +53,7 @@ are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
       >>> from PyPump.PyPump import PyPump
-      >>> pump = PyPump("mizbunny@example.org", client_name="Test.io", secure=True)
+      >>> pump = PyPump("mizbunny@example.org", client_name="Test.io")
       >>> client_credentials = pump.get_registration()
       # will return [<token>, <secret>]
       >>> client_tokens = pump.get_token()
@@ -71,7 +71,7 @@ reconnect like so::
     ...          secret=client_credentials[1], # the client secret
     ...          token=client_tokens[0], # the token key
     ...          token_secret=client_tokens[1], # the token secret
-    ...          secure=True) # for using HTTPS
+    ...          )
 
 Okay, we're connected!  Next up, we want to check out what our last 30
 messages are.  PyPump supports python-style index slicing::
