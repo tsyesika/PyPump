@@ -16,6 +16,7 @@ setup(
         install_requires=[
                 "requests-oauthlib>=0.3.0",
                 "requests>=1.2.0",
+                "nose",
                 ],
         classifiers=[
                 "Development Status :: 3 - Alpha",
