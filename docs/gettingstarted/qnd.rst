@@ -8,7 +8,7 @@ Introduction
 
 .. warning:: This is not complete, this is used as a fast intro for those fairly familiar or a reference for those who are a little rusty with PyPump
 
-PyPump is a library for `pump.io <http://pump.io>`_, this guide is designed to get you up to speed and using this library in a very short amount of time, to do that I avoid long winded explanations, if you're completely new to PyPump and/or pump.io please use :doc:`tutorial`.
+This guide is designed to get you up to speed and using this library in a very short amount of time, to do that I avoid long winded explanations, if you're completely new to PyPump and/or pump.io please use :doc:`tutorial`.
 
 Getting connected
 -----------------
@@ -19,7 +19,7 @@ So we need to get started::
 
 First time lets do all the oauth stuff::
 
-    >>> pump = PyPump(webfinger, client_name="Quick 'n dirty")
+    >>> pump = PyPump("me@my.server.org", client_name="Quick 'n dirty")
 
 Super, next, I wanna see my inbox::
 
@@ -30,7 +30,7 @@ Super, next, I wanna see my inbox::
 
 .. note:: using an index or slice makes the request. If you iterate over it without a request it **will** be empty,
 
-Oh, my friend evan isn't there, I probably need to follow him::
+Oh, my friend Evan isn't there, I probably need to follow him::
 
     >>> evan = pump.Person("evan@e14n.org")
     >>> evan.follow()
@@ -40,7 +40,7 @@ Awesome. Lets check again::
     >>> for item in my_inbox[:20]:
     ...     print item
 
-Oh there evan likes PyPump super::
+Evan likes PyPump, super!::
 
     >>> awesome_note = my_inbox[1] # second note in my inbox
     >>> awesome_note.content
@@ -71,8 +71,6 @@ Oh it's an image, lets see the thumb nail::
     >>> fout.write(urllib2.urlopen(url).read())
     >>> fout.close()
 
-*looks at image*
-
 Hmm, I want to see a bigger version::
 
     >>> large_url = latest_item.full_url
@@ -84,9 +82,7 @@ Hmm, I want to see a bigger version::
     >>> fout.write(urllib2.urlopen(url).read())
     >>> fout.close()
 
-*looks at larger image*
-
-That looks awesome, Lets post a comment::
+That looks awesome, lets post a comment::
 
     >>> my_comment = pump.Comment("Great, super imaeg")
     >>> latest_item.comment(my_comment)
@@ -95,11 +91,11 @@ Oh no, I made a typo::
 
     >>> my_comment.delete()
     >>> my_comment.content = "Great, super image")
-    >>> latest_item.ocmment(my_comment)
+    >>> latest_item.comment(my_comment)
 
-Much better, Lets make a note to tell people how easy this all is::
+Much better! Lets make a note to tell people how easy this all is::
 
     >>> my_note = pump.Note("My gawd... PyPump is super easy to get started with")
     >>> my_note.send()
 
-Lovely. Don't forget is there are any issues please issue them on our `GitHub <https://github.com/xray7224/PyPump/issues>`_!
+Don't forget is there are any issues please issue them on our `GitHub <https://github.com/xray7224/PyPump/issues>`_!
