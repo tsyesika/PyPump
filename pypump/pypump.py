@@ -157,7 +157,7 @@ class PyPump(object):
         data = to_unicode(data)
 
         if raw is False:
-            url = "{protocol}{server}/{endpoint}".format(
+            url = "{protocol}://{server}/{endpoint}".format(
                     protocol=self.protocol,
                     server=self.server,
                     endpoint=endpoint
