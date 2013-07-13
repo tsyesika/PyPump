@@ -7,7 +7,7 @@ Tutorial
 PyPump and the Pump API
 -----------------------
 
-PyPump is tooling to implement and interface with the `Pump API
+PyPump is aiming to implement and interface with the `Pump API
 <https://github.com/e14n/pump.io/blob/master/API.md>`_, which is a
 federation protocol for the web.  You can read the actual Pump API
 docs to get a sense of all that, but here's a high level overview.
@@ -17,7 +17,7 @@ descriptions of activities back and forth across different users on
 different sites.  At the highest conceptual level, it's not too
 different from the idea of email servers sending emails back and
 forth, but the messages (activities here) are much more specific and
-cary more specific meaning about what "type" of message is being sent
+carry more specific meaning about what "type" of message is being sent
 back and forth.  An activity can be a user "favoriting" something or
 "posting an image" or what have you.
 
@@ -58,7 +58,7 @@ your first time, you need to authenticate this client::
       # will return [<token>, <secret>]
       >>> client_tokens = pump.get_token()
 
-The PyPump call will try to verify with oauth, You may wish to override how it asks for authentication.
+The PyPump call will try to verify with OAuth, You may wish to override how it asks for authentication.
 PyPump by default writes to standard out a URL for the user to click and reads in from standard in for a verification
 code presented by the webserver.
 
@@ -117,7 +117,7 @@ he's said some interesting things?::
     >>> for messages in evan.inbox:
     >>>     print message.content
 
-Prehaps we want to know a bit about evan::
+Prehaps we want to know a bit about Evan::
 
     >>> print evan.summery  
 
