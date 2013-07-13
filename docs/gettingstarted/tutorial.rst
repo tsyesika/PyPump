@@ -52,7 +52,7 @@ mizbunny@example.org.  We want to check what our latest messages
 are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
-      >>> from PyPump.PyPump import PyPump
+      >>> from pypump import PyPump
       >>> pump = PyPump("mizbunny@example.org", client_name="Test.io")
       >>> client_credentials = pump.get_registration()
       # will return [<token>, <secret>]
