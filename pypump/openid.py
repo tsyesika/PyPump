@@ -56,7 +56,7 @@ class OpenID(object):
         else:
             self.server = server
 
-        self.name = client_name = client_name
+        self.name = client_name
         self.type = application_type
         self.logo_url = self.logo_url if logo_url is not None else logo_url
 
