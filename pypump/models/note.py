@@ -247,7 +247,7 @@ class Note(AbstractModel):
         nid = data.get("id", None)
         links = {}
         if "object" in data:
-            nid = data["object"].get("id", None)
+            nid = data["object"].get("id", nid)
             data_obj = data["object"]
             content = data["object"].get("content", u"")
             summary = data["content"]
