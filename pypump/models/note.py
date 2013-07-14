@@ -147,7 +147,9 @@ class Note(AbstractModel):
             # oh dear, raise
             raise PumpException(data["error"])
          
-        self.unserialize(data["object"], obj=self)
+        self.unserialize(data, obj=self)
+
+        return True
 
     def comment(self, comment):
         """ Posts a comment """
@@ -165,7 +167,7 @@ class Note(AbstractModel):
         }
 
         data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
-        
+
         if data.get("verb", None) == activity["verb"]:
             self.deleted = True
             return True
@@ -242,13 +244,12 @@ class Note(AbstractModel):
         """ Goes from JSON -> Note object """
         if data.get("verb", "") == "delete":
             return Note.unserialize_to_deleted(data, obj=obj)
-
         summary = None
         nid = data.get("id", None)
         links = {}
         if "object" in data:
-            nid = data["object"].get("id", nid)
             data_obj = data["object"]
+            nid = data_obj.get("id", nid)
             content = data["object"].get("content", u"")
             summary = data["content"]
             if "proxy_url" in data_obj.get("likes", []):
@@ -276,7 +277,7 @@ class Note(AbstractModel):
                     links=links,
                     )
         else:
-            obj = Note(content=content)
+            obj.content = content
             obj.summary = summary
             obj.id = nid
             obj.actor = Note._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
