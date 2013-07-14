@@ -6,6 +6,7 @@ I want to thank anyone who has contributed, I have limited time myself so This p
 Programming Contributors
 =========================
 - Christopher Webber / cwebber (https://github.com/cwebber)
+- Sibi / psibi (https://github.com/psibi)
 
 Documentation Contributors 
 ==========================
