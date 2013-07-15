@@ -23,7 +23,9 @@ class Location(AbstractModel):
 
     TYPE = "location"
 
-    name = ""
+    name = None
+    longitude = None
+    latitude = None
 
     def __init__(self, name, *args, **kwargs):
         super(Location, self).__init__(*args, **kwargs)
@@ -37,7 +39,25 @@ class Location(AbstractModel):
 
     @staticmethod
     def unserialize(data, obj=None):
-        name = data["displayName"]
+        name = data.get("displayName", None)
+        
+        if ("lon" in data and "lat" in data):
+            self.longitude = int(data["lon"])
+            self.latitude = int(data["lat"])
+        
+        elif "position" in data:
+            position = data["position"][:-1]
+            if position[1:].find("+") != -1:
+                self.latitude = position.lstrip("+").split("+", 1)[0]
+                self.latitude = int(self.latitude)
+
+                self.longitude = int(position[1:].split("+", 1)[1])
+            else:
+                self.latitude = position.lstrip("+").split("-", 1)[0]
+                self.latitude = int(self.latitude)
+
+                self.longitude = int(position[1:].split("-", 1)[1])               
+
         if obj is None:
             return Location(name=name)
         else:
