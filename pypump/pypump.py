@@ -189,10 +189,10 @@ class PyPump(object):
                 # can't do much
                 try:
                     try:
-                        data = request.json()
+                        data = response.json()
                         error = data["error"]
                     except ValueError:
-                        error = request.content
+                        error = response.content
                     
                     if not error:
                         raise IndexError # yesss i know.
