@@ -51,14 +51,14 @@ class Location(AbstractModel):
             position = data["position"][:-1]
             if position[1:].find("+") != -1:
                 latitude = position.lstrip("+").split("+", 1)[0]
-                latitude = int(latitude)
+                latitude = float(latitude)
 
-                longitude = int(position[1:].split("+", 1)[1])
+                longitude = float(position[1:].split("+", 1)[1])
             else:
                 latitude = position.lstrip("+").split("-", 1)[0]
-                latitude = int(latitude)
+                latitude = float(latitude)
 
-                longitude = int(position[1:].split("-", 1)[1])               
+                longitude = float(position[1:].split("-", 1)[1])               
 
         else:
             longitude = None
