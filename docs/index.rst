@@ -9,12 +9,12 @@ PyPump - Python Pump.io Library
 PyPump provides a simple, powerful and pythonic way of interfacing with `pump.io <http://pump.io>`_.
 The community for PyPump lives on IRC in the #pypump channel on `MegNet <http://megworld.co.uk/irc>`_.
 
-PyPump is under the `GPLv3 <https://www.gnu.org/licenses/gpl.html>`. You should probably
+PyPump is under the `GPLv3 <https://www.gnu.org/licenses/gpl.html>`_. You should probably
 look to see if/how this may impact you and your programs if you desire to use PyPump.
 
 Getting started
 ---------------
-If you're new to PyPump and feeling a bit overwhelmed the :ref:`tutorial <gettingstarted/tutorial>` is the best 
+If you're new to PyPump and feeling a bit overwhelmed the :doc:`tutorial` is the best 
 place to go.
 
 Contents
@@ -26,11 +26,11 @@ Contents
    gettingstarted/qnd
    gettingstarted/tutorial
    gettingstarted/authentication
-   gettingstarted/common
    
 
 Models
-======   
+------
+   
 .. toctree::
    :maxdepth: 1
 
@@ -39,13 +39,5 @@ Models
    models/comment
    models/image
    models/person
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
 
 This was build on |today|
