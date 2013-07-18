@@ -5,7 +5,7 @@ Authorization
 What you need to know
 ---------------------
 
-Pump.io uses oauth 1.0 with dynamic client registration, this available through a lot of libraries, PyPump uses `oauthlib <https://github.com/idan/oauthlib`. All of that is handled by PyPump however there are some things to know.
+Pump.io uses oauth 1.0 with dynamic client registration, this available through a lot of libraries, PyPump uses `oauthlib <https://github.com/idan/oauthlib>`_ and a wrapper around it to provide an provide an interface with the `requests <http://docs.python-requests.org/en/latest/>`_ library - `requests-oauthlib <https://github.com/requests/requests-oauthlib>`. All of that is handled by PyPump however there are some things to know.
 
 OAuth works by exchanging pre-established client credentials and token, you however have to provide those each time you make instantiate the PyPump object. You will have to provide a mechanism to store these so that you can you can provide them the next time.
 
