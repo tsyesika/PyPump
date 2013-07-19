@@ -44,8 +44,8 @@ class Location(AbstractModel):
         name = data.get("displayName", None)
         
         if ("lon" in data and "lat" in data):
-            longitude = int(data["lon"])
-            latitude = int(data["lat"])
+            longitude = float(data["lon"])
+            latitude = float(data["lat"])
         
         elif "position" in data:
             position = data["position"][:-1]
