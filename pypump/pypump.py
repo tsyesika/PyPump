@@ -34,6 +34,7 @@ from models.person import Person
 from models.image import Image
 from models.inbox import Inbox
 from models.location import Location
+from models.address import Address
 
 class PyPump(object):
 
@@ -116,6 +117,9 @@ class PyPump(object):
 
         self.Location = Location
         self.Location._pump = self
+
+        self.Address = Address
+        self.Address._pump = self
 
     ##
     # getters to expose some data which might be useful

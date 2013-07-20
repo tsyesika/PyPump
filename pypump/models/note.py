@@ -26,6 +26,7 @@ from pypump.compatability import *
 from pypump.models import AbstractModel
 from pypump.models.person import Person
 from pypump.models.comment import Comment
+from pypump.models.address import Address
 
 @implement_to_string
 class Note(AbstractModel):
@@ -111,7 +112,7 @@ class Note(AbstractModel):
 
         if isinstance(people, list):
             self._to = people
-        elif isinstance(people, str):
+        elif isinstance(people, dict):
             self._to = [people]
         else:
             raise TypeError("Unknown type %s (%s)" % (type(people), people))
@@ -126,7 +127,7 @@ class Note(AbstractModel):
 
         if isinstance(people, list):
             self._cc = people
-        elif isinstance(people, str):
+        elif isinstance(people, dict):
             self._cc = [people]
         else:
             raise TypeError("Unknown type %s (%s)" % (type(people), people))
@@ -216,13 +217,16 @@ class Note(AbstractModel):
 
     def serialize(self):
         """ Seralizes note to be posted """
+        address = Address()
         query = {
             "verb":self.VERB,
             "object":{
                 "objectType":self.TYPE,
                 "content":self.content,
             },
-        }
+            "to":self._to if self._to else [address.createFollowers()],
+            "cc":self._cc if self._cc else [address.createFollowers()]
+            }
 
         return json.dumps(query)
 
