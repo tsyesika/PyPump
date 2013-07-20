@@ -32,7 +32,7 @@ class Person(AbstractModel):
 
     TYPE = "person"
     ENDPOINT = "/api/user/%s/feed"
-
+    LIST_ENDPOINT = "/api/user/%s/lists/person"
     id = ""
     username = ""
     display_name = ""
@@ -154,6 +154,21 @@ class Person(AbstractModel):
             raise PumpException(data["error"])
 
         # now to do something!
+    
+    def getUserList(self):
+        """Returns Lists of people created by person"""
+        data = self._pump.request(self.LIST_ENDPOINT % self._pump.nickname, method="GET")
+        
+        # we need to actually store the new note data the server has sent back
+        if "error" in data:
+            # oh dear, raise
+            raise PumpException(data["error"])
+        
+        user_list = []
+        for item in data['items']:
+            user_list.append(Address(item['url'], item['displayName']))
+
+        return user_list
 
     def __repr__(self):
         return self.id.lstrip("acct:")
