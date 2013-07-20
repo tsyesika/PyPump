@@ -139,7 +139,7 @@ class Person(AbstractModel):
     def unfollow(self):
         """ Unfollow a user """
         activity = {
-            "verb":"unfollow",
+            "verb":"stop-following",
             "object":{
                 "id":self.id,
                 "objectType":"person",
@@ -153,7 +153,8 @@ class Person(AbstractModel):
         if "error" in data:
             raise PumpException(data["error"])
 
-        # now to do something!
+        self.unserialize(data, obj=self) 
+        return True
 
     def __repr__(self):
         return self.id.lstrip("acct:")
@@ -186,7 +187,7 @@ class Person(AbstractModel):
 
         self = cls() if obj is None else obj
 
-        if "verb" in data and data["verb"] in ["follow", "unfollow"]:
+        if "verb" in data and data["verb"] in ["follow", "stop-following"]:
             return None
 
     
