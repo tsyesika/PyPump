@@ -257,7 +257,7 @@ class Note(AbstractModel):
             elif "likes" in data_obj:
                 links["likes"] = data_obj["likes"]["url"]
 
-            if "pump_io" in data_obj.get("replies", {}) and "proxyURL" in data_obj.get["replies"].get("pump_io", {}):
+            if "pump_io" in data_obj.get("replies", {}) and "proxyURL" in data_obj["replies"].get("pump_io", {}):
                 url = data_obj["replies"]["pump_io"]["proxyURL"].lstrip("http://").lstrip("https://")
                 links["comments"] = url.split("/", 1)[1]
             elif links.get("comments", []):
