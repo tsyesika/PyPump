@@ -7,6 +7,7 @@ Programming Contributors
 =========================
 - Christopher Webber / cwebber (https://github.com/cwebber)
 - Sibi / psibi (https://github.com/psibi)
+- Jonas Haraldsson / kabniel (https://github.com/kabniel)
 
 Documentation Contributors 
 ==========================
