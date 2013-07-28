@@ -1,5 +1,5 @@
-from  compatability import *
-from models import AbstractModel
+from pypump.compatability import *
+from pypump.models import AbstractModel
 import imp
 import glob
 

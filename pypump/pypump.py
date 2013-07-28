@@ -18,22 +18,24 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+from __future__ import absolute_import
+
 import json
 
 import requests
 from requests_oauthlib import OAuth1
-import openid
+import pypump.openid as openid
 
-from compatability import *
-from exception import PyPumpException
+from pypump.compatability import *
+from pypump.exception import PyPumpException
 
 # load models
-from models.note import Note
-from models.comment import Comment
-from models.person import Person
-from models.image import Image
-from models.inbox import Inbox
-from models.location import Location
+from pypump.models.note import Note
+from pypump.models.comment import Comment
+from pypump.models.person import Person
+from pypump.models.image import Image
+from pypump.models.inbox import Inbox
+from pypump.models.location import Location
 
 class PyPump(object):
 
