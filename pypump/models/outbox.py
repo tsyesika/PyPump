@@ -18,7 +18,7 @@
 from pypump.compatability import *
 from pypump.models.feed import Feed
 
-class Inbox(Feed):
+class Outbox(Feed):
     
     ENDPOINT = "api/user/{username}/inbox"
 

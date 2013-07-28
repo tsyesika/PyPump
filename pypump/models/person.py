@@ -31,7 +31,7 @@ class Person(AbstractModel):
 
 
     TYPE = "person"
-    ENDPOINT = "/api/user/%s/feed"
+    ENDPOINT = "/api/user/{username}/feed"
 
     id = ""
     username = ""
@@ -42,19 +42,24 @@ class Person(AbstractModel):
     location = None # place item
     summary = "" # lil bit about them =]    
     image = None # Image items
+
     inbox = None
+    outbox = None
+    messages = None
 
     is_self = False # is this you?
 
     def __init__(self, webfinger=None, id="", username="", url="", summary="", 
-                 inbox=None, display_name="", image=None, published=None, 
-                 updated=None, location=None, me=None, *args, **kwargs):
+                 inbox=None, outbox=None, display_name="", image=None, 
+                 published=None, updated=None, location=None, me=None, 
+                 *args, **kwargs):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
         url - url to profile
         summary - summary of the user
-        inbox - This is the persons inbox
+        inbox - This is the person's inbox
+        outbox - This is the person's outbox
         display_name - what the user want's to show up (defualt: username)
         image - image of the user (default: No image/None)
         published - when the user joined pump (default: now)
@@ -74,11 +79,16 @@ class Person(AbstractModel):
             else:
                 # they probably just gave a username, the assumption is it's on our server!
                 username, server = webfinger, self._pump.server
-            self.inbox = self._pump.Inbox(username=self)
+            if username == self._pump.nickname and server == self._pump.server:
+                self.inbox = self._pump.Inbox(self) if inbox is None else inbox
+                self.messages = self.inbox
+            else:
+                self.outbox = self._pump.Outbox(self) if outbox is None else outbox
+                self.messages = self.outbox
             # now do some checking
             if server == self._pump.server:
                 # cool we can get quite a bit of info.
-                data = self._pump.request("/api/user/%s/profile" % username)
+                data = self._pump.request("/api/user/{0}/profile".format(username))
                 self.unserialize(data, obj=self)
                 # lets hope we've found it
                 return
@@ -88,7 +98,6 @@ class Person(AbstractModel):
                 self.username = username
                 self.server = server
                 self.is_self = False
-                self.inbox = self._pump.Inbox(self) if inbox is None else inbox
                 return 
 
         self.id = id
@@ -115,6 +124,8 @@ class Person(AbstractModel):
 
         if me and self.id == me.id:
             self.is_self = True
+            self.outbox = self._pump.Outbox(self)
+            self.message = self.outbox
 
     def follow(self): 
         """ You follow this user """
@@ -126,7 +137,7 @@ class Person(AbstractModel):
             }
         }
 
-        endpoint = self.ENDPOINT % self._pump.nickname
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -146,7 +157,7 @@ class Person(AbstractModel):
             }
         }
 
-        endpoint = self.ENDPOINT % self._pump.nickname
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -194,15 +205,15 @@ class Person(AbstractModel):
         username = data["preferredUsername"]
         display = data["displayName"]
 
-        self.id = "acct:%s@%s" % (username, self._pump.server)
+        self.id = "acct:%s@%s" % (username, cls._pump.server)
         self.username = username
         self.display_name = display
         self.url = data["links"]["self"]["href"]
         self.summary = data["summary"] if "summary" in data else ""
         self.updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
         self.published = datetime.strptime(data["published"], cls.TSFORMAT) if "published" in data else self.updated
-        self.me = True if "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id else False
-        self.location = self._pump.Location.unserialize(data["location"]) if "location" in data else None
+        self.me = True if "acct:%s@%s" % (cls._pump.nickname, cls._pump.server) == self.id else False
+        self.location = cls._pump.Location.unserialize(data["location"]) if "location" in data else None
 
-        self.updated = datetime.strptime(data["updated"], self.TSFORMAT) if "updated" in data else datetime.now()
+        self.updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
         return self

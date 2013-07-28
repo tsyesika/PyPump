@@ -23,9 +23,8 @@ from pypump.compatability import *
 @implement_to_string
 class Comment(AbstractModel):
 
-    TYPE = "comment"
     VERB = "post"
-    ENDPOINT = "/api/user/%s/feed"
+    ENDPOINT = "/api/user/{username}/feed"
 
     id = None
     content = ""
@@ -36,7 +35,8 @@ class Comment(AbstractModel):
     published = None
     likes = []
 
-    def __init__(self, content, cid=None, summary=None, note=None, published=None, updated=None, actor=None, *args, **kwargs):
+    def __init__(self, content, cid=None, summary=None, note=None, 
+                 published=None, updated=None, actor=None, *args, **kwargs):
         super(Comment, self).__init__(*args, **kwargs)
 
         self.id = "" if cid is None else cid
@@ -56,10 +56,14 @@ class Comment(AbstractModel):
             self.updated = self.published
 
     def __repr__(self):
-        return "<Comment by %s at %s>" % (self.actor, self.published.strftime("%Y/%m/%d"))
+        return "<{type} by {name} at {date}>".format(
+                    type=self.TYPE,
+                    name=self.actor,
+                    date=self.published.strftime("%Y/%m/%d")
+                    )
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
 
     def like(self, verb="like"):
         """ Will like the comment """
@@ -72,7 +76,7 @@ class Comment(AbstractModel):
         
         }
 
-        endpoint = self.ENDPOINT % self._pump.nickname
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -133,7 +137,7 @@ class Comment(AbstractModel):
             },
         }
     
-        endpoint = self.ENDPOINT % self._pump.nickname
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -147,8 +151,8 @@ class Comment(AbstractModel):
 
         return True
 
-    @staticmethod
-    def unserialize(data, obj=None):
+    @classmethod
+    def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
         if "object" in data:
             published = datetime.strptime(data["object"]["published"], Comment.TSFORMAT)
@@ -166,7 +170,14 @@ class Comment(AbstractModel):
        
         if obj is None:
             cid = data["id"] if "id" in data else ""
-            return Comment(content=content, cid=cid, actor=actor, summary=summary, published=published, updated=updated)
+            return cls(
+                content=content,
+                cid=cid,
+                actor=actor,
+                summary=summary,
+                published=published,
+                updated=updated
+                )
         
         obj.id = data["id"] if "id" in data else ""
         obj.actor = actor

@@ -19,6 +19,10 @@ import json
 
 class AbstractModel(object):
 
+    @property
+    def TYPE(self):
+        return self.__class__.__name__
+    
     _mapping = {
         "objectType":"TYPE",
     }

@@ -35,6 +35,7 @@ from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.inbox import Inbox
+from pypump.models.outbox import Outbox
 from pypump.models.location import Location
 
 class PyPump(object):
@@ -104,6 +105,9 @@ class PyPump(object):
         
         self.Inbox = Inbox
         self.Inbox._pump = self
+
+        self.Outbox = Outbox
+        self.Outbox._pump = self
 
         self.Image = Image
         self.Image._pump = self

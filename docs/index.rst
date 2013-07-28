@@ -26,7 +26,7 @@ Contents
    gettingstarted/qnd
    gettingstarted/tutorial
    gettingstarted/authentication
-   
+   gettingstarted/verifier_callback 
 
 Models
 ------

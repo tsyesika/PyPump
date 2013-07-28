@@ -21,8 +21,6 @@ from pypump.compatability import *
 @implement_to_string
 class Location(AbstractModel):
 
-    TYPE = "location"
-
     name = None
     longitude = None
     latitude = None
@@ -34,10 +32,10 @@ class Location(AbstractModel):
         self.latitude = latitude
 
     def __repr__(self):
-        return self.name
+        return "<{type} {name}>".format(type=self.TYPE, name=self.name)
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
 
     @classmethod
     def unserialize(cls, data, obj=None):

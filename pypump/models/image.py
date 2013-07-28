@@ -21,8 +21,7 @@ from pypump.models import AbstractModel
 @implement_to_string
 class Image(AbstractModel):
     
-    TYPE = "image"
-    ENDPOINT = "/api/user/%s/feed"
+    ENDPOINT = "/api/user/{username}/feed"
 
     # we need some methods to go grab the image for us.
     _full_url = ""
@@ -33,7 +32,8 @@ class Image(AbstractModel):
     summary = ""
     id = None
 
-    def __init__(self, full_url, id, summary=None, actor=None, thumb_url=None, width=None, height=None, *args, **kwargs):
+    def __init__(self, full_url, id, summary=None, actor=None, thumb_url=None, 
+                 width=None, height=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
@@ -46,10 +46,13 @@ class Image(AbstractModel):
         self.height = height
 
     def __repr__(self):
-        return "<Image at %s>" % self.url
+        return "<{type} at {url}>".format(
+                type=self.TYPE,
+                url=self.url
+                )
 
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
 
     def __get_full_url(self):
         if type(self._full_url) == self:
@@ -78,7 +81,7 @@ class Image(AbstractModel):
             },
         }
     
-        endpoint = self.ENDPOINT % self._pump.nickname
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -99,7 +102,7 @@ class Image(AbstractModel):
             },
         }
 
-        endpoint = self.ENDPOINT % self.nickname
+        endpoint = self.ENDPOINT.format(username=self.nickname)
         
         data = self._pump.request(endpoint, method="POST", data=activity)
 
@@ -111,8 +114,8 @@ class Image(AbstractModel):
     def unfavorite(self):
         return self.unlike(verb="unfavorite")
 
-    @staticmethod
-    def unserialize(data, obj=None):
+    @classmethod
+    def unserialize(cls, data, obj=None):
         full_url = None
 
         data = data.get("object", data)
@@ -123,7 +126,7 @@ class Image(AbstractModel):
         author = data["actor"] if "actor" in data else actor
 
         if "location" in data:
-            location = Image._pump.unserialize(data["location"])
+            location = cls._pump.unserialize(data["location"])
         else:
             location = None
 
@@ -131,7 +134,7 @@ class Image(AbstractModel):
 
         if "fullImage" in data:
             full_obj = data["fullImage"]
-            full_url = Image.unserialize(full_obj)
+            full_url = cls.unserialize(full_obj)
         
         if "image" in data:
             data = data["image"]
@@ -144,7 +147,15 @@ class Image(AbstractModel):
         full_url = url if full_url is None else full_url
 
         if obj is None:
-            return Image(id=iid, summary=summary, full_url=full_url, thumb_url=url, height=height, width=width, actor=actor)
+            return cls(
+                id=iid,
+                summary=summary,
+                full_url=full_url,
+                thumb_url=url,
+                height=height,
+                width=width,
+                actor=actor
+                )
         else:
             obj.id = iid
             obj.actor = actor

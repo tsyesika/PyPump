@@ -30,9 +30,8 @@ from pypump.models.comment import Comment
 @implement_to_string
 class Note(AbstractModel):
     
-    TYPE = "note"
     VERB = "post"
-    ENDPOINT = "/api/user/%s/feed"
+    ENDPOINT = "/api/user/{username}/feed"
 
     id = ""
     summary = ""
@@ -52,7 +51,9 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, summary=None, nid=None, to=None, cc=None, actor=None, published=None, updated=None, links=None, deleted=True, *args, **kwargs):
+    def __init__(self, content, summary=None, nid=None, to=None, cc=None, 
+                 actor=None, published=None, updated=None, links=None, 
+                 deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
@@ -114,7 +115,10 @@ class Note(AbstractModel):
         elif isinstance(people, str):
             self._to = [people]
         else:
-            raise TypeError("Unknown type %s (%s)" % (type(people), people))
+            raise TypeError("Unknown type {type} ({person})".format(
+                type=type(people),
+                person=people
+                ))
 
     to = property(fset=set_to)
 
@@ -129,7 +133,10 @@ class Note(AbstractModel):
         elif isinstance(people, str):
             self._cc = [people]
         else:
-            raise TypeError("Unknown type %s (%s)" % (type(people), people))
+            raise TypeError("Unknown type {type} ({person})".format(
+                    type=type(people),
+                    person=people
+                    ))
 
     cc = property(fset=set_cc, fget=_cc)
 
@@ -140,7 +147,11 @@ class Note(AbstractModel):
         self._cc = tuple(self._cc)
 
         # post it!
-        data = self._pump.request(self.ENDPOINT % self._pump.nickname, method="POST", data=self.serialize())
+        data = self._pump.request(
+                self.ENDPOINT.format(username=self._pump.nickname,
+                method="POST",
+                data=self.serialize()
+                ))
 
         # we need to actually store the new note data the server has sent back
         if "error" in data:
@@ -166,7 +177,11 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
+        data = self._pump.request(
+                "/api/user/{username}/feed".format(username=self._pump.nickname),
+                method="POST",
+                data=activity
+                )
 
         if data.get("verb", None) == activity["verb"]:
             self.deleted = True
@@ -184,7 +199,11 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
+        data = self._pump.request(
+                self.ENDPOINT.format(username=self._pump.nickname),
+                method="POST",
+                data=activity
+                )
 
     def unlike(self, verb="unlike"):
         """ Unlikes the Note """
@@ -196,7 +215,11 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request("/api/user/%s/feed" % self._pump.nickname, method="POST", data=activity)
+        data = self._pump.request(
+                self.ENDPOINT.format(username=self._pump.nickname),
+                method="POST",
+                data=activity
+                )
 
     # synonyms
     def favorite(self, *args, **kwargs):
@@ -208,11 +231,15 @@ class Note(AbstractModel):
         return self.unlike(verb="unfavorite", *args, **kwargs)
 
     def __repr__(self):
-        note_type = "Deleted Note" if self.deleted else "Note"
-        return "<%s by %s at %s>" % (note_type, self.actor, self.published.strftime("%Y/%m/%d"))
+        note_type = "Deleted {0}".format(self.TYPE) if self.deleted else self.TYPE
+        return "<{type} by {person} at {date}>".format(
+                type=note_type,
+                person=self.actor,
+                date=self.published.strftime("%Y/%m/%d")
+                )
    
     def __str__(self):
-        return self.__repr__()
+        return str(self.__repr__())
 
     def serialize(self):
         """ Seralizes note to be posted """
@@ -226,24 +253,24 @@ class Note(AbstractModel):
 
         return json.dumps(query)
 
-    @staticmethod
-    def unserialize_to_deleted(data, obj=None):
+    @classmethod
+    def unserialize_to_deleted(cls, data, obj=None):
         """ Unserializes to a deleted note """
-        deleted_note = Note("") if obj is None else obj
+        deleted_note = cls(str()) if obj is None else obj
         deleted_note.deleted = True
 
         deleted_note.id = data["id"] if "id" in data else ""
         deleted_note.actor = deleted_note._pump.Person.unserialize(data["actor"])        
-        deleted_note.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
-        deleted_note.published = datetime.strptime(data["published"], Note.TSFORMAT)
+        deleted_note.updated = datetime.strptime(data["updated"], cls.TSFORMAT)
+        deleted_note.published = datetime.strptime(data["published"], cls.TSFORMAT)
 
         return deleted_note
 
-    @staticmethod
-    def unserialize(data, obj=None):
+    @classmethod
+    def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
         if data.get("verb", "") == "delete":
-            return Note.unserialize_to_deleted(data, obj=obj)
+            return cls.unserialize_to_deleted(data, obj=obj)
         summary = None
         nid = data.get("id", None)
         links = {}
@@ -265,23 +292,23 @@ class Note(AbstractModel):
         else:
             content = data["content"]
         if obj is None:
-            return Note(
+            return cls(
                     nid=nid,
                     content=content,
                     summary=summary,
                     to=(), # todo still.
                     cc=(), # todo: ^^
-                    actor=Note._pump.Person.unserialize(data["actor"]),
-                    updated=datetime.strptime(data["updated"], Note.TSFORMAT),
-                    published=datetime.strptime(data["published"], Note.TSFORMAT),
+                    actor=cls._pump.Person.unserialize(data["actor"]),
+                    updated=datetime.strptime(data["updated"], cls.TSFORMAT),
+                    published=datetime.strptime(data["published"], cls.TSFORMAT),
                     links=links,
                     )
         else:
             obj.content = content
             obj.summary = summary
             obj.id = nid
-            obj.actor = Note._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
-            obj.updated = datetime.strptime(data["updated"], Note.TSFORMAT)
-            obj.published = datetime.strptime(data["published"], Note.TSFORMAT)
+            obj.actor = cls._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
+            obj.updated = datetime.strptime(data["updated"], cls.TSFORMAT)
+            obj.published = datetime.strptime(data["published"], cls.TSFORMAT)
             obj._links = links
             return obj
