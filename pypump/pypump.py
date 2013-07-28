@@ -45,10 +45,11 @@ class PyPump(object):
 
     loader = None
     protocol = "https"
+    client = None
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
-                token_secret=None):
+                token_secret=None, verifier_callback=None):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -56,6 +57,7 @@ class PyPump(object):
             Don't forget if you want to use https ensure the secure flag is True
         """
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
+        self.verifier_callback = verifier_callback
 
         if "@" in server:
             # it's a web fingerprint!
@@ -89,13 +91,6 @@ class PyPump(object):
         else:
             self.token = token
             self.token_secret = token_secret
-
-        self.client = OAuth1(
-                client_key=to_unicode(self.consumer.key),
-                client_secret=to_unicode(self.consumer.secret),
-                resource_owner_key=to_unicode(self.token),
-                resource_owner_secret=to_unicode(self.token_secret)
-                )        
 
     def populate_models(self):
         # todo: change me
@@ -144,6 +139,10 @@ class PyPump(object):
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
         """
+
+        # check client has been setup
+        if self.client is None:
+            self.setup_oauth_client()
 
         params = {} if params is None else params
 
@@ -236,22 +235,43 @@ class PyPump(object):
     def oauth_request(self):
         """ Makes a oauth connection """
         # get tokens from server and make a dict of them.
-        server_token = self.request_token()
+        self.__server_tokens = self.request_token()
         
-        # now we need the user to authorize me to use their pump.io account
-        server_token['verifier'] = self.get_access(server_token['token'])
-        access = self.request_access(**server_token) 
-    
-    def get_access(self, token):
-        """ this asks the user to let us use their account """
+        token = self.__server_tokens["token"]
 
-        print("To allow us to use your pump.io please follow the instructions at:")
-        print("{protocol}://{server}/oauth/authorize?oauth_token={token}".format(
+        url = "{protocol}://{server}/oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.server,
                 token=token.decode("utf-8")
-                ))
-        
+                )
+
+        # now we need the user to authorize me to use their pump.io account
+        if self.verifier_callback is None:
+            verifier = self.get_access(url)
+            self.verifier(verifier)
+        else:    
+            self.verifier_callback(url)
+    
+    def verifier(self, verifier):
+        """ Called once verifier has been retrived """
+        self.__server_tokens["verifier"] = verifier
+        self.request_access(**self.__server_tokens)
+
+    def setup_oauth_client(self):
+        """ Sets up client for requests to pump """
+        self.client = OAuth1(
+                client_key=to_unicode(self.consumer.key),
+                client_secret=to_unicode(self.consumer.secret),
+                resource_owner_key=to_unicode(self.token),
+                resource_owner_secret=to_unicode(self.token_secret)
+                )
+
+    def get_access(self, url):
+        """ this asks the user to let us use their account """
+
+        print("To allow us to use your pump.io please follow the instructions at:")
+        print(url)
+
         code = raw_input("Verifier Code: ").lstrip(" ").rstrip(" ")
         return code
 
@@ -289,5 +309,5 @@ class PyPump(object):
 
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
-        
+        self.__server_tokens = None # clean up code.
         
