@@ -61,6 +61,8 @@ class PyPump(object):
         """
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
         self.verifier_callback = verifier_callback
+        self.client_name = client_name
+        self.client_type = client_type
 
         if "@" in server:
             # it's a web fingerprint!
@@ -140,15 +142,20 @@ class PyPump(object):
     ## 
     # server 
     ##
-    def request(self, endpoint, method="GET", data="", raw=False, params=None, attempts=10):
+    def request(self, endpoint, method="GET", data="", 
+                raw=False, params=None, attempts=10, client=None):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
         """
 
+        if client is None:
+            client = self.client
+
         # check client has been setup
-        if self.client is None:
+        if client is None:
             self.setup_oauth_client()
+            client = self.client
 
         params = {} if params is None else params
 
@@ -173,7 +180,7 @@ class PyPump(object):
         for attempt in range(attempts):
             if method == "POST":
                 request = {
-                        "auth": self.client,
+                        "auth": client,
                         "headers": {"Content-Type": "application/json"},
                         "params": params,
                         "data": data,
@@ -182,7 +189,7 @@ class PyPump(object):
             elif method == "GET":
                 request = {
                         "params": params,
-                        "auth": self.client,
+                        "auth": client,
                         }
   
                 response = self._requester(requests.get, endpoint, raw, **request)
@@ -216,13 +223,13 @@ class PyPump(object):
                     endpoint=endpoint
                     )
         else:
-            url = raw
+            url = endpoint
 
         try:
             response = fnc(url, **kwargs)
             return response
         except requests.exceptions.ConnectionError:
-            if self.protocol == "http":
+            if self.protocol == "http" or raw:
                 raise # shoot this seems real.
             self.set_http()
             return self._requester(fnc, endpoint, raw, **kwargs)

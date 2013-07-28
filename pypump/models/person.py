@@ -17,6 +17,10 @@
 
 from datetime import datetime
 
+from requests_oauthlib import OAuth1
+
+from pypump.openid import OpenID
+from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.compatability import *
@@ -89,16 +93,21 @@ class Person(AbstractModel):
             if server == self._pump.server:
                 # cool we can get quite a bit of info.
                 data = self._pump.request("/api/user/{0}/profile".format(username))
-                self.unserialize(data, obj=self)
-                # lets hope we've found it
-                return
             else:
-                # right not a huge amount we can do
                 self.id = "acct:%s@%s" % (username, server)
                 self.username = username
                 self.server = server
                 self.is_self = False
-                return 
+                url = "{server}/api/user/{username}/profile".format(
+                        server=self.server,
+                        username=self.username
+                        )
+
+                return
+                # register client as we need to use the client credentials
+                self.register_client()
+            self.unserialize(data, obj=self)
+            return
 
         self.id = id
         self.inbox = self._pump.Inbox(self) if inbox is None else inbox
@@ -126,6 +135,20 @@ class Person(AbstractModel):
             self.is_self = True
             self.outbox = self._pump.Outbox(self)
             self.message = self.outbox
+
+    def register_client(self):
+        """ Registers client on foreign server """
+        openid = OpenID(
+                self.server,
+                self._pump.client_name,
+                self._pump.client_type
+                )
+        openid.pypump = self._pump
+        self.client_credentials = openid.register_client()
+        self.client = OAuth1(
+                client_key=self.client_credentials.key,
+                client_secret=self.client_credentials.secret
+                )
 
     def follow(self): 
         """ You follow this user """
