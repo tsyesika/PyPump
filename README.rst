@@ -58,7 +58,7 @@ If you just want to chat and let us know the cool things you're doing with PyPum
 Licence?
 ========
 
-We're licenced under the GPL v3. You can find more information about this licence at https://www.gnu.org/licenses/gpl.html
+We're licenced under the GPL version 3 or (at your option) a later version. You can find more information about this licence at https://www.gnu.org/licenses/gpl.html
 
 
 Want to help out?
