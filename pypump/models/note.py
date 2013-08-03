@@ -148,10 +148,10 @@ class Note(AbstractModel):
 
         # post it!
         data = self._pump.request(
-                self.ENDPOINT.format(username=self._pump.nickname,
+                self.ENDPOINT.format(username=self._pump.nickname),
                 method="POST",
                 data=self.serialize()
-                ))
+                )
 
         # we need to actually store the new note data the server has sent back
         if "error" in data:
@@ -160,7 +160,7 @@ class Note(AbstractModel):
          
         self.unserialize(data, obj=self)
 
-        return True
+        return self
 
     def comment(self, comment):
         """ Posts a comment """
@@ -246,7 +246,7 @@ class Note(AbstractModel):
         query = {
             "verb":self.VERB,
             "object":{
-                "objectType":self.TYPE,
+                "objectType":self.TYPE.lower(),
                 "content":self.content,
             },
         }

@@ -11,6 +11,16 @@ The best way to install PyPump is via pip, if you haven't, setup::
     $ source path/to/virtualenv/bin/activate
     $ pip install pypump
 
+If you get an error which looks like::
+
+      Could not find a version that satisfies the requirement pypump (from versions: 0.1.2a-, 0.1.5a, 0.1.3a-, 0.1.4a, 0.1.1a, 0.1.6a, 0.1a)
+      Cleaning up...
+      No distributions matching the version for pypump
+
+You need to specify the latest version, for example::
+
+    $ pip install pypump==0.1.6a
+
 
 Using git
 ---------
