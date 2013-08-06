@@ -98,4 +98,32 @@ Much better! Lets make a note to tell people how easy this all is::
     >>> my_note = pump.Note("My gawd... PyPump is super easy to get started with")
     >>> my_note.send()
 
+But hold on though, that only sent it to followers? What gives::
+
+    >>> awesome_pump = pump.Note("PyPump is really awesome!")
+    >>> awesome_pump.to = pump.Public
+    >>> awesome_pump.cc = (pump.Followers, pump.Following, pump.Person("MyFriend@server.com"))
+    >>> awesome_pump.send()
+
+Oh cool that's sent to all my friends, So can i make my own lists::
+
+    >>> for my_list in pump.List.all():
+    ...    print my_list.name
+    Coworkers
+    Family
+    Friends
+
+Oh are all those my lists that are defined. How do I send a note to them?::
+
+    >>> new_note = pump.Note("Work sucks!")
+    >>> new_note.to = pump.List("Coworkers")
+    >>> new_note.cc = pump.List("Friends)
+
+So, can i send something to all of of the groups I made? Yep::
+
+    >>> another_note = pump.Note("This really goes to everyone in my groups?")
+    >>> another_note.to = pump.List.all()
+    >>> another_note.cc = (pump.Perosn("moggers87@microca.st"), pump.Person("cwebber@identi.ca"))
+    >>> another_note.send()
+
 Don't forget is there are any issues please issue them on our `GitHub <https://github.com/xray7224/PyPump/issues>`_!
