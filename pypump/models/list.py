@@ -17,25 +17,43 @@
 import json
 
 from pypump.models import AbstractModel
+from pypump.exception import PyPumpException
 from pypump.compatability import *
 
 @implement_to_string
 class List(AbstractModel):
 
     TYPE = "Collection"
-    ENDPOINT = "api/user/{username}/lists/"
+    ENDPOINT = "api/user/{username}/lists/{name}"
 
     id = None
     name = None
 
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, id=None, *args, **kwargs):
         self.name = name
+        self.id = self.id if id is None else id
+
+        if self.id is None and self.name:
+            user_lists = self.all()
+            for user_list in user_lists:
+                if user_list.name == self.name:
+                    self.id = user_list.id
+            
+            if self.id is None:
+                error = "Can't find list with name {0!r} (Lists found: {1})".format(
+                        self.name,
+                        ", ".join(user_lists))
+                PyPumpException(error)
+        
         super(List, self).__init__(*args, **kwargs)
 
     @classmethod
     def all(cls):
         """ Lists all of the users lists """
-        data = cls._pump.request(cls.ENDPOINT.format(username=cls._pump.nickname))
+        data = cls._pump.request(cls.ENDPOINT.format(
+                username=cls._pump.nickname,
+                name="person"
+                ))
         
         lists = list()
         for item in data["items"]:
@@ -58,11 +76,15 @@ class List(AbstractModel):
     @classmethod
     def unserialize(cls, data, obj=None):
         """ Takes data from the server and builds list """
+        id = data["id"]
+        name = data["displayName"]
+        
         if obj is None:
-            obj = cls()
+            obj = cls(name=name, id=id)
+        else:
+            obj.id = id
+            obj.name = name
 
-        obj.id = data["id"]
-        obj.name = data["displayName"]
         return obj
 
 class Public(List):
