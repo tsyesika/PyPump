@@ -78,7 +78,7 @@ class Feed(AbstractModel):
 
     def __iter__(self):
         """ Produces an iterator """
-        if self._outbox:
+        if self._feed:
             return self._feed.__iter__()
         
         data = self.__request()
