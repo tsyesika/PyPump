@@ -224,9 +224,12 @@ class Person(AbstractModel):
         if "verb" in data and data["verb"] in ["follow", "stop-following"]:
             return None
 
-    
-        username = data["preferredUsername"]
-        display = data["displayName"]
+        try:
+            username = data["preferredUsername"]
+            display = data["displayName"]
+        except KeyError:
+            # This will be fixed properly soon.
+            return None
 
         self.id = "acct:%s@%s" % (username, cls._pump.server)
         self.username = username

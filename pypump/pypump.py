@@ -52,7 +52,8 @@ class PyPump(object):
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
-                token_secret=None, verifier_callback=None):
+                token_secret=None, verifier_callback=None,
+                callback_uri="oob"):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -63,6 +64,7 @@ class PyPump(object):
         self.verifier_callback = verifier_callback
         self.client_name = client_name
         self.client_type = client_type
+        self.callback_ui = callback_uri
 
         if "@" in server:
             # it's a web fingerprint!
@@ -293,7 +295,7 @@ class PyPump(object):
         client = OAuth1(
                 client_key=self.consumer.key,
                 client_secret=self.consumer.secret,
-                callback_uri="oob"
+                callback_uri=self.callback_uri
                 )
         
         request = {"auth": client}
