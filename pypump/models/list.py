@@ -35,7 +35,7 @@ class List(AbstractModel):
     @classmethod
     def all(cls):
         """ Lists all of the users lists """
-        data = cls._pump.request(self.ENDPOINT.format(username=cls._pump.nickname))
+        data = cls._pump.request(cls.ENDPOINT.format(username=cls._pump.nickname))
         
         lists = list()
         for item in data["items"]:
