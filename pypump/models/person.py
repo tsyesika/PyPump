@@ -156,7 +156,7 @@ class Person(AbstractModel):
             "verb":"follow",
             "object":{
                 "id":self.id,
-                "objectType":"person",
+                "objectType":self.objectType,
             }
         }
 
@@ -176,7 +176,7 @@ class Person(AbstractModel):
             "verb":"stop-following",
             "object":{
                 "id":self.id,
-                "objectType":"person",
+                "objectType":self.objectType,
             }
         }
 

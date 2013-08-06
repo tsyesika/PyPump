@@ -37,6 +37,7 @@ from pypump.models.image import Image
 from pypump.models.inbox import Inbox
 from pypump.models.outbox import Outbox
 from pypump.models.location import Location
+from pypump.models.list import List, Public, Followers, Following
 
 class PyPump(object):
 
@@ -122,6 +123,18 @@ class PyPump(object):
         self.Location = Location
         self.Location._pump = self
 
+        self.List = List
+        self.List._pump = self
+
+        self.Public = Public
+        self.Public._pump = self
+
+        self.Following = Following
+        self.Following._pump = self
+
+        self.Followers = Followers
+        self.Followers._pump = self
+
     ##
     # getters to expose some data which might be useful
     ##
@@ -144,6 +157,16 @@ class PyPump(object):
     ## 
     # server 
     ##
+    def build_url(self, endpoint):
+        """ Returns a fully qualified URL """
+        endpoint = endpoint.lstrip("/")
+        url = "{proto}://{server}/{endpoint}".format(
+                proto=self.protocol,
+                server=self.server,
+                endpoint=endpoint
+                )
+        return url
+
     def request(self, endpoint, method="GET", data="", 
                 raw=False, params=None, attempts=10, client=None):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
@@ -198,8 +221,15 @@ class PyPump(object):
 
             if response.status_code == 200:
                 # huray!
-                return response.json()
-            elif response.status_code in [400]:
+                return response.json() 
+
+            ##
+            # Debugging
+            ##
+            print response
+            print response.content
+            
+            if response.status_code in [400]:
                 # can't do much
                 try:
                     try:
@@ -219,11 +249,7 @@ class PyPump(object):
         raise PyPumpException(error)
     def _requester(self, fnc, endpoint, raw=False, **kwargs):
         if not raw:
-            url = "{protocol}://{server}/{endpoint}".format(
-                    protocol=self.protocol,
-                    server=self.server,
-                    endpoint=endpoint
-                    )
+            url = self.build_url(endpoint) 
         else:
             url = endpoint
 
@@ -254,11 +280,11 @@ class PyPump(object):
         
         token = self.__server_tokens["token"]
 
-        url = "{protocol}://{server}/oauth/authorize?oauth_token={token}".format(
+        url = self.build_url("oauth/authorize?oauth_token{token}".format(
                 protocol=self.protocol,
                 server=self.server,
                 token=token.decode("utf-8")
-                )
+                ))
 
         # now we need the user to authorize me to use their pump.io account
         if self.verifier_callback is None:

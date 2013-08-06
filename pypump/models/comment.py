@@ -71,7 +71,7 @@ class Comment(AbstractModel):
             "verb":verb,
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             },
         
         }
@@ -94,7 +94,7 @@ class Comment(AbstractModel):
             "verb":verb,
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             },
         }
 
@@ -112,7 +112,7 @@ class Comment(AbstractModel):
             "verb":"delete",
             "objecty":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             },
         }
 
@@ -128,11 +128,11 @@ class Comment(AbstractModel):
         activity = {
             "verb":self.VERB,
             "object":{
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
                 "content":self.content,
                 "inReplyTo":{
                     "id":self.note.id,
-                    "objectType":self.note.TYPE,
+                    "objectType":self.note.objectType,
                 },
             },
         }

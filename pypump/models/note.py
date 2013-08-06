@@ -110,17 +110,30 @@ class Note(AbstractModel):
         if isinstance(self._to, tuple):
             raise ImmutableError("people", self)
 
-        if isinstance(people, list):
-            self._to = people
-        elif isinstance(people, str):
-            self._to = [people]
-        else:
-            raise TypeError("Unknown type {type} ({person})".format(
-                type=type(people),
-                person=people
-                ))
+        if type(people) == tuple:
+            people = list(people)
+        if type(people) != list:
+            people = [people]
 
-    to = property(fset=set_to)
+        for i, item in enumerate(people):
+            if is_class(item):
+                people[i] = item()
+
+            if isinstance(people[i], self._pump.Person):
+                people[i] = {
+                    "id": people[i].id,
+                    "objectType": people[i].objectType,
+                    }
+            else:
+                # must be collection/list
+                people[i] = people[i].serialize(as_dict=True)
+
+        self._to = people
+
+    def get_to(self):
+        return self._to
+
+    to = property(fset=set_to, fget=get_to)
 
     def set_cc(self, people):
         """ Allows you to set/change who it's cc'ed to """
@@ -128,17 +141,30 @@ class Note(AbstractModel):
         if isinstance(self._cc, tuple):
             raise ImmutableError("people", self)
 
-        if isinstance(people, list):
-            self._cc = people
-        elif isinstance(people, str):
-            self._cc = [people]
-        else:
-            raise TypeError("Unknown type {type} ({person})".format(
-                    type=type(people),
-                    person=people
-                    ))
+        if type(people) == tuple:
+            people = list(people)
+        if type(people) != list:
+            people = [people]
 
-    cc = property(fset=set_cc, fget=_cc)
+        for i, item in enumerate(people):
+            if is_class(item):
+                people[i] = item()
+
+            if isinstance(people[i], self._pump.Person):
+                people[i] = {
+                    "id": people[i].id,
+                    "objectType": people[i].objectType,
+                    }
+            else:
+                # must be collection/list
+                people[i] = people[i].serialize(as_dict=True)
+
+        self._cc = people
+
+    def get_cc(self):
+        return self._cc
+
+    cc = property(fset=set_cc, fget=get_cc)
 
     def send(self):
         """ Sends the post to the server """
@@ -173,7 +199,7 @@ class Note(AbstractModel):
             "verb":"delete",
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType": self.objectType,
             }
         }
 
@@ -195,7 +221,7 @@ class Note(AbstractModel):
             "verb":"like",
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             }
         }
 
@@ -211,7 +237,7 @@ class Note(AbstractModel):
             "verb":verb,
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             }
         }
 
@@ -246,9 +272,11 @@ class Note(AbstractModel):
         query = {
             "verb":self.VERB,
             "object":{
-                "objectType":self.TYPE.lower(),
+                "objectType":self.objectType,
                 "content":self.content,
             },
+            "to": self._to,
+            "cc": self._cc,
         }
 
         return json.dumps(query)

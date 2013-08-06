@@ -22,7 +22,11 @@ class AbstractModel(object):
     @property
     def TYPE(self):
         return self.__class__.__name__
-    
+
+    @property
+    def objectType(self):
+        return self.TYPE.lower()
+
     _mapping = {
         "objectType":"TYPE",
     }

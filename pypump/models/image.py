@@ -77,7 +77,7 @@ class Image(AbstractModel):
             "verb":verb,
             "object":{
                 "id":"",
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             },
         }
     
@@ -98,7 +98,7 @@ class Image(AbstractModel):
             "verb":verb,
             "object":{
                 "id":self.id,
-                "objectType":self.TYPE,
+                "objectType":self.objectType,
             },
         }
 
