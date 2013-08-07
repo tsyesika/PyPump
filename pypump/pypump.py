@@ -280,7 +280,7 @@ class PyPump(object):
         
         token = self.__server_tokens["token"]
 
-        url = self.build_url("oauth/authorize?oauth_token{token}".format(
+        url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.server,
                 token=token.decode("utf-8")
