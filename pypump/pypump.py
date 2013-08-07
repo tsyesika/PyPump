@@ -65,7 +65,7 @@ class PyPump(object):
         self.verifier_callback = verifier_callback
         self.client_name = client_name
         self.client_type = client_type
-        self.callback_ui = callback_uri
+        self.callback_uri = callback_uri
 
         if "@" in server:
             # it's a web fingerprint!
