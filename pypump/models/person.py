@@ -16,6 +16,7 @@
 ##
 
 from datetime import datetime
+from dateutil.parser import parse
 
 from requests_oauthlib import OAuth1
 
@@ -201,8 +202,8 @@ class Person(AbstractModel):
         """ Unserializes the data from a service """
         id = data["id"]
         display = data["displayName"]
-        updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
-        published = datetime.strptime(data["published"], cls.TSFORMAT) if "published" in data else updated
+        updated = parse(data["updated"]) if "updated" in data else datetime.now()
+        published = parse(data["published"]) if "published" in data else updated
 
         if obj is None:
             obj = cls()
@@ -236,10 +237,10 @@ class Person(AbstractModel):
         self.display_name = display
         self.url = data["links"]["self"]["href"]
         self.summary = data["summary"] if "summary" in data else ""
-        self.updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
-        self.published = datetime.strptime(data["published"], cls.TSFORMAT) if "published" in data else self.updated
+        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
+        self.published = parse(data["published"]) if "published" in data else self.updated
         self.me = True if "acct:%s@%s" % (cls._pump.nickname, cls._pump.server) == self.id else False
         self.location = cls._pump.Location.unserialize(data["location"]) if "location" in data else None
 
-        self.updated = datetime.strptime(data["updated"], cls.TSFORMAT) if "updated" in data else datetime.now()
+        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
         return self
