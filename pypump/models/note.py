@@ -17,6 +17,7 @@
 
 import json
 from datetime import datetime
+from dateutil.parser import parse
 
 from pypump.exception.ImmutableException import ImmutableException
 from pypump.exception.PumpException import PumpException
@@ -289,8 +290,8 @@ class Note(AbstractModel):
 
         deleted_note.id = data["id"] if "id" in data else ""
         deleted_note.actor = deleted_note._pump.Person.unserialize(data["actor"])        
-        deleted_note.updated = datetime.strptime(data["updated"], cls.TSFORMAT)
-        deleted_note.published = datetime.strptime(data["published"], cls.TSFORMAT)
+        deleted_note.updated = parse(data["updated"])
+        deleted_note.published = parse(data["published"])
 
         return deleted_note
 
@@ -327,8 +328,8 @@ class Note(AbstractModel):
                     to=(), # todo still.
                     cc=(), # todo: ^^
                     actor=cls._pump.Person.unserialize(data["actor"]),
-                    updated=datetime.strptime(data["updated"], cls.TSFORMAT),
-                    published=datetime.strptime(data["published"], cls.TSFORMAT),
+                    updated=parse(data["updated"]),
+                    published=parse(data["published"]),
                     links=links,
                     )
         else:
@@ -336,7 +337,7 @@ class Note(AbstractModel):
             obj.summary = summary
             obj.id = nid
             obj.actor = cls._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
-            obj.updated = datetime.strptime(data["updated"], cls.TSFORMAT)
-            obj.published = datetime.strptime(data["published"], cls.TSFORMAT)
+            obj.updated = parse(data["updated"])
+            obj.published = parse(data["published"])
             obj._links = links
             return obj
