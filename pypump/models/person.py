@@ -231,7 +231,7 @@ class Person(AbstractModel):
             # This will be fixed properly soon.
             return None
 
-        self.id = "acct:%s@%s" % (username, cls._pump.server)
+        self.id = data["id"]
         self.username = username
         self.display_name = display
         self.url = data["links"]["self"]["href"]
