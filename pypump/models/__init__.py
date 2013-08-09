@@ -33,9 +33,6 @@ class AbstractModel(object):
 
     _pump = None
 
-    # constants
-    TSFORMAT = "%Y-%m-%dT%H:%M:%SZ"
-
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
         if pypump:

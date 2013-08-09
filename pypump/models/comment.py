@@ -16,6 +16,7 @@
 ##
 
 from datetime import datetime
+from dateutil.parser import parse
 
 from pypump.models import AbstractModel
 from pypump.compatability import *
@@ -155,13 +156,13 @@ class Comment(AbstractModel):
     def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
         if "object" in data:
-            published = datetime.strptime(data["object"]["published"], Comment.TSFORMAT)
-            updated = datetime.strptime(data["object"]["updated"], Comment.TSFORMAT)
+            published = parse(data["object"]["published"])
+            updated = parse(data["object"]["updated"])
             summary = data["content"]
             content = data["object"]["content"]
         else:
-            published = datetime.strptime(data["published"], Comment.TSFORMAT)
-            updated = datetime.strptime(data["updated"], Comment.TSFORMAT)
+            published = parse(data["published"])
+            updated = parse(data["updated"])
             summary = ""
             content = data["content"]
 
