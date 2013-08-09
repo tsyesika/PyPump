@@ -81,7 +81,15 @@ class OpenID(object):
                 "data": data
                 }
 
-        response = self.pypump._requester(requests.post, self.ENDPOINT, **request)
+        if self.server == self.pypump.server:
+            response = self.pypump._requester(requests.post, self.ENDPOINT, **request)
+        else:
+            url = "{proto}://{server}/{endpoint}".format(
+                proto=self.pypump.protocol,
+                server = self.server,
+                endpoint = self.ENDPOINT
+            )
+            response = self.pypump._requester(requests.post, url, raw=True, **request)
         
         try:
             server_data = response.json()
