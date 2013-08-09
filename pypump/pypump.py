@@ -158,14 +158,24 @@ class PyPump(object):
     # server 
     ##
     def build_url(self, endpoint):
+        server = None
+        if "://" in endpoint:
+            #looks like an url, let's break it down
+            server, endpoint = self.deconstruct_url(endpoint)
+
         """ Returns a fully qualified URL """
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
                 proto=self.protocol,
-                server=self.server,
+                server=self.server if server is None else server,
                 endpoint=endpoint
                 )
         return url
+
+    def deconstruct_url(self, url):
+        proto, url = url.split("://")
+        server, endpoint = url.split("/", 1)
+        return (server, endpoint)
 
     def request(self, endpoint, method="GET", data="", 
                 raw=False, params=None, attempts=10, client=None):
@@ -193,12 +203,8 @@ class PyPump(object):
 
         data = to_unicode(data)
 
-        if raw is False:
-            url = "{protocol}://{server}/{endpoint}".format(
-                    protocol=self.protocol,
-                    server=self.server,
-                    endpoint=endpoint
-                    )
+        if not raw:
+            url = self.build_url(endpoint)
         else:
             url = endpoint
 
