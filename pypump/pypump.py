@@ -158,12 +158,12 @@ class PyPump(object):
     # server 
     ##
     def build_url(self, endpoint):
+        """ Returns a fully qualified URL """
         server = None
         if "://" in endpoint:
             #looks like an url, let's break it down
             server, endpoint = self.deconstruct_url(endpoint)
 
-        """ Returns a fully qualified URL """
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
                 proto=self.protocol,
@@ -173,6 +173,7 @@ class PyPump(object):
         return url
 
     def deconstruct_url(self, url):
+        """ Breaks down URL and returns server and endpoint """
         proto, url = url.split("://")
         server, endpoint = url.split("/", 1)
         return (server, endpoint)
