@@ -99,14 +99,15 @@ class Person(AbstractModel):
                 self.username = username
                 self.server = server
                 self.is_self = False
-                url = "{server}/api/user/{username}/profile".format(
+                url = "{proto}://{server}/api/user/{username}/profile".format(
+                        proto=self._pump.protocol,
                         server=self.server,
                         username=self.username
                         )
 
-                return
                 # register client as we need to use the client credentials
                 self.register_client()
+                data = self._pump.request(url, raw=True, client=self.client)
             self.unserialize(data, obj=self)
             return
 
