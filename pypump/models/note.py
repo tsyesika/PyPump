@@ -84,8 +84,8 @@ class Note(AbstractModel):
         # gotta go get them.
         endpoint = self._links["likes"]
         likes = self._pump.request(endpoint, raw=True)
-        for k,v in likes["items"].items():
-            self._likes.append(Person.unserialize(v))
+        for serialized_person in likes["items"]:
+            self._likes.append(Person.unserialize(serialized_person))
 
         return self._likes
 
