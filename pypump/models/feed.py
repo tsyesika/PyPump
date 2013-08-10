@@ -22,17 +22,40 @@ from pypump.models import AbstractModel
 @implement_to_string
 class Feed(AbstractModel):
 
-    _feed = []
+    _feed = None
     _count = None
     _offset = None
     actor = None
     author = actor
 
+    _ENDPOINT = None
     @property
     def ENDPOINT(self):
-        raise NotImplemented("Definition of the ENDPOINT must be done by subclass")
+        if self._ENDPOINT is None:
+            raise NotImplemented("Definition of the ENDPOINT must be done by subclass")
+        return self._ENDPOINT
 
-    def __init__(self, username=None):
+    @property
+    def major(self):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        endpoint += "major"
+        return self.__class__(username=self.actor, endpoint=endpoint)
+
+    @property
+    def minor(self):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        endpoint += "minor"
+        return self.__class__(username=self.actor, endpoint=endpoint)
+
+    def __init__(self, username=None, endpoint=None):
+        if endpoint is not None:
+            self._ENDPOINT = endpoint
+        
+        self._feed = list() if self._feed is None else self._feed
         
         if isinstance(username, self._pump.Person):
             self.actor = username
@@ -41,7 +64,7 @@ class Feed(AbstractModel):
         if username is None:
             return
 
-        self.actor = self._pump.Person(username)
+        self.actor = self._pump.Person(username)        
 
     def __getitem__(self, key):
         """ Adds Feed[<feed>] """
@@ -115,8 +138,7 @@ class Feed(AbstractModel):
             # oh dear, we gotta raise an error
             raise PyPumpException("No actor defined on {feed}".format(feed=self))
 
-        endpoint = self.ENDPOINT.format(username=self.actor.username)
-        data = self._pump.request(endpoint, params=param)
+        data = self._pump.request(self.ENDPOINT, params=param)
 
         return data
 

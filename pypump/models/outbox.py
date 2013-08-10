@@ -19,6 +19,11 @@ from pypump.compatability import *
 from pypump.models.feed import Feed
 
 class Outbox(Feed):
-    
-    ENDPOINT = "api/user/{username}/inbox"
+
+    def ENDPOINT(self):
+        if self._ENDPOINT is not None:
+            return self._ENDPOINT
+
+        self._ENDPOINT = "api/user/{username}/inbox".format(username=self.actor.username)
+        return self._ENDPOINT
 

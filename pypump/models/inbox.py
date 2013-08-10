@@ -20,5 +20,10 @@ from pypump.models.feed import Feed
 
 class Inbox(Feed):
     
-    ENDPOINT = "api/user/{username}/inbox"
-
+    @property
+    def ENDPOINT(self):
+        if self._ENDPOINT:
+            return self._ENDPOINT
+        
+        self._ENDPOINT = "api/user/{username}/inbox".format(username=self.actor.username)
+        return self.ENDPOINT
