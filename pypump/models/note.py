@@ -312,7 +312,7 @@ class Note(AbstractModel):
             elif links.get("comments", []):
                 links["comments"] = data_obj["replies"]["url"]
         else:
-            content = data["content"]
+            content = data["content"] if "content" in data else ""
         if obj is None:
             return cls(
                     nid=nid,
