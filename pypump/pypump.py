@@ -38,6 +38,7 @@ from pypump.models.inbox import Inbox
 from pypump.models.outbox import Outbox
 from pypump.models.location import Location
 from pypump.models.list import List, Public, Followers, Following
+from pypump.models.activity import Activity
 
 class PyPump(object):
 
@@ -134,6 +135,9 @@ class PyPump(object):
 
         self.Followers = Followers
         self.Followers._pump = self
+
+        self.Activity = Activity
+        self.Activity._pump = self
 
     ##
     # getters to expose some data which might be useful

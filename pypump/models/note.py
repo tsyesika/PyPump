@@ -37,7 +37,6 @@ class Note(AbstractModel):
     id = ""
     summary = ""
     content = ""
-    actor = None # who posted.
     updated = None # last time this was updated
     published = None # When this was published
     deleted = False # has the note been deleted
@@ -53,7 +52,7 @@ class Note(AbstractModel):
     _links = {}
 
     def __init__(self, content, summary=None, nid=None, to=None, cc=None, 
-                 actor=None, published=None, updated=None, links=None, 
+                 published=None, updated=None, links=None, 
                  deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
@@ -64,7 +63,6 @@ class Note(AbstractModel):
         self.content = content
         self._to = [] if to is None else to
         self._cc = [] if cc is None else cc
-        self.actor = actor
 
         if published:
             self.published = published
@@ -259,11 +257,7 @@ class Note(AbstractModel):
 
     def __repr__(self):
         note_type = "Deleted {0}".format(self.TYPE) if self.deleted else self.TYPE
-        return "<{type} by {person} at {date}>".format(
-                type=note_type,
-                person=self.actor,
-                date=self.published.strftime("%Y/%m/%d")
-                )
+        return note_type
    
     def __str__(self):
         return str(self.__repr__())
@@ -289,7 +283,6 @@ class Note(AbstractModel):
         deleted_note.deleted = True
 
         deleted_note.id = data["id"] if "id" in data else ""
-        deleted_note.actor = deleted_note._pump.Person.unserialize(data["actor"])        
         deleted_note.updated = parse(data["updated"])
         deleted_note.published = parse(data["published"])
 
@@ -327,7 +320,6 @@ class Note(AbstractModel):
                     summary=summary,
                     to=(), # todo still.
                     cc=(), # todo: ^^
-                    actor=cls._pump.Person.unserialize(data["actor"]),
                     updated=parse(data["updated"]),
                     published=parse(data["published"]),
                     links=links,
@@ -336,7 +328,6 @@ class Note(AbstractModel):
             obj.content = content
             obj.summary = summary
             obj.id = nid
-            obj.actor = cls._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
             obj.updated = parse(data["updated"])
             obj.published = parse(data["published"])
             obj._links = links

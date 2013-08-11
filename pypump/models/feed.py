@@ -170,7 +170,7 @@ class Feed(AbstractModel):
 
         for v in items:
             # do we know about it?
-            obj_type = v["object"]["objectType"].capitalize()
+            obj_type = cls.OBJECT_TYPES
 
             # todo: make less hacky
             try:

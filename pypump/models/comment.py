@@ -32,19 +32,17 @@ class Comment(AbstractModel):
     summary = ""
     note = None
     updated = None
-    actor = None
     published = None
     likes = []
 
     def __init__(self, content, cid=None, summary=None, note=None, 
-                 published=None, updated=None, actor=None, *args, **kwargs):
+                 published=None, updated=None, *args, **kwargs):
         super(Comment, self).__init__(*args, **kwargs)
 
         self.id = "" if cid is None else cid
         self.content = content
         self.summary = summary
         self.note = note
-        self.actor = actor
 
         if published:
             self.published = published 
@@ -57,11 +55,7 @@ class Comment(AbstractModel):
             self.updated = self.published
 
     def __repr__(self):
-        return "<{type} by {name} at {date}>".format(
-                    type=self.TYPE,
-                    name=self.actor,
-                    date=self.published.strftime("%Y/%m/%d")
-                    )
+        return self.TYPE
 
     def __str__(self):
         return str(self.__repr__())
@@ -164,24 +158,20 @@ class Comment(AbstractModel):
             published = parse(data["published"])
             updated = parse(data["updated"])
             summary = ""
-            content = data["content"]
+            #comment have no content if deleted
+            content = data["content"] if "content" in data else ""
 
-        person = data["actor"] if "actor" in data else data["author"]
-        actor = Comment._pump.Person.unserialize(person)
-       
         if obj is None:
             cid = data["id"] if "id" in data else ""
             return cls(
                 content=content,
                 cid=cid,
-                actor=actor,
                 summary=summary,
                 published=published,
                 updated=updated
                 )
         
         obj.id = data["id"] if "id" in data else ""
-        obj.actor = actor
         obj.content = content
         obj.summary = summary
         obj.published = published

@@ -1,0 +1,129 @@
+##
+# Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
+# 
+# This program is free software: you can redistribute it and/or modify 
+# it under the terms of the GNU General Public License as published by 
+# the Free Software Foundation, either version 3 of the License, or 
+# (at your option) any later version. 
+# 
+# This program is distributed in the hope that it will be useful, 
+# but WITHOUT ANY WARRANTY; without even the implied warranty of 
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
+# GNU General Public License for more details. 
+# 
+# You should have received a copy of the GNU General Public License 
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+##
+
+from dateutil.parser import parse as dateparse
+
+from pypump.models import AbstractModel
+from pypump.compatability import *
+
+#TODO clean up and move to own file
+class Generator(object):
+    display_name = None
+
+    def __repr__(self):
+        return self.display_name
+
+    def __init__(self, display_name, *args, **kwargs):
+        self.display_name = display_name
+
+        super(Generator, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def unserialize(cls, data):
+        display_name = data["displayName"]
+
+        return cls(display_name)
+
+#TODO clean up and move to own file
+class UnknownObject(object):
+    TYPE = None
+    display_name = None
+
+    def __repr__(self):
+        return self.display_name if self.display_name else self.TYPE
+
+    def __str__(self):
+        return str(self.__repr__())
+
+    def __init__(self, object_type=None, display_name=None, *args, **kwargs):
+        self.TYPE = object_type
+        self.display_name = display_name
+
+        super(UnknownObject, self).__init__(*args, **kwargs)
+
+    @classmethod
+    def unserialize(cls, data):
+        object_type = data["objectType"] if "objectType" in data else ""
+        display_name = data["displayName"] if "displayName" in data else ""
+
+        return cls(display_name=display_name, object_type=object_type)
+
+@implement_to_string
+class Activity(AbstractModel):
+    obj = None
+    verb = None
+    actor = None
+    generator = None
+    updated = None
+    url = None
+    published = None
+    content = None
+    id = None
+
+    def __init__(self, obj, verb, actor, generator,
+                 updated, url, published, content, id, *args, **kwargs):
+
+        super(Activity, self).__init__(*args, **kwargs)
+
+        self.obj = obj
+        self.verb = verb
+        self.actor = actor
+        self.generator = generator
+        self.updated = updated
+        self.url = url
+        self.published = published
+        self.content = content
+        self.id = id
+    
+    def __repr__(self):
+        return "<{actor}{verb}{obj}{generator}{date}>".format(
+            actor = self.actor,
+            verb = " {v}".format(v=self.verb.split('/')[-1]),
+            obj = " {o}".format(o=self.obj),
+            generator = " via {g}".format(g=self.generator) if self.generator else "",
+            date = " on {d}".format(d=self.published)
+        )
+
+    def __str__(self):
+        return str(self.__repr__())
+
+    @classmethod
+    def unserialize(cls, data):
+        """ From JSON -> Activity object """
+
+        dataobj = data["object"]
+        obj_type = dataobj["objectType"].capitalize()
+
+        try:
+            objekt = getattr(cls._pump, obj_type)
+            obj = objekt.unserialize(dataobj)
+        except AttributeError:
+            obj = UnknownObject.unserialize(dataobj)
+
+        verb = data["verb"]
+        actor = cls._pump.Person.unserialize(data["actor"])
+        # looks like generator is not always there (at least not for verb:'update' obj:Person)
+        generator = Generator.unserialize(data["generator"]) if "generator" in data else None
+        updated = dateparse(data["updated"])
+        url = data["url"]
+        published = dateparse(data["published"])
+        content = data["content"]
+        id = data["id"]
+
+        return cls(obj, verb, actor, generator, updated,
+                   url, published, content, id)
+
