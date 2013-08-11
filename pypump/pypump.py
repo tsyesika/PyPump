@@ -163,13 +163,24 @@ class PyPump(object):
     ##
     def build_url(self, endpoint):
         """ Returns a fully qualified URL """
+        server = None
+        if "://" in endpoint:
+            #looks like an url, let's break it down
+            server, endpoint = self.deconstruct_url(endpoint)
+
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
                 proto=self.protocol,
-                server=self.server,
+                server=self.server if server is None else server,
                 endpoint=endpoint
                 )
         return url
+
+    def deconstruct_url(self, url):
+        """ Breaks down URL and returns server and endpoint """
+        proto, url = url.split("://")
+        server, endpoint = url.split("/", 1)
+        return (server, endpoint)
 
     def request(self, endpoint, method="GET", data="", 
                 raw=False, params=None, attempts=10, client=None):
@@ -197,12 +208,8 @@ class PyPump(object):
 
         data = to_unicode(data)
 
-        if raw is False:
-            url = "{protocol}://{server}/{endpoint}".format(
-                    protocol=self.protocol,
-                    server=self.server,
-                    endpoint=endpoint
-                    )
+        if not raw:
+            url = self.build_url(endpoint)
         else:
             url = endpoint
 
@@ -253,7 +260,7 @@ class PyPump(object):
         raise PyPumpException(error)
     def _requester(self, fnc, endpoint, raw=False, **kwargs):
         if not raw:
-            url = self.build_url(endpoint) 
+            url = self.build_url(endpoint)
         else:
             url = endpoint
 
@@ -263,8 +270,13 @@ class PyPump(object):
         except requests.exceptions.ConnectionError:
             if self.protocol == "http" or raw:
                 raise # shoot this seems real.
-            self.set_http()
-            return self._requester(fnc, endpoint, raw, **kwargs)
+            else:
+                # rebuild url using http for raw request then go back to https as default
+                self.set_http()
+                url = self.build_url(endpoint)
+                self.set_https()
+                raw = True
+                return self._requester(fnc, url, raw, **kwargs)
 
     def set_https(self):
         """ Enforces protocol to be https """
