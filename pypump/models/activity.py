@@ -15,31 +15,36 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from dateutil.parser import parse as dateparse
+from dateutil.parser import parse as parse
 
 from pypump.models import AbstractModel
 from pypump.compatability import *
 
 #TODO clean up and move to own file
 class Generator(object):
+    """ The client used to generate the activity """
     display_name = None
+    id = None
 
     def __repr__(self):
         return self.display_name
 
-    def __init__(self, display_name, *args, **kwargs):
+    def __init__(self, display_name=display_name, id=id, *args, **kwargs):
         self.display_name = display_name
+        self.id = id
 
         super(Generator, self).__init__(*args, **kwargs)
 
     @classmethod
     def unserialize(cls, data):
-        display_name = data["displayName"]
+        id = data["id"]
+        display_name = data["displayName"] if "displayName" in data else "Unknown client"
 
-        return cls(display_name)
+        return cls(id=id, display_name=display_name)
 
 #TODO clean up and move to own file
-class UnknownObject(object):
+class Unknown(object):
+    """ This class is used when we can't find a matching object type """
     TYPE = None
     display_name = None
 
@@ -90,6 +95,7 @@ class Activity(AbstractModel):
         self.id = id
     
     def __repr__(self):
+        # TODO Maybe better to strip tags from self.content and return that instead
         return "<{actor}{verb}{obj}{generator}{date}>".format(
             actor = self.actor,
             verb = " {v}".format(v=self.verb.split('/')[-1]),
@@ -112,15 +118,15 @@ class Activity(AbstractModel):
             objekt = getattr(cls._pump, obj_type)
             obj = objekt.unserialize(dataobj)
         except AttributeError:
-            obj = UnknownObject.unserialize(dataobj)
+            obj = Unknown.unserialize(dataobj)
 
         verb = data["verb"]
         actor = cls._pump.Person.unserialize(data["actor"])
-        # looks like generator is not always there (at least not for verb:'update' obj:Person)
+        # generator is not always there (at least not for verb:'update' obj:Person)
         generator = Generator.unserialize(data["generator"]) if "generator" in data else None
-        updated = dateparse(data["updated"])
+        updated = parse(data["updated"])
         url = data["url"]
-        published = dateparse(data["published"])
+        published = parse(data["published"])
         content = data["content"]
         id = data["id"]
 
