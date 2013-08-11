@@ -89,7 +89,7 @@ class OpenID(object):
                 server = self.server,
                 endpoint = self.ENDPOINT
             )
-            response = self.pypump._requester(requests.post, url, raw=True, **request)
+            response = self.pypump._requester(requests.post, url, **request)
         
         try:
             server_data = response.json()

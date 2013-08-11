@@ -107,7 +107,7 @@ class Person(AbstractModel):
 
                 # register client as we need to use the client credentials
                 self.register_client()
-                data = self._pump.request(url, raw=True, client=self.client)
+                data = self._pump.request(url, client=self.client)
             self.unserialize(data, obj=self)
             return
 
