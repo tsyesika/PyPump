@@ -1,4 +1,3 @@
-
 ===============
 Quick 'n Dirty!
 ===============
@@ -123,7 +122,7 @@ So, can i send something to all of of the groups I made? Yep::
 
     >>> another_note = pump.Note("This really goes to everyone in my groups?")
     >>> another_note.to = pump.List.all()
-    >>> another_note.cc = (pump.Perosn("moggers87@microca.st"), pump.Person("cwebber@identi.ca"))
+    >>> another_note.cc = (pump.Person("moggers87@microca.st"), pump.Person("cwebber@identi.ca"))
     >>> another_note.send()
 
 Don't forget is there are any issues please issue them on our `GitHub <https://github.com/xray7224/PyPump/issues>`_!
