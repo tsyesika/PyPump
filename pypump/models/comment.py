@@ -29,30 +29,25 @@ class Comment(AbstractModel):
 
     id = None
     content = ""
-    summary = ""
     note = None
     updated = None
     published = None
+    deleted = False
+    liked = False
     likes = []
 
-    def __init__(self, content, cid=None, summary=None, note=None, 
-                 published=None, updated=None, *args, **kwargs):
+    def __init__(self, content, id=None, note=None, published=None, updated=None,
+                 deleted=False, liked = False, *args, **kwargs):
+
         super(Comment, self).__init__(*args, **kwargs)
 
-        self.id = "" if cid is None else cid
+        self.id = "" if id is None else id
         self.content = content
-        self.summary = summary
         self.note = note
-
-        if published:
-            self.published = published 
-        else:
-            self.published = datetime.now()
-
-        if updated:
-            self.updated = updated
-        else:
-            self.updated = self.published
+        self.published = published
+        self.updated = updated
+        self.deleted = deleted
+        self.liked = liked
 
     def __repr__(self):
         return self.TYPE
@@ -72,7 +67,6 @@ class Comment(AbstractModel):
         }
 
         endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
         data = self._pump.request(endpoint, method="POST", data=activity)
 
         if not data:
@@ -80,6 +74,8 @@ class Comment(AbstractModel):
 
         if "error" in data:
             raise PumpError(data["error"])
+
+        self.unserialize(data["object"], obj=self)
 
         return True
 
@@ -93,11 +89,16 @@ class Comment(AbstractModel):
             },
         }
 
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
         if not data:
             return False
 
         if "error" in data:
             raise PumpError(data["error"])
+
+        self.unserialize(data["object"], obj=self)
 
         return True
 
@@ -105,17 +106,22 @@ class Comment(AbstractModel):
         """ Will delete the comment if the comment is posted by you """
         activity = {
             "verb":"delete",
-            "objecty":{
+            "object":{
                 "id":self.id,
                 "objectType":self.objectType,
             },
         }
+
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
 
         if not data:
             return False
 
         if "error" in data:
             raise PumpError(data["error"])
+
+        self.unserialize(data["object"], obj=self)
 
         return True
 
@@ -133,7 +139,6 @@ class Comment(AbstractModel):
         }
     
         endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
         data = self._pump.request(endpoint, method="POST", data=activity)
 
         if not data:
@@ -142,39 +147,35 @@ class Comment(AbstractModel):
         if "error" in data:
             raise PumpException(data["data"])
 
-        self.unserialize(data, obj=self)
+        self.unserialize(data["object"], obj=self)
 
         return True
 
     @classmethod
     def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
-        if "object" in data:
-            published = parse(data["object"]["published"])
-            updated = parse(data["object"]["updated"])
-            summary = data["content"]
-            content = data["object"]["content"]
-        else:
-            published = parse(data["published"])
-            updated = parse(data["updated"])
-            summary = ""
-            #comment have no content if deleted
-            content = data["content"] if "content" in data else ""
+        content = data["content"] if "content" in data else ""
+        id = data["id"] if "id" in data else ""
+        published = parse(data["published"])
+        updated = parse(data["updated"])
+        deleted = parse(data["deleted"]) if "deleted" in data else False
+        liked = data["liked"] if "liked" in data else False
 
         if obj is None:
-            cid = data["id"] if "id" in data else ""
             return cls(
-                content=content,
-                cid=cid,
-                summary=summary,
-                published=published,
-                updated=updated
+                content = content,
+                id = id,
+                published = published,
+                updated = updated,
+                deleted = deleted,
+                liked = liked
                 )
         
-        obj.id = data["id"] if "id" in data else ""
         obj.content = content
-        obj.summary = summary
+        obj.id = id
         obj.published = published
         obj.updated = updated
+        obj.deleted = deleted
+        obj.liked = liked
         return obj
         
