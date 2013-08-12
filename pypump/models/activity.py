@@ -58,7 +58,7 @@ class Unknown(object):
         self.TYPE = object_type
         self.display_name = display_name
 
-        super(UnknownObject, self).__init__(*args, **kwargs)
+        super(Unknown, self).__init__(*args, **kwargs)
 
     @classmethod
     def unserialize(cls, data):
