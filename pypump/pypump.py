@@ -209,6 +209,7 @@ class PyPump(object):
         else:
             url = endpoint
 
+        lastresponse = ""
         for attempt in range(attempts):
             if method == "POST":
                 request = {
@@ -233,9 +234,11 @@ class PyPump(object):
             ##
             # Debugging
             ##
-            print response
-            print response.content
-            
+            if response.content != lastresponse:
+                lastresponse = response.content
+                print response
+                print response.content
+ 
             if response.status_code in [400]:
                 # can't do much
                 try:
@@ -248,7 +251,7 @@ class PyPump(object):
                     if not error:
                         raise IndexError # yesss i know.
                 except IndexError:
-                    error = "Recieved a 400 bad request error. This is likely due to an OAuth failure"
+                    error = "Received a 400 bad request error. This is likely due to an OAuth failure"
                 raise PyPumpException(error)
         
         # failed, oh no!
