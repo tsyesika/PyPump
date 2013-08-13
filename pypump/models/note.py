@@ -35,7 +35,6 @@ class Note(AbstractModel):
     ENDPOINT = "/api/user/{username}/feed"
 
     id = ""
-    summary = ""
     content = ""
     updated = None # last time this was updated
     published = None # When this was published
@@ -51,15 +50,14 @@ class Note(AbstractModel):
 
     _links = {}
 
-    def __init__(self, content, summary=None, nid=None, to=None, cc=None, 
+    def __init__(self, content, id=None, to=None, cc=None, 
                  published=None, updated=None, links=None, 
                  deleted=True, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else {}
 
-        self.id = nid if nid else None
-        self.summary = "" if summary is None else summary
+        self.id = id if id else None
         self.content = content
         self._to = [] if to is None else to
         self._cc = [] if cc is None else cc
@@ -183,7 +181,7 @@ class Note(AbstractModel):
             # oh dear, raise
             raise PumpException(data["error"])
          
-        self.unserialize(data, obj=self)
+        self.unserialize(data["object"], obj=self)
 
         return self
 
@@ -291,44 +289,39 @@ class Note(AbstractModel):
     @classmethod
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
-        if data.get("verb", "") == "delete":
+        if "deleted" in data:
             return cls.unserialize_to_deleted(data, obj=obj)
-        summary = None
-        nid = data.get("id", None)
+        id = data.get("id", None)
         links = {}
-        if "object" in data:
-            data_obj = data["object"]
-            nid = data_obj.get("id", nid)
-            content = data["object"].get("content", u"")
-            summary = data["content"]
-            if "proxy_url" in data_obj.get("likes", []):
-                links["likes"] = data_obj["likes"]["proxy_url"]
-            elif "likes" in data_obj:
-                links["likes"] = data_obj["likes"]["url"]
+        content = data.get("content", u"")
+        if "proxy_url" in data.get("likes", []):
+            links["likes"] = data["likes"]["proxy_url"]
+        elif "likes" in data:
+            links["likes"] = data["likes"]["url"]
 
-            if "pump_io" in data_obj.get("replies", {}) and "proxyURL" in data_obj["replies"].get("pump_io", {}):
-                url = data_obj["replies"]["pump_io"]["proxyURL"].split("://")[-1]
-                links["comments"] = url.split("/", 1)[1]
-            elif links.get("comments", []):
-                links["comments"] = data_obj["replies"]["url"]
-        else:
-            content = data["content"] if "content" in data else ""
+        if "pump_io" in data.get("replies", {}) and "proxyURL" in data["replies"].get("pump_io", {}):
+            url = data["replies"]["pump_io"]["proxyURL"].split("://")[-1]
+            links["comments"] = url.split("/", 1)[1]
+        elif links.get("comments", []):
+            links["comments"] = data["replies"]["url"]
+
+        updated=parse(data["updated"])
+        published=parse(data["published"])
+
         if obj is None:
             return cls(
-                    nid=nid,
+                    id=id,
                     content=content,
-                    summary=summary,
                     to=(), # todo still.
                     cc=(), # todo: ^^
-                    updated=parse(data["updated"]),
-                    published=parse(data["published"]),
+                    updated=updated,
+                    published=published,
                     links=links,
                     )
         else:
             obj.content = content
-            obj.summary = summary
-            obj.id = nid
-            obj.updated = parse(data["updated"])
-            obj.published = parse(data["published"])
+            obj.id = id
+            obj.updated = updated
+            obj.published = published
             obj._links = links
             return obj
