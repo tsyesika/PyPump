@@ -32,12 +32,12 @@ class Image(AbstractModel):
     summary = ""
     id = None
 
-    def __init__(self, full_url, id, summary=None, actor=None, thumb_url=None, 
+    def __init__(self, full_url, id, content=None, actor=None, thumb_url=None, 
                  width=None, height=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
-        self.summary = summary
+        self.content = content
         self.actor = actor
         self._full_url = full_url
         self._thumb_url = full_url if thumb_url is None else thumb_url
@@ -130,7 +130,7 @@ class Image(AbstractModel):
         else:
             location = None
 
-        summary = data["summary"] if "summary" in data else ""
+        content = data["content"] if "content" in data else unicode()
 
         if "fullImage" in data:
             full_obj = data["fullImage"]
@@ -149,7 +149,7 @@ class Image(AbstractModel):
         if obj is None:
             return cls(
                 id=iid,
-                summary=summary,
+                content=content,
                 full_url=full_url,
                 thumb_url=url,
                 height=height,
@@ -159,7 +159,7 @@ class Image(AbstractModel):
         else:
             obj.id = iid
             obj.actor = actor
-            obj.summary = summary
+            obj.content = content
             obj._full_url = full_url
             obj._thumb_url = url
             obj.height = height
