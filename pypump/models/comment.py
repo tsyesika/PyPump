@@ -55,6 +55,21 @@ class Comment(AbstractModel):
     def __str__(self):
         return str(self.__repr__())
 
+    def _post_activity(self, activity):
+        """ POSTs activity and updates self with new data in response """
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if not data:
+            return False        
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        self.unserialize(data["object"], obj=self)
+
+        return True
+
     def like(self, verb="like"):
         """ Will like the comment """
         activity = {
@@ -66,18 +81,7 @@ class Comment(AbstractModel):
         
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False        
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
+        return self._post_activity(activity)
 
     def unlike(self, verb="unlike"):
         """ If comment is liked, it will unlike it """
@@ -89,18 +93,7 @@ class Comment(AbstractModel):
             },
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
+        return self._post_activity(activity)
 
     def delete(self):
         """ Will delete the comment if the comment is posted by you """
@@ -112,18 +105,7 @@ class Comment(AbstractModel):
             },
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
+        return self._post_activity(activity)
 
     def send(self):
         activity = {
@@ -137,19 +119,8 @@ class Comment(AbstractModel):
                 },
             },
         }
-    
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
 
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpException(data["data"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
+        return self._post_activity(activity)
 
     @classmethod
     def unserialize(cls, data, obj=None):
