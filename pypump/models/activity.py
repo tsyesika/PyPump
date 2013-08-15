@@ -16,7 +16,7 @@
 ##
 
 from dateutil.parser import parse as parse
-
+import re
 from pypump.models import AbstractModel
 from pypump.compatability import *
 
@@ -96,13 +96,7 @@ class Activity(AbstractModel):
     
     def __repr__(self):
         # TODO Maybe better to strip tags from self.content and return that instead
-        return "<{actor}{verb}{obj}{generator}{date}>".format(
-            actor = self.actor,
-            verb = " {v}".format(v=self.verb.split('/')[-1]),
-            obj = " {o}".format(o=self.obj),
-            generator = " via {g}".format(g=self.generator) if self.generator else "",
-            date = " on {d}".format(d=self.published)
-        )
+        return '<Activity: {content}>'.format(content=re.sub('<.*?>', '', self.content))
 
     def __str__(self):
         return str(self.__repr__())
