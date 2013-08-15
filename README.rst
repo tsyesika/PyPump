@@ -6,7 +6,7 @@ PyPump - Python Pump.io Library
 :Web: https://github.com/xray7224/PyPump/
 :Keywords: pump.io, library, social, federated
 
-What is pump?
+What is Pump.io?
 ==============
 
 Pump.io is a socially oriented federated network. It provides a way to post notes and images as well and subscribe to other people to get updates on what they post.
