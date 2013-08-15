@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License 
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
+import datetime
+from dateutil.parser import parse
 
 from pypump.compatability import *
 from pypump.models import AbstractModel
@@ -21,75 +23,50 @@ from pypump.models import AbstractModel
 @implement_to_string
 class Image(AbstractModel):
     
-    ENDPOINT = "/api/user/{username}/feed"
-
-    # we need some methods to go grab the image for us.
-    _full_url = ""
-    _thumb_url = ""
-
+    url = None
     actor = None
     author = actor
     summary = ""
     id = None
+    updated = None
+    published = None
 
-    def __init__(self, full_url, id, content=None, actor=None, thumb_url=None, 
-                 width=None, height=None, *args, **kwargs):
+    @property
+    def ENDPOINT(self):
+        return "/api/user/{username}/feed".format(self._pump.nickname)
+
+    def __init__(self, id, url, content=None, actor=None, width=None, height=None,
+                 published=None, updated=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
         self.content = content
         self.actor = actor
-        self._full_url = full_url
-        self._thumb_url = full_url if thumb_url is None else thumb_url
-
-        self.width = width
-        self.height = height
+        self.url = url
+        self.published = published
+        self.updated = updated
 
     def __repr__(self):
-        return "<{type} at {url}>".format(
-                type=self.TYPE,
-                url=self.url
-                )
+        return "<{type} at {url}>".format(type=self.TYPE, url=self.url)
 
     def __str__(self):
-        return str(self.__repr__())
-
-    def __get_full_url(self):
-        if type(self._full_url) == self:
-            return self._full_url.full_url
-        
-        return self._full_url
-
-    full_url = property(__get_full_url)
-    url = full_url
-
-    def __get_thumb_url(self):
-        if type(self._thumb_url) == self:
-            return self._thumb_url.thumb_url
-        
-        return self._thumb_url
-    
-    thumb_url = property(__get_thumb_url)
+        return str(repr(self))
 
     def like(self, verb="like"):
         """ This will like the image """
         activity = {
             "verb":verb,
             "object":{
-                "id":"",
+                "id": self.id,
                 "objectType":self.objectType,
             },
         }
     
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
-        data = self._pump.request(endpoint, method="POST", data=activity)
+        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
 
         if "error" in data:
             raise PumpError(data["error"])
         
-        return True
-
     def favorite(self):
         return self.like(verb="favorite")
 
@@ -102,67 +79,39 @@ class Image(AbstractModel):
             },
         }
 
-        endpoint = self.ENDPOINT.format(username=self.nickname)
-        
-        data = self._pump.request(endpoint, method="POST", data=activity)
+        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
 
         if "error" in data:
             raise PumpError(data["error"])
-
-        return True
 
     def unfavorite(self):
         return self.unlike(verb="unfavorite")
 
     @classmethod
     def unserialize(cls, data, obj=None):
-        full_url = None
+        if "object" in data:
+            return cls.unsrialize(data=data["object"], obj=obj)
 
-        data = data.get("object", data)
+        image_id = data["id"]
+        full_image = data["fullImage"]["url"]
+        full_image = cls(id=image_id, url=full_image)
 
-        iid = data["id"] if "id" in data else "" 
+        image = data["image"]["url"]
+        image = cls(id=image_id, url=image)
 
-        actor = data["author"] if "author" in data else None
-        author = data["actor"] if "actor" in data else actor
+        author = cls._pump.Person.unserialize(data["author"])
 
-        if "location" in data:
-            location = cls._pump.unserialize(data["location"])
-        else:
-            location = None
+        for i in [full_image, image]:
+            i.author = author
+            i.published = parse(data["published"])
+            i.updated = parse(data["updated"])
+            i.display_name = data["displayName"]
 
-        content = data["content"] if "content" in data else unicode()
+        # set the full and normal image on each one
+        full_image.image = image
+        full_image.original = full_image
 
-        if "fullImage" in data:
-            full_obj = data["fullImage"]
-            full_url = cls.unserialize(full_obj)
-        
-        if "image" in data:
-            data = data["image"]
-        
-        url = data["url"]
-        width = data["width"] if "width" in data else None
-        height = data["height"] if "height" in data else None
+        image.image = image
+        image.original = full_image
 
-
-        full_url = url if full_url is None else full_url
-
-        if obj is None:
-            return cls(
-                id=iid,
-                content=content,
-                full_url=full_url,
-                thumb_url=url,
-                height=height,
-                width=width,
-                actor=actor
-                )
-        else:
-            obj.id = iid
-            obj.actor = actor
-            obj.content = content
-            obj._full_url = full_url
-            obj._thumb_url = url
-            obj.height = height
-            obj.width = width
-            return obj
-
+        return image 
