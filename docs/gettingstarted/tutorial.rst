@@ -74,22 +74,42 @@ reconnect like so::
     ...          )
 
 Okay, we're connected!  Next up, we want to check out what our last 30
-messages are.  PyPump supports python-style index slicing::
+items in our inbox are, but first we need to find ourselves::
 
-    >>> recent_messages = pump.inbox[:30]  # get last 30 messages
+    >>> me = pump.Person("mizbunny@example.org")
+    >>> me.summary
+    >>> 'Hello and welcome to my summary'
 
-We could print out each of the most recent messages like so::
+That looks like us, now to find our inbox items.
+The inbox comes in three versions
 
-    >>> for message in recent_messages:
-    >>>     print message.content
+- me.inbox.major is where major activities such as posted notes and images end up.
+- me.inbox.minor is where minor activities such as likes and comments end up.
+- me.inbox is a combination of both of the above.
+
+We only want to see notes, so we use the major inbox.
+The inbox supports python-style index slicing::
+
+    >>> recent_activities = me.inbox.major[:30]  # get last 30 activities
+
+We could print out each of the most recent activities like so::
+
+    >>> for activity in recent_activities:
+    >>>     print activity
+    <Activity: Evan Prodromou posted a note>
+    <Activity: jrobb posted a note>
+    <Activity: jpope posted a note>
+    <Activity: sazius posted a note>
+    ...
 
 Maybe we're just looking at our most recent message, and see it's from
 our friend Evan.  It seems that he wants to invite us over for a
 dinner party::
 
-    >>> message = recent_messages[0]
-    >>> message
-    <Notice by evan at 04/05/2013>
+    >>> activity = recent_activities[0]
+    >>> activity
+    <Activity: Evan Prodromou posted a note>
+    >>> message = activity.obj
     >>> message.author
     <User evan@e14n.com>
     >>> message.content
@@ -97,8 +117,7 @@ dinner party::
 
 We can comment on the message saying we'd love to::
 
-    >>> from PyPump.models.comemnt import Comment
-    >>> our_reply = Comment("I'd love to!")
+    >>> our_reply = pump.Comment("I'd love to!")
     >>> message.comment(our_reply) # this is evans message we got above!
 
 (Since this Note activity is being instantiated, it needs a
@@ -114,12 +133,13 @@ We can also check to see what our buddy's public feed is.  Maybe
 he's said some interesting things?::
 
     >>> evan = message.author
-    >>> for messages in evan.inbox:
+    >>> for activity in evan.outbox:
+    >>>     message = activity.obj
     >>>     print message.content
 
 Prehaps we want to know a bit about Evan::
 
-    >>> print evan.summery  
+    >>> print evan.summary  
 
 .. Maybe we took a picture, and we want to post that picture to our
 .. public feed so everyone can see it.  We can do this by posting it to

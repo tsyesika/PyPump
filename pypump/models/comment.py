@@ -29,42 +29,48 @@ class Comment(AbstractModel):
 
     id = None
     content = ""
-    summary = ""
     note = None
     updated = None
-    actor = None
     published = None
+    deleted = False
+    liked = False
     likes = []
+    author = None
 
-    def __init__(self, content, cid=None, summary=None, note=None, 
-                 published=None, updated=None, actor=None, *args, **kwargs):
+    def __init__(self, content, id=None, note=None, published=None, updated=None,
+                 deleted=False, liked = False, author = None, *args, **kwargs):
+
         super(Comment, self).__init__(*args, **kwargs)
 
-        self.id = "" if cid is None else cid
+        self.id = "" if id is None else id
         self.content = content
-        self.summary = summary
         self.note = note
-        self.actor = actor
-
-        if published:
-            self.published = published 
-        else:
-            self.published = datetime.now()
-
-        if updated:
-            self.updated = updated
-        else:
-            self.updated = self.published
+        self.published = published
+        self.updated = updated
+        self.deleted = deleted
+        self.liked = liked
+        self.author = author
 
     def __repr__(self):
-        return "<{type} by {name} at {date}>".format(
-                    type=self.TYPE,
-                    name=self.actor,
-                    date=self.published.strftime("%Y/%m/%d")
-                    )
+        return self.TYPE
 
     def __str__(self):
         return str(self.__repr__())
+
+    def _post_activity(self, activity):
+        """ POSTs activity and updates self with new data in response """
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if not data:
+            return False        
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        self.unserialize(data["object"], obj=self)
+
+        return True
 
     def like(self, verb="like"):
         """ Will like the comment """
@@ -77,17 +83,7 @@ class Comment(AbstractModel):
         
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False        
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        return True
+        return self._post_activity(activity)
 
     def unlike(self, verb="unlike"):
         """ If comment is liked, it will unlike it """
@@ -99,34 +95,19 @@ class Comment(AbstractModel):
             },
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        return True
+        return self._post_activity(activity)
 
     def delete(self):
         """ Will delete the comment if the comment is posted by you """
         activity = {
             "verb":"delete",
-            "objecty":{
+            "object":{
                 "id":self.id,
                 "objectType":self.objectType,
             },
         }
 
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-        return True
+        return self._post_activity(activity)
 
     def send(self):
         activity = {
@@ -140,56 +121,37 @@ class Comment(AbstractModel):
                 },
             },
         }
-    
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
 
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpException(data["data"])
-
-        self.unserialize(data, obj=self)
-
-        return True
+        return self._post_activity(activity)
 
     @classmethod
     def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
-        if "object" in data:
-            if data["verb"] != "post":
-                return
-            published = parse(data["object"]["published"])
-            updated = parse(data["object"]["updated"])
-            summary = data["content"]
-            content = data["object"]["content"]
-        else:
-            published = parse(data["published"])
-            updated = parse(data["updated"])
-            summary = ""
-            content = data["content"]
+        content = data["content"] if "content" in data else ""
+        id = data["id"] if "id" in data else ""
+        published = parse(data["published"])
+        updated = parse(data["updated"])
+        deleted = parse(data["deleted"]) if "deleted" in data else False
+        liked = data["liked"] if "liked" in data else False
+        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
-        person = data["actor"] if "actor" in data else data["author"]
-        actor = Comment._pump.Person.unserialize(person)
-       
         if obj is None:
-            cid = data["id"] if "id" in data else ""
             return cls(
-                content=content,
-                cid=cid,
-                actor=actor,
-                summary=summary,
-                published=published,
-                updated=updated
+                content = content,
+                id = id,
+                published = published,
+                updated = updated,
+                deleted = deleted,
+                liked = liked,
+                author = author,
                 )
         
-        obj.id = data["id"] if "id" in data else ""
-        obj.actor = actor
         obj.content = content
-        obj.summary = summary
+        obj.id = id
         obj.published = published
         obj.updated = updated
+        obj.deleted = deleted
+        obj.liked = liked
+        obj.author = author
         return obj
         

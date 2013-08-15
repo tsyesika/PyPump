@@ -15,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import json
 from datetime import datetime
 from dateutil.parser import parse
 
@@ -33,12 +32,12 @@ class Note(AbstractModel):
     ENDPOINT = "/api/user/{username}/feed"
 
     id = ""
-    summary = ""
     content = ""
-    actor = None # who posted.
     updated = None # last time this was updated
     published = None # When this was published
     deleted = False # has the note been deleted
+    liked = False
+    author = None
 
     # where to?
     _to = list()
@@ -47,19 +46,17 @@ class Note(AbstractModel):
 
     _links = dict()
 
-    def __init__(self, content, summary=None, nid=None, to=None, cc=None, 
-                 actor=None, published=None, updated=None, links=None, 
-                 deleted=True, *args, **kwargs):
+    def __init__(self, content, id=None, to=None, cc=None, 
+                 published=None, updated=None, links=None, 
+                 deleted=False, liked=False, author=None, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else dict()
 
-        self.id = nid if nid else None
-        self.summary = "" if summary is None else summary
+        self.id = id if id else None
         self.content = content
         self._to = list() if to is None else to
         self._cc = list() if cc is None else cc
-        self.actor = actor
 
         if published:
             self.published = published
@@ -70,6 +67,9 @@ class Note(AbstractModel):
             self.updated = updated
         else:
             self.updated = self.published
+        self.deleted = deleted
+        self.liked = liked
+        self.author = author
 
     def _get_likes(self):
         """ gets the likes """
@@ -95,6 +95,21 @@ class Note(AbstractModel):
         return comments_obj
 
     comments = property(_get_comments)
+
+    def _post_activity(self, activity):
+        """ POSTs activity and updates self with new data in response """
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
+        if not data:
+            return False        
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        self.unserialize(data["object"], obj=self)
+
+        return True
 
     def set_to(self, people):
         """ Allows you to set/change who it's to """
@@ -164,21 +179,17 @@ class Note(AbstractModel):
         self._to = tuple(self._to)
         self._cc = tuple(self._cc)
 
-        # post it!
-        data = self._pump.request(
-                self.ENDPOINT.format(username=self._pump.nickname),
-                method="POST",
-                data=self.serialize()
-                )
+        activity = {
+            "verb":self.VERB,
+            "object":{
+                "objectType":self.objectType,
+                "content":self.content,
+            },
+            "to": self._to,
+            "cc": self._cc,
+        }
 
-        # we need to actually store the new note data the server has sent back
-        if "error" in data:
-            # oh dear, raise
-            raise PumpException(data["error"])
-         
-        self.unserialize(data, obj=self)
-
-        return self
+        return self._post_activity(activity)
 
     def comment(self, comment):
         """ Posts a comment """
@@ -195,17 +206,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request(
-                "/api/user/{username}/feed".format(username=self._pump.nickname),
-                method="POST",
-                data=activity
-                )
-
-        if data.get("verb", None) == activity["verb"]:
-            self.deleted = True
-            return True
-
-        return False
+        return self._post_activity(activity)
 
     def like(self):
         """ Likes the Note """
@@ -217,11 +218,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request(
-                self.ENDPOINT.format(username=self._pump.nickname),
-                method="POST",
-                data=activity
-                )
+        return self._post_activity(activity)
 
     def unlike(self, verb="unlike"):
         """ Unlikes the Note """
@@ -233,11 +230,7 @@ class Note(AbstractModel):
             }
         }
 
-        data = self._pump.request(
-                self.ENDPOINT.format(username=self._pump.nickname),
-                method="POST",
-                data=activity
-                )
+        return self._post_activity(activity)
 
     # synonyms
     def favorite(self, *args, **kwargs):
@@ -249,86 +242,54 @@ class Note(AbstractModel):
         return self.unlike(verb="unfavorite", *args, **kwargs)
 
     def __repr__(self):
-        note_type = "Deleted {0}".format(self.TYPE) if self.deleted else self.TYPE
-        return "<{type} by {person} at {date}>".format(
-                type=note_type,
-                person=self.actor,
-                date=self.published.strftime("%Y/%m/%d")
-                )
+        return "<{t}>".format(t=self.TYPE)
    
     def __str__(self):
         return str(self.__repr__())
 
-    def serialize(self):
-        """ Seralizes note to be posted """
-        query = {
-            "verb":self.VERB,
-            "object":{
-                "objectType":self.objectType,
-                "content":self.content,
-            },
-            "to": self._to,
-            "cc": self._cc,
-        }
-
-        return json.dumps(query)
-
-    @classmethod
-    def unserialize_to_deleted(cls, data, obj=None):
-        """ Unserializes to a deleted note """
-        deleted_note = cls(str()) if obj is None else obj
-        deleted_note.deleted = True
-
-        deleted_note.id = data["id"] if "id" in data else ""
-        deleted_note.actor = deleted_note._pump.Person.unserialize(data["actor"])        
-        deleted_note.updated = parse(data["updated"])
-        deleted_note.published = parse(data["published"])
-
-        return deleted_note
-
     @classmethod
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
-        if data.get("verb", "") == "delete":
-            return cls.unserialize_to_deleted(data, obj=obj)
-        summary = None
-        nid = data.get("id", None)
+        id = data.get("id", None)
         links = dict()
-        if "object" in data:
-            data_obj = data["object"]
-            nid = data_obj.get("id", nid)
-            content = data["object"].get("content", u"")
-            summary = data["content"]
-            if "proxy_url" in data_obj.get("likes", []):
-                links["likes"] = data_obj["likes"]["proxy_url"]
-            elif "likes" in data_obj:
-                links["likes"] = data_obj["likes"]["url"]
+        content = data.get("content", u"")
+        if "proxy_url" in data.get("likes", []):
+            links["likes"] = data["likes"]["proxy_url"]
+        elif "likes" in data:
+            links["likes"] = data["likes"]["url"]
 
-            if "pump_io" in data_obj.get("replies", {}) and "proxyURL" in data_obj["replies"].get("pump_io", {}):
-                url = data_obj["replies"]["pump_io"]["proxyURL"].split("://")[-1]
-                links["replies"] = url.split("/", 1)[1]
-            elif data_obj.get("replies", None):
-                links["replies"] = data_obj["replies"]["url"]
-        else:
-            content = data["content"]
+        if "pump_io" in data.get("replies", {}) and "proxyURL" in data["replies"].get("pump_io", {}):
+            url = data["replies"]["pump_io"]["proxyURL"].split("://")[-1]
+            links["replies"] = url.split("/", 1)[1]
+        elif data.get("replies", None):
+            links["replies"] = data["replies"]["url"]
+
+        updated=parse(data["updated"])
+        published=parse(data["published"])
+        liked = data["liked"] if "liked" in data else False
+        deleted = parse(data["deleted"]) if "deleted" in data else False
+        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
+
         if obj is None:
             return cls(
-                    nid=nid,
+                    id=id,
                     content=content,
-                    summary=summary,
                     to=(), # todo still.
                     cc=(), # todo: ^^
-                    actor=cls._pump.Person.unserialize(data["actor"]),
-                    updated=parse(data["updated"]),
-                    published=parse(data["published"]),
+                    updated=updated,
+                    published=published,
                     links=links,
+                    liked=liked,
+                    deleted=deleted,
+                    author=author,
                     )
         else:
             obj.content = content
-            obj.summary = summary
-            obj.id = nid
-            obj.actor = cls._pump.Person.unserialize(data["actor"]) if "actor" in data else obj.actor
-            obj.updated = parse(data["updated"])
-            obj.published = parse(data["published"])
+            obj.id = id
+            obj.updated = updated
+            obj.published = published
             obj._links = links
+            obj.liked = liked
+            obj.deleted = deleted
+            obj.author = author
             return obj
