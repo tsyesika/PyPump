@@ -35,9 +35,10 @@ class Comment(AbstractModel):
     deleted = False
     liked = False
     likes = []
+    author = None
 
     def __init__(self, content, id=None, note=None, published=None, updated=None,
-                 deleted=False, liked = False, *args, **kwargs):
+                 deleted=False, liked = False, author = None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
@@ -48,6 +49,7 @@ class Comment(AbstractModel):
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
+        self.author = author
 
     def __repr__(self):
         return self.TYPE
@@ -131,6 +133,7 @@ class Comment(AbstractModel):
         updated = parse(data["updated"])
         deleted = parse(data["deleted"]) if "deleted" in data else False
         liked = data["liked"] if "liked" in data else False
+        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
         if obj is None:
             return cls(
@@ -139,7 +142,8 @@ class Comment(AbstractModel):
                 published = published,
                 updated = updated,
                 deleted = deleted,
-                liked = liked
+                liked = liked,
+                author = author,
                 )
         
         obj.content = content
@@ -148,5 +152,6 @@ class Comment(AbstractModel):
         obj.updated = updated
         obj.deleted = deleted
         obj.liked = liked
+        obj.author = author
         return obj
         

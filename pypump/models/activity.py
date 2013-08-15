@@ -95,7 +95,6 @@ class Activity(AbstractModel):
         self.id = id
     
     def __repr__(self):
-        # TODO Maybe better to strip tags from self.content and return that instead
         return '<Activity: {content}>'.format(content=re.sub('<.*?>', '', self.content))
 
     def __str__(self):
@@ -107,6 +106,10 @@ class Activity(AbstractModel):
 
         dataobj = data["object"]
         obj_type = dataobj["objectType"].capitalize()
+
+        if "author" not in dataobj:
+            # author is not set for posted objects in inbox/major, so we add it
+            dataobj["author"] = data["actor"]
 
         try:
             objekt = getattr(cls._pump, obj_type)

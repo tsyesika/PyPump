@@ -37,6 +37,7 @@ class Note(AbstractModel):
     published = None # When this was published
     deleted = False # has the note been deleted
     liked = False
+    author = None
 
     # where to?
     _to = list()
@@ -47,7 +48,7 @@ class Note(AbstractModel):
 
     def __init__(self, content, id=None, to=None, cc=None, 
                  published=None, updated=None, links=None, 
-                 deleted=False, liked=False, *args, **kwargs):
+                 deleted=False, liked=False, author=None, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else dict()
@@ -68,6 +69,7 @@ class Note(AbstractModel):
             self.updated = self.published
         self.deleted = deleted
         self.liked = liked
+        self.author = author
 
     def _get_likes(self):
         """ gets the likes """
@@ -266,6 +268,7 @@ class Note(AbstractModel):
         published=parse(data["published"])
         liked = data["liked"] if "liked" in data else False
         deleted = parse(data["deleted"]) if "deleted" in data else False
+        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
         if obj is None:
             return cls(
@@ -277,7 +280,8 @@ class Note(AbstractModel):
                     published=published,
                     links=links,
                     liked=liked,
-                    deleted=deleted
+                    deleted=deleted,
+                    author=author,
                     )
         else:
             obj.content = content
@@ -287,4 +291,5 @@ class Note(AbstractModel):
             obj._links = links
             obj.liked = liked
             obj.deleted = deleted
+            obj.author = author
             return obj
