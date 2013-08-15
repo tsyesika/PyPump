@@ -69,7 +69,7 @@ class Note(AbstractModel):
             self.updated = self.published
         self.deleted = deleted
         self.liked = liked
-        self.author = author
+        self.author = self._pump.Person(self._pump.nickname) if author is None else author
 
     def _get_likes(self):
         """ gets the likes """
@@ -242,10 +242,10 @@ class Note(AbstractModel):
         return self.unlike(verb="unfavorite", *args, **kwargs)
 
     def __repr__(self):
-        return "<{t}>".format(t=self.TYPE)
+        return "<{type} by {name}>".format(type=self.TYPE, name=self.author.display_name)
    
     def __str__(self):
-        return str(self.__repr__())
+        return str(repr(self))
 
     @classmethod
     def unserialize(cls, data, obj=None):
