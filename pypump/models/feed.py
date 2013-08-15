@@ -19,10 +19,36 @@ from pypump.compatability import *
 from pypump.exception import PyPumpException 
 from pypump.models import AbstractModel
 
+class InfiniteFeed(object):
+    
+    previous = None
+
+    def __init__(self, feed):
+        self.feed = feed
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        if self.previous is None:
+            # first iteration
+            data = self.feed._request(count=1)
+        else:
+            data = self.feed._request(count=1, before=self.previous)
+
+        data = data["items"]
+        if not data:
+            # we're done
+            raise StopIteration
+        
+        obj = getattr(self.feed._pump, self.feed.OBJECT_TYPES)
+        obj = obj.unserialize(data[0])
+        self.previous = obj.id
+        return obj
+
 @implement_to_string
 class Feed(AbstractModel):
 
-    _feed = None
     _count = None
     _offset = None
     actor = None
@@ -55,13 +81,8 @@ class Feed(AbstractModel):
         if endpoint is not None:
             self._ENDPOINT = endpoint
         
-        self._feed = list() if self._feed is None else self._feed
-        
         if isinstance(username, self._pump.Person):
             self.actor = username
-            return
-
-        if username is None:
             return
 
         self.actor = self._pump.Person(username)        
@@ -72,9 +93,9 @@ class Feed(AbstractModel):
             return self.__getslice__(key)
         count = 1
         offset = key
-        data = self.__request(offset=offset, count=count)
-        self.unserialize(data, obj=self) 
-        return self._feed[0]
+        data = self._request(offset=offset, count=count)
+        data = self.unserialize(data)
+        return data[0]
 
     def __getslice__(self, s, e=None):
         """ Grab multiple items from feed """
@@ -91,48 +112,44 @@ class Feed(AbstractModel):
             offset = s.start
             count = None
 
-        data = self.__request(offset=offset, count=count)
-        obj = self.unserialize(data, obj=self)
+        data = self._request(offset=offset, count=count)
+        data = self.unserialize(data)
 
         if s.step:
-            return obj._feed[::s.step]
+            return data[::s.step]
         else:
-            return obj._feed
+            return data
 
     def __iter__(self):
         """ Produces an iterator """
-        if self._feed:
-            return self._feed.__iter__()
-        
-        data = self.__request()
-        return self.unserialize(data, obj=self).__iter__()
-
+        return InfiniteFeed(self) 
+    
     def __repr__(self):
         if self.author:
-            return "<{actor} {type} of {num} items>".format(
+            return "<{type}: {actor}>".format(
                     actor=self.actor,
                     type=self.TYPE,
-                    num=len(self)
                     )
         else:
-            return "<{type} of {num} items>".format(type=self.TYPE, num=len(self))
-
+            return "<{type}>".format(type=self.TYPE)
+    
     def __str__(self):
-        return str(self.__repr__())
+        return str(repr(self))
 
-    def __len__(self):
-        """ Gives amount of items in the feed """
-        return len(self._feed)
-
-    def __request(self, offset=None, count=None):
+    def _request(self, offset=None, count=None, since=None, before=None):
         """ Makes a request """
-        param = {}
+        param = dict()
 
-        if count:
+        if count is not None:
             param["count"] = count
 
-        if offset:
+        if offset is not None:
             param["offset"] = offset
+
+        if since is not None:
+            param["since"] = before
+        elif before is not None:
+            param["before"] = before
 
         if self.actor is None:
             # oh dear, we gotta raise an error
@@ -142,22 +159,9 @@ class Feed(AbstractModel):
 
         return data
 
-    def clear(self):
-        """ Clears an feed """
-        self._feed = []
-
     @classmethod
-    def unserialize(cls, data, obj=None, user=None):
-        """ Produces self._feed from JSON data """
-        if obj is None:
-            self = cls()
-        else:
-            self = obj
-
-        user = self.actor if user is None else user
-
-        self.actor = user
-
+    def unserialize(cls, data, user=None):
+        """ Produce a List from JOSN data """
         if type(data) == list:
             items = data
         elif type(data) == dict:
@@ -168,22 +172,23 @@ class Feed(AbstractModel):
                     data=data
                     ))
 
+        unserialized_items = list()
+
         for v in items:
             # do we know about it?
             obj_type = cls.OBJECT_TYPES
 
             # todo: make less hacky
             try:
-                obj = getattr(self._pump, obj_type)
+                obj = getattr(cls._pump, obj_type)
             except AttributeError:
                 continue # what is this stange type of which you are?
             
             try:
                 real_obj = obj.unserialize(v)
                 if real_obj is not None:
-                    self._feed.append(real_obj)
+                    unserialized_items.append(real_obj)
             except TypeError:
-                # caused by missing out the self param, will fix tomorrow
                 pass
 
-        return self 
+        return unserialized_items

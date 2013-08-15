@@ -19,6 +19,7 @@ from pypump.compatability import *
 from pypump.models.feed import Feed
 
 class Inbox(Feed):
+
     OBJECT_TYPES = "Activity"
     
     @property
