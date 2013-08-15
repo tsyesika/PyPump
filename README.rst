@@ -2,7 +2,7 @@
 PyPump - Python Pump.io Library
 ================================
 
-:Version: 0.1.9a
+:Version: 0.2
 :Web: https://github.com/xray7224/PyPump/
 :Keywords: pump.io, library, social, federated
 
@@ -58,7 +58,7 @@ If you just want to chat and let us know the cool things you're doing with PyPum
 Licence?
 ========
 
-We're licenced under the GPL version 3 or (at your option) a later version. You can find more information about this licence at https://www.gnu.org/licenses/gpl.html
+We're licensed under the GPL version 3 or (at your option) a later version. You can find more information about this licence at https://www.gnu.org/licenses/gpl.html
 
 
 Want to help out?

@@ -24,8 +24,6 @@ from pypump.exception.PumpException import PumpException
 from pypump.compatability import *
 
 from pypump.models import AbstractModel
-from pypump.models.person import Person
-from pypump.models.comment import Comment
 
 @implement_to_string
 class Note(AbstractModel):
@@ -41,26 +39,23 @@ class Note(AbstractModel):
     liked = False
 
     # where to?
-    _to = []
-    _cc = []
+    _to = list()
+    _cc = list()
     
 
-    _likes = [] # cache of likes
-    _comments = [] # cache of comemnts
-
-    _links = {}
+    _links = dict()
 
     def __init__(self, content, id=None, to=None, cc=None, 
                  published=None, updated=None, links=None, 
                  deleted=False, liked=False, *args, **kwargs):
         super(Note, self).__init__(*args, **kwargs)
 
-        self._links = links if links else {}
+        self._links = links if links else dict()
 
         self.id = id if id else None
         self.content = content
-        self._to = [] if to is None else to
-        self._cc = [] if cc is None else cc
+        self._to = list() if to is None else to
+        self._cc = list() if cc is None else cc
 
         if published:
             self.published = published
@@ -76,30 +71,26 @@ class Note(AbstractModel):
 
     def _get_likes(self):
         """ gets the likes """
-        if self._likes:
-            return self._likes
-
         # gotta go get them.
         endpoint = self._links["likes"]
         likes = self._pump.request(endpoint, raw=True)
+        likes_obj = list()
         for serialized_person in likes["items"]:
-            self._likes.append(Person.unserialize(serialized_person))
+            likes_obj.append(self._pump.Person.unserialize(serialized_person))
 
-        return self._likes
+        return likes_obj
 
     likes = property(fget=_get_likes)
 
     def _get_comments(self): 
         """ Gets the comments """
-        if self._comments:
-            return self._comments
-
-        endpoint = self._links["comments"]
+        endpoint = self._links["replies"]
         comments = self._pump.request(endpoint, raw=True)
-        for v in comments.get("items", []):
-            self._comments.append(Comment.unserialize(v))
+        comments_obj = list()
+        for v in comments.get("items", comments):
+            comments_obj.append(self._pump.Comment.unserialize(v))
 
-        return self._comments
+        return comments_obj
 
     comments = property(_get_comments)
 
@@ -258,7 +249,7 @@ class Note(AbstractModel):
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
         id = data.get("id", None)
-        links = {}
+        links = dict()
         content = data.get("content", u"")
         if "proxy_url" in data.get("likes", []):
             links["likes"] = data["likes"]["proxy_url"]
@@ -267,9 +258,9 @@ class Note(AbstractModel):
 
         if "pump_io" in data.get("replies", {}) and "proxyURL" in data["replies"].get("pump_io", {}):
             url = data["replies"]["pump_io"]["proxyURL"].split("://")[-1]
-            links["comments"] = url.split("/", 1)[1]
-        elif links.get("comments", []):
-            links["comments"] = data["replies"]["url"]
+            links["replies"] = url.split("/", 1)[1]
+        elif data.get("replies", None):
+            links["replies"] = data["replies"]["url"]
 
         updated=parse(data["updated"])
         published=parse(data["published"])
