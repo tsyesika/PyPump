@@ -39,5 +39,6 @@ Models
    models/comment
    models/image
    models/person
+   models/activity
 
 This was build on |today|
