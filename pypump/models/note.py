@@ -249,8 +249,7 @@ class Note(AbstractModel):
         return self.unlike(verb="unfavorite", *args, **kwargs)
 
     def __repr__(self):
-        note_type = "Deleted {0}".format(self.TYPE) if self.deleted else self.TYPE
-        return note_type
+        return "<{t}>".format(t=self.TYPE)
    
     def __str__(self):
         return str(self.__repr__())

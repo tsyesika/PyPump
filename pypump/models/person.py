@@ -193,7 +193,7 @@ class Person(AbstractModel):
         return True
 
     def __repr__(self):
-        return self.id.replace("acct:", "")
+        return "<Person: {person}>".format(person=self.id.replace("acct:", ""))
 
     def __str__(self):
         return self.__repr__()

@@ -27,7 +27,7 @@ class Generator(object):
     id = None
 
     def __repr__(self):
-        return self.display_name
+        return "<Generator: {g_name}>".format(g_name=self.display_name)
 
     def __init__(self, display_name=display_name, id=id, *args, **kwargs):
         self.display_name = display_name
