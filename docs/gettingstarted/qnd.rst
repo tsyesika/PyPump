@@ -24,8 +24,8 @@ Super, next, I wanna see my inbox::
 
     >>> me = pump.Person("me@my.server.org")
     >>> my_inbox = me.inbox
-    >>> for item in my_inbox[:20]:
-    ...     print item.content
+    >>> for activity in my_inbox[:20]:
+    ...     print activity
 
 .. note:: using an index or slice makes the request. If you iterate over it without a request it **will** be empty,
 
@@ -36,12 +36,13 @@ Oh, my friend Evan isn't there, I probably need to follow him::
 
 Awesome. Lets check again::
 
-    >>> for item in my_inbox[:20]:
-    ...     print item
+    >>> for activity in my_inbox[:20]:
+    ...     print activity
 
 Evan likes PyPump, super!::
 
-    >>> awesome_note = my_inbox[1] # second note in my inbox
+    >>> activity = my_inbox[1] # second activity in my inbox
+    >>> awesome_note = activity.obj
     >>> awesome_note.content
     'Oh wow, PyPump is awesome!'
     >>> awesome_note.like()
@@ -58,13 +59,13 @@ Cool! Lets tell them about these docs::
 
 I wonder what was posted last::
 
-    >>> latest_item = my_inbox[0]
-    >>> print latest_item
-    <Image at <Image at https://some.server/uploads/somefriend/2013/7/7/0fXmLQ.png>>
+    >>> latest_activity = my_inbox[0]
+    >>> print latest_activity
+    <Activity: jrobb posted an image>
 
 Oh it's an image, lets see the thumb nail::
 
-    >>> url = latest_item.thumb_url
+    >>> url = latest_activity.obj.thumb_url
     >>> fout = open("some_image.{0}".format(url.split(".")[-1], "wb")
     >>> import urllib2 # this will be different with python3
     >>> fout.write(urllib2.urlopen(url).read())
@@ -72,7 +73,7 @@ Oh it's an image, lets see the thumb nail::
 
 Hmm, I want to see a bigger version::
 
-    >>> large_url = latest_item.full_url
+    >>> large_url = latest_activity.obj.full_url
     >>> print large_url
     <Image at https://some.server/uploads/somefriend/2013/7/7/JkdX2.png">
     >>> # you will find Images often hold other pump.Image objects, we just need to extra the url
@@ -84,13 +85,13 @@ Hmm, I want to see a bigger version::
 That looks awesome, lets post a comment::
 
     >>> my_comment = pump.Comment("Great, super imaeg")
-    >>> latest_item.comment(my_comment)
+    >>> latest_activity.obj.comment(my_comment)
 
 Oh no, I made a typo::
 
     >>> my_comment.delete()
     >>> my_comment.content = "Great, super image")
-    >>> latest_item.comment(my_comment)
+    >>> latest_activity.obj.comment(my_comment)
 
 Much better! Lets make a note to tell people how easy this all is::
 
