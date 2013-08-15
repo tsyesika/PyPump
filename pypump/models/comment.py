@@ -99,6 +99,9 @@ class Comment(AbstractModel):
             },
         }
 
+        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
+        data = self._pump.request(endpoint, method="POST", data=activity)
+
         if not data:
             return False
 
@@ -156,6 +159,8 @@ class Comment(AbstractModel):
     def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
         if "object" in data:
+            if data["verb"] != "post":
+                return
             published = parse(data["object"]["published"])
             updated = parse(data["object"]["updated"])
             summary = data["content"]
