@@ -50,7 +50,6 @@ class Person(AbstractModel):
 
     inbox = None
     outbox = None
-    messages = None
 
     is_self = False # is this you?
 
@@ -86,10 +85,7 @@ class Person(AbstractModel):
                 username, server = webfinger, self._pump.server
             if username == self._pump.nickname and server == self._pump.server:
                 self.inbox = self._pump.Inbox(self) if inbox is None else inbox
-                self.messages = self.inbox
-            else:
-                self.outbox = self._pump.Outbox(self) if outbox is None else outbox
-                self.messages = self.outbox
+            self.outbox = self._pump.Outbox(self) if outbox is None else outbox
             # now do some checking
             if server == self._pump.server:
                 # cool we can get quite a bit of info.

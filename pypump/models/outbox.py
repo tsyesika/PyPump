@@ -20,10 +20,13 @@ from pypump.models.feed import Feed
 
 class Outbox(Feed):
 
+    OBJECT_TYPES = "Activity"
+
+    @property
     def ENDPOINT(self):
         if self._ENDPOINT is not None:
             return self._ENDPOINT
 
-        self._ENDPOINT = "api/user/{username}/inbox".format(username=self.actor.username)
+        self._ENDPOINT = "api/user/{username}/feed".format(username=self.actor.username)
         return self._ENDPOINT
 
