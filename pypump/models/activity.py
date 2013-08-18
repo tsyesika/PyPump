@@ -95,7 +95,11 @@ class Activity(AbstractModel):
         self.id = id
     
     def __repr__(self):
-        return '<Activity: {content}>'.format(content=re.sub('<.*?>', '', self.content))
+        return '<Activity: {webfinger} {verb}ed {model}>'.format(
+                webfinger=self.actor.id[5:], # [5:] to strip of acct:
+                verb=self.verb.rstrip("e"), # english: e + ed = ed
+                model=self.obj.objectType
+                )
 
     def __str__(self):
         return str(self.__repr__())
