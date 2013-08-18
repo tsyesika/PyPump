@@ -18,49 +18,54 @@
 from datetime import datetime
 from dateutil.parser import parse
 
-from pypump.models import AbstractModel
+from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
+                           Deleteable)
 from pypump.compatability import *
 
 @implement_to_string
-class Comment(AbstractModel):
+class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     VERB = "post"
-    ENDPOINT = "/api/user/{username}/feed"
+
+    @property
+    def ENDPOINT(self):
+        return "/api/user/{username}/feed".format(
+            username=self._pump.nickname
+            )
 
     id = None
     content = ""
-    note = None
+    model = None
     updated = None
     published = None
     deleted = False
-    liked = False
-    likes = []
     author = None
+    _links = None
 
-    def __init__(self, content, id=None, note=None, published=None, updated=None,
-                 deleted=False, liked = False, author = None, *args, **kwargs):
+    def __init__(self, content, id=None, model=None, published=None, updated=None,
+                 deleted=False, liked=False, author=None, links=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
         self.id = "" if id is None else id
         self.content = content
-        self.note = note
+        self.model = model
         self.published = published
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
         self.author = author
+        self._links = dict() if links is None else links
 
     def __repr__(self):
         return self.TYPE
 
     def __str__(self):
-        return str(self.__repr__())
+        return str(repr(self))
 
     def _post_activity(self, activity):
         """ POSTs activity and updates self with new data in response """
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
+        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
 
         if not data:
             return False        
@@ -72,43 +77,6 @@ class Comment(AbstractModel):
 
         return True
 
-    def like(self, verb="like"):
-        """ Will like the comment """
-        activity = {
-            "verb":verb,
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            },
-        
-        }
-
-        return self._post_activity(activity)
-
-    def unlike(self, verb="unlike"):
-        """ If comment is liked, it will unlike it """
-        activity = {
-            "verb":verb,
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            },
-        }
-
-        return self._post_activity(activity)
-
-    def delete(self):
-        """ Will delete the comment if the comment is posted by you """
-        activity = {
-            "verb":"delete",
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            },
-        }
-
-        return self._post_activity(activity)
-
     def send(self):
         activity = {
             "verb":self.VERB,
@@ -116,8 +84,8 @@ class Comment(AbstractModel):
                 "objectType":self.objectType,
                 "content":self.content,
                 "inReplyTo":{
-                    "id":self.note.id,
-                    "objectType":self.note.objectType,
+                    "id":self.model.id,
+                    "objectType":self.model.objectType,
                 },
             },
         }
@@ -135,15 +103,21 @@ class Comment(AbstractModel):
         liked = data["liked"] if "liked" in data else False
         author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
+        links = dict()
+        links["likes"] = data["likes"]["url"]
+        links["replies"] = data["replies"]["url"]
+        links["shares"] = data["shares"]["url"]
+
         if obj is None:
             return cls(
-                content = content,
-                id = id,
-                published = published,
-                updated = updated,
-                deleted = deleted,
-                liked = liked,
-                author = author,
+                content=content,
+                id=id,
+                published=published,
+                updated=updated,
+                deleted=deleted,
+                liked=liked,
+                author=author,
+                links=links
                 )
         
         obj.content = content
@@ -153,5 +127,6 @@ class Comment(AbstractModel):
         obj.deleted = deleted
         obj.liked = liked
         obj.author = author
+        obj._links = links
         return obj
         

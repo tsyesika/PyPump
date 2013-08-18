@@ -23,13 +23,20 @@ from pypump.exception.PumpException import PumpException
 
 from pypump.compatability import *
 
-from pypump.models import AbstractModel
+from pypump.models import (AbstractModel, Likeable, Shareable, Commentable,
+                           Deleteable)
 
 @implement_to_string
-class Note(AbstractModel):
+class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     
     VERB = "post"
-    ENDPOINT = "/api/user/{username}/feed"
+    
+    @property
+    def ENDPOINT(self):
+        return "/api/user/{username}/feed".format(
+            username=self._pump.nickname
+            )
+
 
     id = ""
     content = ""
@@ -70,46 +77,6 @@ class Note(AbstractModel):
         self.deleted = deleted
         self.liked = liked
         self.author = self._pump.Person(self._pump.nickname) if author is None else author
-
-    def _get_likes(self):
-        """ gets the likes """
-        # gotta go get them.
-        endpoint = self._links["likes"]
-        likes = self._pump.request(endpoint, raw=True)
-        likes_obj = list()
-        for serialized_person in likes["items"]:
-            likes_obj.append(self._pump.Person.unserialize(serialized_person))
-
-        return likes_obj
-
-    likes = property(fget=_get_likes)
-
-    def _get_comments(self): 
-        """ Gets the comments """
-        endpoint = self._links["replies"]
-        comments = self._pump.request(endpoint, raw=True)
-        comments_obj = list()
-        for v in comments.get("items", comments):
-            comments_obj.append(self._pump.Comment.unserialize(v))
-
-        return comments_obj
-
-    comments = property(_get_comments)
-
-    def _post_activity(self, activity):
-        """ POSTs activity and updates self with new data in response """
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if not data:
-            return False        
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
 
     def set_to(self, people):
         """ Allows you to set/change who it's to """
@@ -191,58 +158,11 @@ class Note(AbstractModel):
 
         return self._post_activity(activity)
 
-    def comment(self, comment):
-        """ Posts a comment """
-        comment.note = self
-        comment.send()
-
-    def delete(self):
-        """ Delete's the note """
-        activity = {
-            "verb":"delete",
-            "object":{
-                "id":self.id,
-                "objectType": self.objectType,
-            }
-        }
-
-        return self._post_activity(activity)
-
-    def like(self):
-        """ Likes the Note """
-        activity = {
-            "verb":"like",
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            }
-        }
-
-        return self._post_activity(activity)
-
-    def unlike(self, verb="unlike"):
-        """ Unlikes the Note """
-        activity = {
-            "verb":verb,
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            }
-        }
-
-        return self._post_activity(activity)
-
-    # synonyms
-    def favorite(self, *args, **kwargs):
-        """ Maps to like """
-        return self.like(verb="favorite", *args, **kwargs)
-
-    def unfavorite(self, *args, **kwargs):
-        """ Maps to unlike """
-        return self.unlike(verb="unfavorite", *args, **kwargs)
-
     def __repr__(self):
-        return "<{type} by {name}>".format(type=self.TYPE, name=self.author.display_name)
+        return "<{type} by {name}>".format(
+            type=self.TYPE,
+            name=self.author.display_name
+            )
    
     def __str__(self):
         return str(repr(self))

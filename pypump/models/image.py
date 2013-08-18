@@ -18,10 +18,11 @@ import datetime
 from dateutil.parser import parse
 
 from pypump.compatability import *
-from pypump.models import AbstractModel
+from pypump.models import (AbstractModel, Likeable, Commentable, Deleteable,
+                           Shareable)
 
 @implement_to_string
-class Image(AbstractModel):
+class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     
     url = None
     actor = None
@@ -30,13 +31,14 @@ class Image(AbstractModel):
     id = None
     updated = None
     published = None
+    _links = None
 
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(self._pump.nickname)
 
     def __init__(self, id, url, content=None, actor=None, width=None, height=None,
-                 published=None, updated=None, *args, **kwargs):
+                 published=None, updated=None, links=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
@@ -45,47 +47,13 @@ class Image(AbstractModel):
         self.url = url
         self.published = published
         self.updated = updated
+        self._links = dict() if links is None else links
 
     def __repr__(self):
         return "<{type} at {url}>".format(type=self.TYPE, url=self.url)
 
     def __str__(self):
         return str(repr(self))
-
-    def like(self, verb="like"):
-        """ This will like the image """
-        activity = {
-            "verb":verb,
-            "object":{
-                "id": self.id,
-                "objectType":self.objectType,
-            },
-        }
-    
-        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
-
-        if "error" in data:
-            raise PumpError(data["error"])
-        
-    def favorite(self):
-        return self.like(verb="favorite")
-
-    def unlike(self, verb="unlike"):
-        activity = {
-            "verb":verb,
-            "object":{
-                "id":self.id,
-                "objectType":self.objectType,
-            },
-        }
-
-        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
-
-        if "error" in data:
-            raise PumpError(data["error"])
-
-    def unfavorite(self):
-        return self.unlike(verb="unfavorite")
 
     @classmethod
     def unserialize(cls, data, obj=None):
@@ -101,11 +69,16 @@ class Image(AbstractModel):
 
         author = cls._pump.Person.unserialize(data["author"])
 
+        links = dict()
+        links["likes"] = data["likes"]["url"]
+        links["replies"] = data["replies"]["url"]
+        links["shares"] = data["shares"]["url"]
+
         for i in [full_image, image]:
             i.author = author
             i.published = parse(data["published"])
             i.updated = parse(data["updated"])
-            i.display_name = data["displayName"]
+            i.display_name = data.get("displayName", str())
 
         # set the full and normal image on each one
         full_image.image = image
@@ -113,5 +86,9 @@ class Image(AbstractModel):
 
         image.image = image
         image.original = full_image
+
+        # and finally the links
+        full_image._links = links
+        image._links = links
 
         return image 
