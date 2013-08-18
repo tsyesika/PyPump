@@ -58,7 +58,10 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self._links = dict() if links is None else links
 
     def __repr__(self):
-        return self.TYPE
+        return "<{type} by {webfinger}>".format(
+            type=self.TYPE,
+            webfinger=self.author.id[5:]
+            )
 
     def __str__(self):
         return str(repr(self))
