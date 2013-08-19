@@ -23,28 +23,48 @@ class InfiniteFeed(object):
     
     previous = None
 
-    def __init__(self, feed):
+    def __init__(self, feed, offset=None, count=20, stop=None, step=1):
         self.feed = feed
+        self.count = count
+        self.maxcount = 200 # upper API limit for requested items
+        self.offset = offset
+        self.cache = list()
+        self.counter = 0
+        self.stop = stop
+        self.step = step
 
     def __iter__(self):
         return self
 
     def next(self):
-        if self.previous is None:
-            # first iteration
-            data = self.feed._request(count=1)
-        else:
-            data = self.feed._request(count=1, before=self.previous)
+        if not self.cache:
+            if self.previous is None:
+                # first iteration
+                response = self.feed._request(count=self.count, offset=self.offset)
+            else:
+                response = self.feed._request(count=self.count, before=self.previous)
+            self.cache = response['items']
+        data = self.cache.pop(0) if self.cache else None
 
-        data = data["items"]
-        if not data:
+        if not data or (self.stop and self.counter >= self.stop):
             # we're done
             raise StopIteration
+
+        if self.counter > self.count:
+            # raise count if we iterate a lot
+            if self.counter < self.maxcount:
+                self.count = self.counter
+            else:
+                self.count = self.maxcount
         
         obj = getattr(self.feed._pump, self.feed.OBJECT_TYPES)
-        obj = obj.unserialize(data[0])
+        obj = obj.unserialize(data)
         self.previous = obj.id
-        return obj
+        self.counter += 1
+        if (self.counter-1) % self.step == 0:
+            return obj
+        else:
+            return self.next()
 
 @implement_to_string
 class Feed(AbstractModel):
@@ -93,9 +113,8 @@ class Feed(AbstractModel):
             return self.__getslice__(key)
         count = 1
         offset = key
-        data = self._request(offset=offset, count=count)
-        data = self.unserialize(data)
-        return data[0]
+        inf = InfiniteFeed(self, offset=offset, count=count, stop=count)
+        return inf.next()
 
     def __getslice__(self, s, e=None):
         """ Grab multiple items from feed """
@@ -111,14 +130,12 @@ class Feed(AbstractModel):
         elif s.start:
             offset = s.start
             count = None
-
-        data = self._request(offset=offset, count=count)
-        data = self.unserialize(data)
-
-        if s.step:
-            return data[::s.step]
+        if s.step: #TODO make InfiniteFeed take step
+            step = s.step
         else:
-            return data
+            step = 1
+
+        return InfiniteFeed(self, offset=offset, stop=count, step=step)
 
     def __iter__(self):
         """ Produces an iterator """
