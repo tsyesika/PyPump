@@ -27,7 +27,7 @@ Super, next, I wanna see my inbox::
     >>> for activity in my_inbox[:20]:
     ...     print activity
 
-.. note:: using an index or slice makes the request. If you iterate over it without a request it **will** be empty,
+.. note:: iterating over the inbox without any slice will iterate until the very first note in your inbox/feed/outbox
 
 Oh, my friend Evan isn't there, I probably need to follow him::
 

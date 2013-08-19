@@ -161,7 +161,7 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def __repr__(self):
         return "<{type} by {name}>".format(
             type=self.TYPE,
-            name=self.author.display_name
+            name=self.author.webfinger
             )
    
     def __str__(self):

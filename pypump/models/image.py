@@ -43,23 +43,22 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
 
         self.id = id
         self.content = content
-        self.actor = actor
+        self.actor = self.actor if actor is None else actor
         self.url = url
         self.published = published
         self.updated = updated
         self._links = dict() if links is None else links
 
     def __repr__(self):
-        return "<{type} at {url}>".format(type=self.TYPE, url=self.url)
+        return "<{type} by {webfinger}>".format(
+            type=self.TYPE,
+            url=self.actor.webfinger)
 
     def __str__(self):
         return str(repr(self))
 
     @classmethod
     def unserialize(cls, data, obj=None):
-        if "object" in data:
-            return cls.unsrialize(data=data["object"], obj=obj)
-
         image_id = data["id"]
         full_image = data["fullImage"]["url"]
         full_image = cls(id=image_id, url=full_image)
@@ -75,7 +74,7 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
         links["shares"] = data["shares"]["url"]
 
         for i in [full_image, image]:
-            i.author = author
+            i.actor = author
             i.published = parse(data["published"])
             i.updated = parse(data["updated"])
             i.display_name = data.get("displayName", str())

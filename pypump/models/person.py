@@ -134,6 +134,10 @@ class Person(AbstractModel):
             self.outbox = self._pump.Outbox(self)
             self.message = self.outbox
 
+    @property
+    def webfinger(self):
+        return self.id[5:]
+
     def register_client(self):
         """ Registers client on foreign server """
         openid = OpenID(

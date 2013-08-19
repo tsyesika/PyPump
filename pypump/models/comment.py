@@ -60,7 +60,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
             type=self.TYPE,
-            webfinger=self.author.id[5:]
+            webfinger=self.author.webfinger
             )
 
     def __str__(self):
