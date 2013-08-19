@@ -60,18 +60,24 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     @classmethod
     def unserialize(cls, data, obj=None):
         image_id = data["id"]
-        full_image = data["fullImage"]["url"]
-        full_image = cls(id=image_id, url=full_image)
+        if "fullImage" in data:
+            full_image = data["fullImage"]["url"]
+            full_image = cls(id=image_id, url=full_image)
+        else:
+            full_image = None
 
-        image = data["image"]["url"]
-        image = cls(id=image_id, url=image)
+        if "image" in data:
+            image = data["image"]["url"]
+            image = cls(id=image_id, url=image)
+        else:
+            image = None
 
         author = cls._pump.Person.unserialize(data["author"])
 
         links = dict()
-        links["likes"] = data["likes"]["url"]
-        links["replies"] = data["replies"]["url"]
-        links["shares"] = data["shares"]["url"]
+        for i in ["likes", "replies", "shares"]:
+            if data.get(i, None):
+                links[i] = data[i]["url"]
 
         for i in [full_image, image]:
             i.actor = author
