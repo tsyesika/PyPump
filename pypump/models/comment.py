@@ -101,7 +101,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         content = data["content"] if "content" in data else ""
         id = data["id"] if "id" in data else ""
         published = parse(data["published"])
-        updated = parse(data["updated"])
+        updated = parse(data["updated"]) if "updated" in data else False
         deleted = parse(data["deleted"]) if "deleted" in data else False
         liked = data["liked"] if "liked" in data else False
         author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
