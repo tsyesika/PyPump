@@ -107,9 +107,9 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
         links = dict()
-        links["likes"] = data["likes"]["url"]
-        links["replies"] = data["replies"]["url"]
-        links["shares"] = data["shares"]["url"]
+        for i in ["likes", "replies", "shares"]:
+            if data.get(i, None):
+                links[i] = data[i]["url"]
 
         if obj is None:
             return cls(
