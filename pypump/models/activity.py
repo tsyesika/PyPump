@@ -43,7 +43,8 @@ class Generator(object):
         return cls(id=id, display_name=display_name)
 
 #TODO clean up and move to own file
-class Unknown(object):
+@implement_to_string
+class Unknown(AbstractModel):
     """ This class is used when we can't find a matching object type """
     TYPE = None
     display_name = None
