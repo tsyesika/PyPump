@@ -130,7 +130,7 @@ class Feed(AbstractModel):
         elif s.start:
             offset = s.start
             count = None
-        if s.step: #TODO make InfiniteFeed take step
+        if s.step:
             step = s.step
         else:
             step = 1
