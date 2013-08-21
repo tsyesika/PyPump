@@ -186,7 +186,7 @@ class Shareable(object):
         endpoint = self._links["shares"]
         shares = self._pump.request(endpoint, raw=True)
         shares_obj = []
-        for p in comments.get("items", shares_obj):
+        for p in shares.get("items", shares_obj):
             shares_obj.append(self._pump.Person.unserialize(p))
         return shares_obj
 
