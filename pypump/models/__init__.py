@@ -108,7 +108,6 @@ class Likeable(object):
         """ Gets who's liked this object """
         endpoint = self._links["likes"]
         likes = self._pump.request(endpoint, raw=True)
-        print likes
         likes_obj = []
         for l in likes.get("items", likes_obj):
             likes_obj.append(self._pump.Person.unserialize(l))
