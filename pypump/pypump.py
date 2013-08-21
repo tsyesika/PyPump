@@ -243,7 +243,7 @@ class PyPump(object):
                 print response
                 print response.content
  
-            if response.status_code in [400]:
+            if response.status_code == 400:
                 # can't do much
                 try:
                     try:
@@ -297,12 +297,13 @@ class PyPump(object):
         # get tokens from server and make a dict of them.
         self.__server_tokens = self.request_token()
         
-        token = self.__server_tokens["token"]
+        self.token = self.__server_tokens["token"]
+        self.token_secret = self.__server_tokens["token_secret"]
 
         url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.server,
-                token=token.decode("utf-8")
+                token=self.token.decode("utf-8")
                 ))
 
         # now we need the user to authorize me to use their pump.io account
@@ -311,7 +312,7 @@ class PyPump(object):
             self.verifier(verifier)
         else:    
             self.verifier_callback(url)
-    
+ 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
         self.__server_tokens["verifier"] = verifier
