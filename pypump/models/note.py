@@ -211,5 +211,5 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
             obj._links = links
             obj.liked = liked
             obj.deleted = deleted
-            obj.author = author
+            obj.author = author if author else obj.author
             return obj
