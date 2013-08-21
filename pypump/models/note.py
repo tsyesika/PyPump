@@ -173,16 +173,13 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
         id = data.get("id", None)
         links = dict()
         content = data.get("content", u"")
-        if "proxy_url" in data.get("likes", []):
-            links["likes"] = data["likes"]["proxy_url"]
-        elif "likes" in data:
-            links["likes"] = data["likes"]["url"]
 
-        if "pump_io" in data.get("replies", {}) and "proxyURL" in data["replies"].get("pump_io", {}):
-            url = data["replies"]["pump_io"]["proxyURL"].split("://")[-1]
-            links["replies"] = url.split("/", 1)[1]
-        elif data.get("replies", None):
-            links["replies"] = data["replies"]["url"]
+        for i in ["likes", "replies", "shares"]:
+            if data.get(i, None):
+                if "pump_io" in data[i]:
+                    links[i] = data[i]["pump_io"]["proxyURL"]
+                else:
+                    links[i] = data[i]["url"]
 
         updated=parse(data["updated"])
         published=parse(data["published"])
