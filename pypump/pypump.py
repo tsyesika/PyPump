@@ -370,4 +370,33 @@ class PyPump(object):
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
         self.__server_tokens = None # clean up code.
-        
+
+class WebPump(PyPump):
+    """
+        This is a PyPump class which is aimed at mainly web developers.
+        Allowing you to avoid the callbacks making the oauth portion of
+        PyPump instanciation blocking.
+
+        After initialisation you will be able to do `PyPump.verifier_url`
+        allowing you to get the url to direct your user to. That method
+        will return None if the oauth handshake was successful and no
+        verifier callback needs to be done.
+    
+        Once you have the verifier instanciate this class again and
+        call the verifier method alike what you do using the PyPump class
+    """
+
+    url = None
+
+    def __init__(self, *args, **kwargs):
+        """
+            This is exactly the same as PyPump.__init__ apart from 
+            verifier_callback is no longer an option for kwargs and
+            if specified will be ignored.
+        """
+        kwargs["verifier_callback"] = self._callback_verifier
+        super(WebPump, self).__init__(*args, **kwargs)
+
+    def _callback_verifier(self, url):
+        """ This is used to catch the url and store it at `self.url` """
+        self.url = url
