@@ -27,6 +27,7 @@ Contents
    gettingstarted/tutorial
    gettingstarted/authentication
    gettingstarted/verifier_callback 
+   gettingstarted/webpump
 
 Models
 ------
