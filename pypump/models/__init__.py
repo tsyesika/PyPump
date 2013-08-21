@@ -169,7 +169,7 @@ class Commentable(object):
 
     def comment(self, comment):
         """ Posts a comment object on model """
-        comment.model = self
+        comment.inReplyTo = self
         comment.send()
 
 class Shareable(object):

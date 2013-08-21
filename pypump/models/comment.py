@@ -35,26 +35,26 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     id = None
     content = ""
-    model = None
+    inReplyTo = None
     updated = None
     published = None
     deleted = False
     author = None
     _links = None
 
-    def __init__(self, content, id=None, model=None, published=None, updated=None,
+    def __init__(self, content, id=None, inReplyTo=None, published=None, updated=None,
                  deleted=False, liked=False, author=None, links=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
         self.id = "" if id is None else id
         self.content = content
-        self.model = model
+        self.inReplyTo = inReplyTo
         self.published = published
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
-        self.author = author
+        self.author = self._pump.Person(self._pump.nickname) if author is None else author
         self._links = dict() if links is None else links
 
     def __repr__(self):
@@ -87,8 +87,8 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
                 "objectType":self.objectType,
                 "content":self.content,
                 "inReplyTo":{
-                    "id":self.model.id,
-                    "objectType":self.model.objectType,
+                    "id":self.inReplyTo.id,
+                    "objectType":self.inReplyTo.objectType,
                 },
             },
         }
@@ -129,7 +129,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         obj.updated = updated
         obj.deleted = deleted
         obj.liked = liked
-        obj.author = author
+        obj.author = author if author else obj.author
         obj._links = links
         return obj
         
