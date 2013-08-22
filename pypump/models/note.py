@@ -171,9 +171,9 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
         id = data.get("id", None)
-        links = dict()
         content = data.get("content", u"")
 
+        links = dict()
         for i in ["likes", "replies", "shares"]:
             if data.get(i, None):
                 if "pump_io" in data[i]:

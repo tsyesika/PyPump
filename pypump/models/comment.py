@@ -109,7 +109,10 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         links = dict()
         for i in ["likes", "replies", "shares"]:
             if data.get(i, None):
-                links[i] = data[i]["url"]
+                if "pump_io" in data[i]:
+                    links[i] = data[i]["pump_io"]["proxyURL"]
+                else:
+                    links[i] = data[i]["url"]
 
         if obj is None:
             return cls(
