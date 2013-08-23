@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, json, argparse
+import os, json, argparse
 from pypump import PyPump
 
 class App(object):
