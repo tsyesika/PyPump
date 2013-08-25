@@ -25,6 +25,8 @@ from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.compatability import *
+from pypump.models.collection import (FollowersCollection, FollowingCollection,
+                                      Favorites, Inbox, Outbox)
 
 @implement_to_string
 class Person(AbstractModel):
@@ -84,8 +86,11 @@ class Person(AbstractModel):
                 # they probably just gave a username, the assumption is it's on our server!
                 self.username, self.server = webfinger, self._pump.server
             if self.username == self._pump.nickname and self.server == self._pump.server:
-                self.inbox = self._pump.Inbox(self) if inbox is None else inbox
-            self.outbox = self._pump.Outbox(self) if outbox is None else outbox
+                self.inbox = Inbox(self) if inbox is None else inbox
+            self.outbox = Outbox(self) if outbox is None else outbox
+            self.followers = FollowersCollection(self)
+            self.following = FollowingCollection(self)
+            self.favorites = Favorites(self)
             data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
                 proto=self._pump.protocol,
                 server=self.server,
@@ -95,7 +100,7 @@ class Person(AbstractModel):
             return
 
         self.id = id
-        self.inbox = self._pump.Inbox(self) if inbox is None else inbox
+        self.inbox = Inbox(self) if inbox is None else inbox
         self.username = username
         self.url = url
         self.summary = summary
@@ -118,7 +123,7 @@ class Person(AbstractModel):
 
         if me and self.id == me.id:
             self.is_self = True
-            self.outbox = self._pump.Outbox(self)
+            self.outbox = Outbox(self)
 
     @property
     def webfinger(self):
