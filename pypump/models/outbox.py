@@ -27,6 +27,9 @@ class Outbox(Feed):
         if self._ENDPOINT is not None:
             return self._ENDPOINT
 
-        self._ENDPOINT = "api/user/{username}/feed".format(username=self.actor.username)
+        self._ENDPOINT = "{proto}://{server}/api/user/{username}/feed".format(
+            proto=self._pump.protocol,
+            server=self.actor.server,
+            username=self.actor.username)
         return self._ENDPOINT
 

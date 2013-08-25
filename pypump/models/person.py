@@ -76,34 +76,21 @@ class Person(AbstractModel):
         # okay we need to check if the webfinger is being used
         if isinstance(webfinger, string_types):
             # first clean up
-            webfinger = webfinger.lstrip(" ").rstrip(" ")
+            webfinger = webfinger.strip(" ")
             # okay now we need to look if it's on our servers or not.
             if "@" in webfinger:
-                username, server = webfinger.split("@")
+                self.username, self.server = webfinger.split("@")
             else:
                 # they probably just gave a username, the assumption is it's on our server!
-                username, server = webfinger, self._pump.server
-            if username == self._pump.nickname and server == self._pump.server:
+                self.username, self.server = webfinger, self._pump.server
+            if self.username == self._pump.nickname and self.server == self._pump.server:
                 self.inbox = self._pump.Inbox(self) if inbox is None else inbox
             self.outbox = self._pump.Outbox(self) if outbox is None else outbox
-            # now do some checking
-            if server == self._pump.server:
-                # cool we can get quite a bit of info.
-                data = self._pump.request("/api/user/{0}/profile".format(username))
-            else:
-                self.id = "acct:%s@%s" % (username, server)
-                self.username = username
-                self.server = server
-                self.is_self = False
-                url = "{proto}://{server}/api/user/{username}/profile".format(
-                        proto=self._pump.protocol,
-                        server=self.server,
-                        username=self.username
-                        )
-
-                # register client as we need to use the client credentials
-                self.register_client()
-                data = self._pump.request(url, client=self.client)
+            data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
+                proto=self._pump.protocol,
+                server=self.server,
+                username=self.username
+            ))
             self.unserialize(data, obj=self)
             return
 
@@ -132,25 +119,10 @@ class Person(AbstractModel):
         if me and self.id == me.id:
             self.is_self = True
             self.outbox = self._pump.Outbox(self)
-            self.message = self.outbox
 
     @property
     def webfinger(self):
         return self.id[5:]
-
-    def register_client(self):
-        """ Registers client on foreign server """
-        openid = OpenID(
-                self.server,
-                self._pump.client_name,
-                self._pump.client_type
-                )
-        openid.pypump = self._pump
-        self.client_credentials = openid.register_client()
-        self.client = OAuth1(
-                client_key=self.client_credentials.key,
-                client_secret=self.client_credentials.secret
-                )
 
     def follow(self): 
         """ You follow this user """
@@ -223,9 +195,6 @@ class Person(AbstractModel):
 
         self = cls() if obj is None else obj
 
-        if "verb" in data and data["verb"] in ["follow", "stop-following"]:
-            return None
-
         try:
             username = data["preferredUsername"]
             display = data["displayName"]
@@ -234,6 +203,7 @@ class Person(AbstractModel):
             return None
 
         self.id = data["id"]
+        self.server = self.id.replace("acct:", "").split("@")[-1]
         self.username = username
         self.display_name = display
         self.url = data["links"]["self"]["href"]

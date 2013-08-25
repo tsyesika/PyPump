@@ -51,6 +51,7 @@ class PyPump(object):
     loader = None
     protocol = "https"
     client = None
+    _server_cache = dict()
 
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
@@ -81,18 +82,7 @@ class PyPump(object):
 
         self.populate_models()
 
-        # first, if we need to register our client
-        if not (key or secret):
-            oid = openid.OpenID(
-                    server=server,
-                    client_name=client_name,
-                    application_type=client_type
-                    )
-            self.consumer = oid.register_client()
-        else:
-            self.consumer = openid.Consumer()
-            self.consumer.key = key
-            self.consumer.secret = secret
+        self._add_consumer(self.server, key, secret)
 
         if not (token and token_secret):
             # we need to make a new oauth request
@@ -144,7 +134,9 @@ class PyPump(object):
     ##
     def get_registration(self):
         """ This is if key and secret weren't specified at instansiation so we registered them """
-        return (self.consumer.key, self.consumer.secret, self.consumer.expirey)
+        return (self._server_cache[self.server].key,
+                self._server_cache[self.server].secret,
+                self._server_cache[self.server].expirey)
 
     def get_token(self):
         """ This is for when we don't have a token but we've registered one (by asking the user) """
@@ -182,6 +174,29 @@ class PyPump(object):
         server, endpoint = url.split("/", 1)
         return (server, endpoint)
 
+    def _add_consumer(self, url, key=None, secret=None):
+        """ Creates Consumer object with key and secret for server
+        and adds it to _server_cache if it doesnt already exist """
+
+        if "://" in url:
+            server, endpoint = self.deconstruct_url(url)
+        else:
+            server = url
+
+        if server not in self._server_cache:
+            if not (key and secret):
+                oid = openid.OpenID(
+                    server=server,
+                    client_name=self.client_name,
+                    application_type=self.client_type
+                )
+                consumer = oid.register_client()
+            else:
+                consumer = openid.Consumer()
+                consumer.key = key
+                consumer.secret = secret
+            self._server_cache[server] = consumer
+
     def request(self, endpoint, method="GET", data="", 
                 raw=False, params=None, attempts=10, client=None):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
@@ -189,18 +204,11 @@ class PyPump(object):
         attempts = this is how many times it'll try re-attempting
         """
 
-        if client is None:
-            client = self.client
-
         # check client has been setup
         if client is None:
-            self.setup_oauth_client()
-            client = self.client
+            client = self.setup_oauth_client(endpoint)
 
         params = {} if params is None else params
-
-        if endpoint.startswith("/"):
-            endpoint = endpoint[1:] # remove inital / as we add it
 
         if data and isinstance(data, dict):
             # we actually need to make it into a json object as that's what pump.io deals with.
@@ -318,14 +326,29 @@ class PyPump(object):
         self.__server_tokens["verifier"] = verifier
         self.request_access(**self.__server_tokens)
 
-    def setup_oauth_client(self):
+    def setup_oauth_client(self, url=None):
         """ Sets up client for requests to pump """
-        self.client = OAuth1(
-                client_key=to_unicode(self.consumer.key),
-                client_secret=to_unicode(self.consumer.secret),
-                resource_owner_key=to_unicode(self.token),
-                resource_owner_secret=to_unicode(self.token_secret)
-                )
+        if url and "://" in url:
+            server, endpoint = self.deconstruct_url(url)
+        else:
+            server = self.server
+
+        if server not in self._server_cache:
+            self._add_consumer(server)
+        
+        if server == self.server:
+            self.client = OAuth1(
+                    client_key=to_unicode(self._server_cache[self.server].key),
+                    client_secret=to_unicode(self._server_cache[self.server].secret),
+                    resource_owner_key=to_unicode(self.token),
+                    resource_owner_secret=to_unicode(self.token_secret)
+                    )
+            return self.client
+        else:
+            return OAuth1(
+                client_key=to_unicode(self._server_cache[server].key),
+                client_secret=to_unicode(self._server_cache[server].secret),
+            )
 
     def get_access(self, url):
         """ this asks the user to let us use their account """
@@ -339,8 +362,8 @@ class PyPump(object):
     def request_token(self):
         """ Gets a request token so that we can then ask the user for access to the accoutn """
         client = OAuth1(
-                client_key=self.consumer.key,
-                client_secret=self.consumer.secret,
+                client_key=self._server_cache[self.server].key,
+                client_secret=self._server_cache[self.server].secret,
                 callback_uri=self.callback_uri
                 )
         
@@ -357,8 +380,8 @@ class PyPump(object):
     def request_access(self, **auth_info):
         """ This is for when we've got the user's access value and we're asking the server for our access token """
         client = OAuth1(
-                client_key=self.consumer.key,
-                client_secret=self.consumer.secret,
+                client_key=self._server_cache[self.server].key,
+                client_secret=self._server_cache[self.server].secret,
                 resource_owner_key=auth_info['token'],
                 resource_owner_secret=auth_info['token_secret'],
                 verifier=auth_info['verifier']
