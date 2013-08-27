@@ -94,6 +94,8 @@ class AbstractModel(object):
 
         return data
 
+from pypump.models.collection import Collection
+
 class Likeable(object):
     """
         Provides the model with the like and unlike methods as well as
@@ -107,12 +109,7 @@ class Likeable(object):
     def likes(self):
         """ Gets who's liked this object """
         endpoint = self._links["likes"]
-        likes = self._pump.request(endpoint, raw=True)
-        likes_obj = []
-        for l in likes.get("items", likes_obj):
-            likes_obj.append(self._pump.Person.unserialize(l))
-        
-        return likes_obj
+        return Collection(self, endpoint)
 
     favorites = likes
 
@@ -148,6 +145,7 @@ class Likeable(object):
         """ Unfavourite model """
         return self.unlike(verb="unfavorite")
 
+
 class Commentable(object):
     """
         Provides the model with the comment method allowing you to post
@@ -161,16 +159,13 @@ class Commentable(object):
     def comments(self):
         """ Fetches the comment objects for the models """
         endpoint = self._links["replies"]
-        comments = self._pump.request(endpoint, raw=True)
-        comments_obj = []
-        for c in comments.get("items", comments_obj):
-            comments_obj.append(self._pump.Comment.unserialize(c))
-        return comments_obj
+        return Collection(self, endpoint)
 
     def comment(self, comment):
         """ Posts a comment object on model """
         comment.inReplyTo = self
         comment.send()
+
 
 class Shareable(object):
     """
@@ -184,11 +179,7 @@ class Shareable(object):
     def shares(self):
         """ Fetches the people who've shared the model """
         endpoint = self._links["shares"]
-        shares = self._pump.request(endpoint, raw=True)
-        shares_obj = []
-        for p in shares.get("items", shares_obj):
-            shares_obj.append(self._pump.Person.unserialize(p))
-        return shares_obj
+        return Collection(self, endpoint)
 
     def share(self):
         """ Shares the model """

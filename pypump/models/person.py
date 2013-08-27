@@ -25,7 +25,7 @@ from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.compatability import *
-from pypump.models.collection import (FollowersCollection, FollowingCollection,
+from pypump.models.collection import (Followers, Following,
                                       Favorites, Inbox, Outbox)
 
 @implement_to_string
@@ -49,9 +49,6 @@ class Person(AbstractModel):
     location = None # place item
     summary = "" # lil bit about them =]    
     image = None # Image items
-
-    inbox = None
-    outbox = None
 
     is_self = False # is this you?
 
@@ -86,25 +83,24 @@ class Person(AbstractModel):
                 # they probably just gave a username, the assumption is it's on our server!
                 self.username, self.server = webfinger, self._pump.server
             if self.username == self._pump.nickname and self.server == self._pump.server:
-                self.inbox = Inbox(self) if inbox is None else inbox
-            self.outbox = Outbox(self) if outbox is None else outbox
-            self.followers = FollowersCollection(self)
-            self.following = FollowingCollection(self)
-            self.favorites = Favorites(self)
+                self.inbox = Inbox(self)
             data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
                 proto=self._pump.protocol,
                 server=self.server,
                 username=self.username
             ))
             self.unserialize(data, obj=self)
-            return
 
         self.id = id
-        self.inbox = Inbox(self) if inbox is None else inbox
-        self.username = username
-        self.url = url
-        self.summary = summary
-        self.image = image        
+        self.username = username if username else self.username
+        self.url = url if url else self.url
+        self.summary = summary if summary else self.summary
+        self.image = image if image else self.image
+        self.outbox = Outbox(self)
+        self.followers = Followers(self)
+        self.following = Following(self)
+        self.favorites = Favorites(self)
+
 
         if display_name:
             self.display_name = display_name
@@ -123,7 +119,6 @@ class Person(AbstractModel):
 
         if me and self.id == me.id:
             self.is_self = True
-            self.outbox = Outbox(self)
 
     @property
     def webfinger(self):

@@ -24,11 +24,13 @@ class ItemList(object):
 
     previous_id = None
 
-    def __init__(self, collection, start=0, stop=None):
+    def __init__(self, collection, count=None, start=None, stop=None):
         self.collection = collection
         self.start = start
         self.stop = stop
         self.cache = list()
+        self.count = count
+        self.itercounter = 0
         
 
     def __iter__(self):
@@ -37,13 +39,16 @@ class ItemList(object):
     def next(self):
         if not self.cache:
             if not self.previous_id:
-                response = self.collection._request(offset=self.start)
+                response = self.collection._request(count=self.count, offset=self.start)
+            elif "next" in self.collection.links:
+                url = self.collection.links["next"]["href"]
+                response = self.collection._request(count=self.count, next=url)
             else:
-                response = self.collection._request(before=self.previous_id)
-            self.cache = response["items"]
+                response = None
+            self.cache = response["items"] if response else None
         data = self.cache.pop(0) if self.cache else None
 
-        if not data:
+        if not data or (self.stop and self.itercounter >= self.stop):
             raise StopIteration
 
         if not self.collection.objectTypes:
@@ -52,22 +57,17 @@ class ItemList(object):
             obj = getattr(self.collection._pump, self.collection.objectTypes)
         obj = obj.unserialize(data)
         self.previous_id = obj.id
+        self.itercounter +=1
         return obj
 
-class Collection(object):
+class Collection(AbstractModel):
     displayName = None
     totalItems = None
     objectTypes = None
     url = None
     links = dict()
+    _parent = None
     _ENDPOINT = None
-
-    def __init__(self, username, endpoint=None, totalItems=None):
-        self.author = username
-        self.totalItems = totalItems
-        self._pump = self.author._pump
-        if endpoint is not None:
-            self._ENDPOINT = endpoint
 
     @property
     def ENDPOINT(self):
@@ -79,10 +79,48 @@ class Collection(object):
     def items(self):
         return ItemList(self)
 
+    def __init__(self, parent, endpoint=None, totalItems=None):
+        self._parent = parent
+        self.totalItems = totalItems if totalItems else self.totalItems
+        self._pump = self._parent._pump
+        if endpoint is not None:
+            self._ENDPOINT = endpoint
+
+    def __repr__(self):
+        return "<Collection: {type}>".format(
+            type = self.TYPE,
+        )
+
+    def __str__(self):
+        # TODO: Do better
+        if self._parent.TYPE == "person":
+            return "{type} for {user}@{server}".format(
+                type=self.TYPE,
+                user=self._parent.username,
+                server=self._parent.server
+            )
+        else:
+            return "{name}".format(name=self.displayName if self.displayName else self.TYPE)
+
     def __iter__(self):
         return ItemList(self)
 
-    def _request(self, offset=None, count=None, since=None, before=None):
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.__getslice__(key)
+        item = ItemList(self, count=1, start=key, stop=1)
+        try:
+            return item.next()
+        except StopIteration:
+            raise IndexError
+
+    def __getslice__(self, s, e=None):
+        if type(s) is not slice:
+            s = slice(s,e)
+
+        return ItemList(self, start=s.start, stop=s.stop)
+ 
+    def _request(self, offset=None, count=None, since=None, before=None, next=None):
         params = dict()
 
         if count is not None:
@@ -96,10 +134,14 @@ class Collection(object):
         elif before is not None:
             params["before"] = before
 
-        data = self._pump.request(self.ENDPOINT, params=params)
+        if next is not None:
+            url = next
+        else:
+            url = self.ENDPOINT
 
+        print("_request: ", url, params)
+        data = self._pump.request(url, params=params)
         self.unserialize(data)
-
         return data
 
     def unserialize(self, data):
@@ -110,43 +152,47 @@ class Collection(object):
         self.links = data["links"]
 
 
-class FollowersCollection(Collection):
+class Followers(Collection):
+    """ Person's followers """
 
     @property
     def ENDPOINT(self):
         return "{proto}://{server}/api/user/{username}/followers".format(
-            proto=self.author._pump.protocol,
-            server=self.author.server,
-            username=self.author.username
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
         )
 
-class FollowingCollection(Collection):
+class Following(Collection):
+    """ People followed by Person """
 
     @property
     def ENDPOINT(self):
         return "{proto}://{server}/api/user/{username}/following".format(
-            proto=self.author._pump.protocol,
-            server=self.author.server,
-            username=self.author.username
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
         )
 
 class Favorites(Collection):
+    """ Person's favorites """
 
     @property
     def ENDPOINT(self):
         return "{proto}://{server}/api/user/{username}/favorites".format(
-            proto=self.author._pump.protocol,
-            server=self.author.server,
-            username=self.author.username
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
         )
 
 class Inbox(Collection):
+    """ Person's inbox """
 
     _ENDPOINT = "{proto}://{server}/api/user/{username}/inbox"
 
-    def __init__(self, username, endpoint=None):
-        self.author = username
-        self._pump = self.author._pump
+    def __init__(self, parent, endpoint=None):
+        self._parent = parent
+        self._pump = self._parent._pump
         if endpoint is not None:
             self._ENDPOINT = endpoint
 
@@ -154,9 +200,9 @@ class Inbox(Collection):
     @property
     def ENDPOINT(self):
         return self._ENDPOINT.format(
-            proto=self.author._pump.protocol,
-            server=self.author.server,
-            username=self.author.username
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
         )
 
     @property
@@ -165,7 +211,7 @@ class Inbox(Collection):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "direct"
-        return self.__class__(username=self.author, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
     @property
     def major(self):
@@ -173,7 +219,7 @@ class Inbox(Collection):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "major"
-        return self.__class__(username=self.author, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
     @property
     def minor(self):
@@ -181,16 +227,17 @@ class Inbox(Collection):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "minor"
-        return self.__class__(username=self.author, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
 
 class Outbox(Collection):
+    """ Person's outbox """
 
     _ENDPOINT = "{proto}://{server}/api/user/{username}/feed"
 
-    def __init__(self, username, endpoint=None):
-        self.author = username
-        self._pump = self.author._pump
+    def __init__(self, parent, endpoint=None):
+        self._parent = parent
+        self._pump = self._parent._pump
         if endpoint is not None:
             self._ENDPOINT = endpoint
 
@@ -198,9 +245,9 @@ class Outbox(Collection):
     @property
     def ENDPOINT(self):
         return self._ENDPOINT.format(
-            proto=self.author._pump.protocol,
-            server=self.author.server,
-            username=self.author.username
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
         )
 
     @property
@@ -209,7 +256,7 @@ class Outbox(Collection):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "major"
-        return self.__class__(username=self.author, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
     @property
     def minor(self):
@@ -217,5 +264,28 @@ class Outbox(Collection):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "minor"
-        return self.__class__(username=self.author, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
+
+class Comments(Collection):
+    """ A model's comments """
+
+    @property
+    def ENDPOINT(self):
+        return self._ENDPOINT
+
+
+class Likes(Collection):
+    """ A model's likes """
+
+    @property
+    def ENDPOINT(self):
+        return self._ENDPOINT
+
+
+class Shares(Collection):
+    """ A model's shares """
+
+    @property
+    def ENDPOINT(self):
+        return self._ENDPOINT
