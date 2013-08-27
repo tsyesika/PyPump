@@ -20,12 +20,12 @@ from pypump.exception import PyPumpException
 from pypump.models import AbstractModel
 
 class ItemList(object):
-    """ A collections list of items """
+    """ A feed's list of items """
 
     previous_id = None
 
-    def __init__(self, collection, count=None, start=None, stop=None):
-        self.collection = collection
+    def __init__(self, feed, count=None, start=None, stop=None):
+        self.feed = feed
         self.start = start
         self.stop = stop
         self.cache = list()
@@ -39,10 +39,10 @@ class ItemList(object):
     def next(self):
         if not self.cache:
             if not self.previous_id:
-                response = self.collection._request(count=self.count, offset=self.start)
-            elif "next" in self.collection.links:
-                url = self.collection.links["next"]["href"]
-                response = self.collection._request(count=self.count, next=url)
+                response = self.feed._request(count=self.count, offset=self.start)
+            elif "next" in self.feed.links:
+                url = self.feed.links["next"]["href"]
+                response = self.feed._request(count=self.count, next=url)
             else:
                 response = None
             self.cache = response["items"] if response else None
@@ -51,16 +51,17 @@ class ItemList(object):
         if not data or (self.stop and self.itercounter >= self.stop):
             raise StopIteration
 
-        if not self.collection.objectTypes:
-            obj = getattr(self.collection._pump, data["objectType"].capitalize())
+        if not self.feed.objectTypes:
+            obj = getattr(self.feed._pump, data["objectType"].capitalize())
         else:
-            obj = getattr(self.collection._pump, self.collection.objectTypes)
+            obj = getattr(self.feed._pump, self.feed.objectTypes)
         obj = obj.unserialize(data)
         self.previous_id = obj.id
         self.itercounter +=1
         return obj
 
-class Collection(AbstractModel):
+class Feed(AbstractModel):
+    id = None
     displayName = None
     totalItems = None
     objectTypes = None
@@ -85,9 +86,10 @@ class Collection(AbstractModel):
         self._pump = self._parent._pump
         if endpoint is not None:
             self._ENDPOINT = endpoint
+        self.id = self.ENDPOINT
 
     def __repr__(self):
-        return "<Collection: {type}>".format(
+        return "<Feed: {type}>".format(
             type = self.TYPE,
         )
 
@@ -152,7 +154,7 @@ class Collection(AbstractModel):
         self.links = data["links"]
 
 
-class Followers(Collection):
+class Followers(Feed):
     """ Person's followers """
 
     @property
@@ -163,7 +165,7 @@ class Followers(Collection):
             username=self._parent.username
         )
 
-class Following(Collection):
+class Following(Feed):
     """ People followed by Person """
 
     @property
@@ -174,7 +176,7 @@ class Following(Collection):
             username=self._parent.username
         )
 
-class Favorites(Collection):
+class Favorites(Feed):
     """ Person's favorites """
 
     @property
@@ -185,7 +187,7 @@ class Favorites(Collection):
             username=self._parent.username
         )
 
-class Inbox(Collection):
+class Inbox(Feed):
     """ Person's inbox """
 
     _ENDPOINT = "{proto}://{server}/api/user/{username}/inbox"
@@ -230,7 +232,7 @@ class Inbox(Collection):
         return self.__class__(parent=self._parent, endpoint=endpoint)
 
 
-class Outbox(Collection):
+class Outbox(Feed):
     """ Person's outbox """
 
     _ENDPOINT = "{proto}://{server}/api/user/{username}/feed"
@@ -265,4 +267,16 @@ class Outbox(Collection):
             endpoint += "/"
         endpoint += "minor"
         return self.__class__(parent=self._parent, endpoint=endpoint)
+
+
+class Lists(Feed):
+
+    @property
+    def ENDPOINT(self):
+        # TODO limited to "person" lists atm
+        return "{proto}://{server}/api/user/{username}/lists/person".format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
 

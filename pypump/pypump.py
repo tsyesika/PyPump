@@ -35,7 +35,7 @@ from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.location import Location
-from pypump.models.list import List, Public, Followers, Following
+from pypump.models.list import Public
 from pypump.models.activity import Activity
 
 class PyPump(object):
@@ -106,17 +106,8 @@ class PyPump(object):
         self.Location = Location
         self.Location._pump = self
 
-        self.List = List
-        self.List._pump = self
-
         self.Public = Public
         self.Public._pump = self
-
-        self.Following = Following
-        self.Following._pump = self
-
-        self.Followers = Followers
-        self.Followers._pump = self
 
         self.Activity = Activity
         self.Activity._pump = self

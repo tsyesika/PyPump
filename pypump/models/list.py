@@ -93,19 +93,3 @@ class Public(List):
     def __init__(self, *args, **kwargs):
         self.id = self.ENDPOINT
         super(Public, self).__init__(name=self.TYPE, *args, **kwargs)
-
-class Followers(List):
-    ENDPOINT = "api/user/{username}/followers"
-
-    def __init__(self, *args, **kwargs):
-        self.ENDPOINT = self._pump.build_url(self.ENDPOINT.format(username=self._pump.nickname))
-        self.id = self.ENDPOINT
-        super(Followers, self).__init__(name=self.TYPE, *args, **kwargs)
-
-class Following(List):
-    ENDPOINT = "api/user/{username}/following"
-
-    def __init__(self, *args, **kwargs):
-        self.ENDPOINT = self._pump.build_url(self.ENDPOINT.format(username=self._pump.nickname))
-        self.id = self.ENDPOINT
-        super(Following, self).__init__(name=self.TYPE, *args, **kwargs)

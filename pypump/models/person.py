@@ -25,8 +25,8 @@ from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.compatability import *
-from pypump.models.collection import (Followers, Following,
-                                      Favorites, Inbox, Outbox)
+from pypump.models.feed import (Followers, Following, Lists,
+                                Favorites, Inbox, Outbox)
 
 @implement_to_string
 class Person(AbstractModel):
@@ -91,7 +91,8 @@ class Person(AbstractModel):
             ))
             self.unserialize(data, obj=self)
 
-        self.id = id
+        self.id = "acct:{username}@{server}".format(username=self.username,
+                                                    server=self.server)
         self.username = username if username else self.username
         self.url = url if url else self.url
         self.summary = summary if summary else self.summary
@@ -100,6 +101,7 @@ class Person(AbstractModel):
         self.followers = Followers(self)
         self.following = Following(self)
         self.favorites = Favorites(self)
+        self.lists = Lists(self)
 
 
         if display_name:
