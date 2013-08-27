@@ -134,7 +134,10 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
                     }
             else:
                 # must be collection/list
-                people[i] = people[i].serialize(as_dict=True)
+                people[i] = {
+                    "id": people[i].id,
+                    "objectType": "collection",
+                }
 
         self._cc = people
 
