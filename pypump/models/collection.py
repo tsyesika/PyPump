@@ -266,26 +266,3 @@ class Outbox(Collection):
         endpoint += "minor"
         return self.__class__(parent=self._parent, endpoint=endpoint)
 
-
-class Comments(Collection):
-    """ A model's comments """
-
-    @property
-    def ENDPOINT(self):
-        return self._ENDPOINT
-
-
-class Likes(Collection):
-    """ A model's likes """
-
-    @property
-    def ENDPOINT(self):
-        return self._ENDPOINT
-
-
-class Shares(Collection):
-    """ A model's shares """
-
-    @property
-    def ENDPOINT(self):
-        return self._ENDPOINT
