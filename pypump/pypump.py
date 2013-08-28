@@ -37,6 +37,7 @@ from pypump.models.image import Image
 from pypump.models.location import Location
 from pypump.models.list import Public
 from pypump.models.activity import Activity
+from pypump.models.collection import Collection
 
 class PyPump(object):
 
@@ -93,6 +94,9 @@ class PyPump(object):
         # todo: change me
         self.Note = Note
         self.Note._pump = self
+
+        self.Collection = Collection
+        self.Collection._pump = self
 
         self.Comment = Comment
         self.Comment._pump = self

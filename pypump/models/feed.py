@@ -141,7 +141,7 @@ class Feed(AbstractModel):
         else:
             url = self.ENDPOINT
 
-        print("_request: ", url, params)
+        #print("_request: ", url, params)
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data
