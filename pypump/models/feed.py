@@ -141,7 +141,7 @@ class Feed(AbstractModel):
         else:
             url = self.ENDPOINT
 
-        #print("_request: ", url, params)
+        print("_request: ", url, params)
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data
@@ -274,9 +274,30 @@ class Lists(Feed):
     @property
     def ENDPOINT(self):
         # TODO limited to "person" lists atm
+        # offset and count doesnt work properly, see https://github.com/e14n/pump.io/issues/794
         return "{proto}://{server}/api/user/{username}/lists/person".format(
             proto=self._parent._pump.protocol,
             server=self._parent.server,
             username=self._parent.username
         )
+
+    def create(self, display_name, content=None):
+        """ Creates a new list """
+        activity = {
+            "verb":"create",
+            "object":{
+                "objectType":"collection",
+                "objectTypes":["person"],
+                "displayName":display_name,
+                "content":content
+            }
+        }
+        #clean this up, PyPump.FEEDURL?
+        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
+            proto = self._pump.protocol,
+            server = self._pump.server,
+            username = self._pump.nickname
+        )
+
+        self._pump.request(feed_url, method="POST", data=activity)
 

@@ -35,9 +35,8 @@ from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.location import Location
-from pypump.models.list import Public
 from pypump.models.activity import Activity
-from pypump.models.collection import Collection
+from pypump.models.collection import Collection, Public
 
 class PyPump(object):
 
@@ -111,7 +110,6 @@ class PyPump(object):
         self.Location._pump = self
 
         self.Public = Public
-        self.Public._pump = self
 
         self.Activity = Activity
         self.Activity._pump = self
@@ -185,7 +183,7 @@ class PyPump(object):
             self._server_cache[server] = consumer
 
     def request(self, endpoint, method="GET", data="", 
-                raw=False, params=None, attempts=10, client=None):
+                raw=False, params=None, attempts=3, client=None):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
@@ -225,9 +223,18 @@ class PyPump(object):
                         }
   
                 response = self._requester(requests.get, endpoint, raw, **request)
+            elif method == "DELETE":
+                request = {
+                        "params": params,
+                        "auth": client,
+                        }
+  
+                response = self._requester(requests.delete, endpoint, raw, **request)
+
 
             if response.status_code == 200:
                 # huray!
+                self.lastresponse = response.json() #debug
                 return response.json() 
 
             ##

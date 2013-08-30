@@ -60,12 +60,12 @@ class Person(AbstractModel):
 
     @property
     def outbox(self):
-        self._outbox = Outbox(self)
+        self._outbox = self._outbox or Outbox(self)
         return self._outbox
 
     @property
     def followers(self):
-        self._followers = Followers(self)
+        self._followers = self._followers or Followers(self)
         return self._followers
 
     @property

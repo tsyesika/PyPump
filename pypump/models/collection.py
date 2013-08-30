@@ -36,37 +36,41 @@ class Collection(AbstractModel):
     def ENDPOINT(self):
         return self.id
 
-    def add(self):
-        """
-        {
-        "verb": "add",
-        "object":{
-        "objectType": "person",
-        "id": "acct:user@server"
-        },
-        "target":{
-        "objectType": "collection",
-        "id": "server/api/collection/uuid"
+    def add(self, person):
+        """ Adds a person to the collection """
+        activity = {
+            "verb": "add",
+            "object": {
+                "objectType": "person",
+                "id": person.id
+            },
+            "target":{
+                "objectType": "collection",
+                "id": self.id
+            }
         }
+
+        self._post_activity(activity)
+
+    def remove(self, person):
+        """ Removes a person from the collection """
+        activity = {
+            "verb": "remove",
+            "object": {
+                "objectType": "person",
+                "id": person.id
+            },
+            "target":{
+                "objectType": "collection",
+                "id": self.id
+            }
         }
-        """
-        pass
+
+        self._post_activity(activity)
 
     def delete(self):
-        """
-        {
-        "verb": "delete",
-        "object":{
-        "objectType": "person",
-        "id": "acct:user@server"
-        },
-        "target":{
-        "objectType": "collection",
-        "id": "server/api/collection/uuid"
-        }
-        }
-        """
-        pass
+        """ Deletes the collection """
+        self._pump.request(self.id, method="DELETE")
 
     def __str__(self):
         return self.display_name
@@ -78,9 +82,18 @@ class Collection(AbstractModel):
     def unserialize(cls, data, obj=False):
         obj = obj or cls(data["id"])
         obj.display_name = data["displayName"]
+        obj.content = data["content"]
         obj.links = dict()
         for i in ["members",]:
             if i in data:
                 obj.links[i] = data[i]["url"]
 
         return obj
+
+
+class Public(object):
+    ENDPOINT = "http://activityschema.org/collection/public"
+
+    def __init__(self):
+        self.id = self.ENDPOINT
+

@@ -40,7 +40,14 @@ class AbstractModel(object):
 
     def _post_activity(self, activity):
         """ Posts a activity to feed """
-        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
+        # I think we always want to post to feed
+        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
+            proto=self._pump.protocol,
+            server=self._pump.server,
+            username=self._pump.nickname
+        )
+
+        data = self._pump.request(feed_url, method="POST", data=activity)
 
         if not data:
             return False
@@ -48,7 +55,11 @@ class AbstractModel(object):
         if "error" in data:
             raise PumpException(data["error"])
 
-        self.unserialize(data["object"], obj=self)
+        if "target" in data:
+            # we probably want to unserialize target if it's there
+            self.unserialize(data["target"], obj=self)
+        else:
+            self.unserialize(data["object"], obj=self)
 
         return True
 
