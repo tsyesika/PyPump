@@ -50,8 +50,6 @@ class Person(AbstractModel):
     summary = "" # lil bit about them =]    
     image = None # Image items
 
-    is_self = False # is this you?
-
     _outbox = None
     _followers = None
     _following = None
@@ -84,22 +82,19 @@ class Person(AbstractModel):
         return self._lists
 
     def __init__(self, webfinger=None, id="", username="", url="", summary="", 
-                 inbox=None, outbox=None, display_name="", image=None, 
-                 published=None, updated=None, location=None, me=None, 
+                 display_name="", image=None, 
+                 published=None, updated=None, location=None,
                  *args, **kwargs):
         """
         id - the ID of the person. e.g. acct:Username@server.example
         username - persons username
         url - url to profile
         summary - summary of the user
-        inbox - This is the person's inbox
-        outbox - This is the person's outbox
-        display_name - what the user want's to show up (defualt: username)
+        display_name - what the user want's to show up (default: username)
         image - image of the user (default: No image/None)
-        published - when the user joined pump (default: now)
+        published - when the user joined pump (default: None)
         updated - when the user last updated their profile (default: published)
         location - where the user resides (default: No location/None)
-        me - you, used to set is_self, if not given it assumes this person _isn't_ you
         """
         super(Person, self).__init__(*args, **kwargs)
 
@@ -122,35 +117,21 @@ class Person(AbstractModel):
             ))
             self.unserialize(data, obj=self)
 
-        self.username = username if username else self.username
-        self.url = url if url else self.url
-        self.summary = summary if summary else self.summary
-        self.image = image if image else self.image
-
-        if display_name:
-            self.display_name = display_name
-        else:
-            self.display_name = self.username
-
-        if published:
-            self.published = published
-        else:
-            self.published = datetime.now()
-        
-        if updated:
-            self.updated = updated
-        else:
-            self.updated = self.published
-
-        if me and self.id == me.id:
-            self.is_self = True
+        self.username = username or self.username
+        self.url = url or self.url
+        self.summary = summary or self.summary
+        self.image = image or self.image
+        self.display_name = display_name or self.display_name
+        self.published = published or self.published
+        self.updated = updated or self.updated
+        self.isme = (self.username == self._pump.nickname and self.server == self._pump.server)
 
     @property
     def webfinger(self):
         return self.id[5:]
 
     def follow(self): 
-        """ You follow this user """
+        """ Follow person """
         activity = {
             "verb":"follow",
             "object":{
@@ -159,18 +140,10 @@ class Person(AbstractModel):
             }
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        self.unserialize(data, obj=self) 
-        return True
+        self._post_activity(activity)
 
     def unfollow(self):
-        """ Unfollow a user """
+        """ Unfollow person """
         activity = {
             "verb":"stop-following",
             "object":{
@@ -179,21 +152,13 @@ class Person(AbstractModel):
             }
         }
 
-        endpoint = self.ENDPOINT.format(username=self._pump.nickname)
-
-        data = self._pump.request(endpoint, method="POST", data=activity)
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        self.unserialize(data, obj=self) 
-        return True
+        self._post_activity(activity)
 
     def __repr__(self):
         return "<Person: {person}>".format(person=self.id.replace("acct:", ""))
 
     def __str__(self):
-        return self.__repr__()
+        return self.display_name or self.username or self.webfinger
 
     @classmethod
     def unserialize_service(cls, data, obj):
@@ -220,23 +185,16 @@ class Person(AbstractModel):
 
         self = cls() if obj is None else obj
 
-        try:
-            username = data["preferredUsername"]
-            display = data["displayName"]
-        except KeyError:
-            # This will be fixed properly soon.
-            return None
-
         self.id = data["id"]
         self.server = self.id.replace("acct:", "").split("@")[-1]
-        self.username = username
-        self.display_name = display
+        self.username = data["preferredUsername"] if "preferredUsername" in data else None
+        self.display_name = data["displayName"] if "displayName" in data else None
         self.url = data["links"]["self"]["href"]
         self.summary = data["summary"] if "summary" in data else ""
-        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
+        self.updated = parse(data["updated"]) if "updated" in data else None
         self.published = parse(data["published"]) if "published" in data else self.updated
-        self.me = True if "acct:%s@%s" % (cls._pump.nickname, cls._pump.server) == self.id else False
+        self.updated = parse(data["updated"]) if "updated" in data else self.published
+        self.isme = "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id
         self.location = cls._pump.Location.unserialize(data["location"]) if "location" in data else None
 
-        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
         return self
