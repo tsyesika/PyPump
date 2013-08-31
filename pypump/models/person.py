@@ -154,6 +154,23 @@ class Person(AbstractModel):
 
         self._post_activity(activity)
 
+    def update(self, display_name=None, summary=None):
+        """ Updates person's name and bio """
+        display_name = display_name or self.display_name
+        summary = summary or self.summary
+
+        activity = {
+            "verb":"update",
+            "object":{
+                "id":self.id,
+                "objectType":self.objectType,
+                "displayName":display_name,
+                "summary":summary
+            }
+        }
+
+        self._post_activity(activity)
+
     def __repr__(self):
         return "<Person: {person}>".format(person=self.id.replace("acct:", ""))
 
