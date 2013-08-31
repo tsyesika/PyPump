@@ -76,7 +76,7 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
             self.updated = self.published
         self.deleted = deleted
         self.liked = liked
-        self.author = self._pump.Person(self._pump.nickname) if author is None else author
+        self.author = self._pump.me if author is None else author
 
     def set_to(self, people):
         """ Allows you to set/change who it's to """
