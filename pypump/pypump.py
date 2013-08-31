@@ -89,6 +89,11 @@ class PyPump(object):
             self.token = token
             self.token_secret = token_secret
 
+        self.me = self.Person("{username}@{server}".format(
+            username = self.nickname,
+            server = self.server)
+        )
+
     def populate_models(self):
         # todo: change me
         self.Note = Note
@@ -231,10 +236,9 @@ class PyPump(object):
   
                 response = self._requester(requests.delete, endpoint, raw, **request)
 
-
+            self._lastresponse = response # for debug purposes
             if response.status_code == 200:
                 # huray!
-                self.lastresponse = response.json() #debug
                 return response.json() 
 
             ##

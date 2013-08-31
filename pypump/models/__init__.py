@@ -38,7 +38,7 @@ class AbstractModel(object):
         if pypump:
             self._pump = pypump
 
-    def _post_activity(self, activity):
+    def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
         # I think we always want to post to feed
         feed_url = "{proto}://{server}/api/user/{username}/feed".format(
@@ -55,11 +55,13 @@ class AbstractModel(object):
         if "error" in data:
             raise PumpException(data["error"])
 
-        if "target" in data:
-            # we probably want to unserialize target if it's there
-            self.unserialize(data["target"], obj=self)
-        else:
-            self.unserialize(data["object"], obj=self)
+        if unserialize:
+            if "target" in data:
+                # we probably want to unserialize target if it's there
+                # true for collection.{add,remove}
+                self.unserialize(data["target"], obj=self)
+            else:
+                self.unserialize(data["object"], obj=self)
 
         return True
 
@@ -105,7 +107,7 @@ class AbstractModel(object):
 
         return data
 
-from pypump.models.collection import Collection
+from pypump.models.feed import Feed
 
 class Likeable(object):
     """
@@ -120,7 +122,7 @@ class Likeable(object):
     def likes(self):
         """ Gets who's liked this object """
         endpoint = self._links["likes"]
-        return Collection(self, endpoint)
+        return Feed(self, endpoint)
 
     favorites = likes
 
@@ -170,7 +172,7 @@ class Commentable(object):
     def comments(self):
         """ Fetches the comment objects for the models """
         endpoint = self._links["replies"]
-        return Collection(self, endpoint)
+        return Feed(self, endpoint)
 
     def comment(self, comment):
         """ Posts a comment object on model """
@@ -190,7 +192,7 @@ class Shareable(object):
     def shares(self):
         """ Fetches the people who've shared the model """
         endpoint = self._links["shares"]
-        return Collection(self, endpoint)
+        return Feed(self, endpoint)
 
     def share(self):
         """ Shares the model """

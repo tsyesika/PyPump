@@ -141,7 +141,7 @@ class Feed(AbstractModel):
         else:
             url = self.ENDPOINT
 
-        print("_request: ", url, params)
+        #print("feed._request: url: {0}, params: {1}".format(url, params))
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data
@@ -292,12 +292,6 @@ class Lists(Feed):
                 "content":content
             }
         }
-        #clean this up, PyPump.FEEDURL?
-        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
-            proto = self._pump.protocol,
-            server = self._pump.server,
-            username = self._pump.nickname
-        )
 
-        self._pump.request(feed_url, method="POST", data=activity)
+        self._post_activity(activity, unserialize=False)
 

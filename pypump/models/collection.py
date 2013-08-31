@@ -82,7 +82,7 @@ class Collection(AbstractModel):
     def unserialize(cls, data, obj=False):
         obj = obj or cls(data["id"])
         obj.display_name = data["displayName"]
-        obj.content = data["content"]
+        obj.content = data["content"] if "content" in data else None
         obj.links = dict()
         for i in ["members",]:
             if i in data:
