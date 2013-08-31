@@ -19,62 +19,57 @@ from pypump.compatability import *
 from pypump.exception import PyPumpException 
 from pypump.models import AbstractModel
 
-class InfiniteFeed(object):
-    
-    previous = None
+class ItemList(object):
+    """ A feed's list of items """
 
-    def __init__(self, feed, offset=None, count=20, stop=None, step=1):
+    previous_id = None
+
+    def __init__(self, feed, count=None, start=None, stop=None):
         self.feed = feed
-        self.count = count
-        self.maxcount = 200 # upper API limit for requested items
-        self.offset = offset
-        self.cache = list()
-        self.counter = 0
+        self.start = start
         self.stop = stop
-        self.step = step
+        self.cache = list()
+        self.count = count
+        self.itercounter = 0
+        
 
     def __iter__(self):
         return self
 
     def next(self):
         if not self.cache:
-            if self.previous is None:
-                # first iteration
-                response = self.feed._request(count=self.count, offset=self.offset)
+            if not self.previous_id:
+                response = self.feed._request(count=self.count, offset=self.start)
+            elif "next" in self.feed.links:
+                url = self.feed.links["next"]["href"]
+                response = self.feed._request(count=self.count, next=url)
             else:
-                response = self.feed._request(count=self.count, before=self.previous)
-            self.cache = response['items']
+                response = None
+            self.cache = response["items"] if response else None
         data = self.cache.pop(0) if self.cache else None
 
-        if not data or (self.stop and self.counter >= self.stop):
-            # we're done
+        if not data or (self.stop and self.itercounter >= self.stop):
             raise StopIteration
 
-        if self.counter > self.count:
-            # raise count if we iterate a lot
-            if self.counter < self.maxcount:
-                self.count = self.counter
-            else:
-                self.count = self.maxcount
-        
-        obj = getattr(self.feed._pump, self.feed.OBJECT_TYPES)
-        obj = obj.unserialize(data)
-        self.previous = obj.id
-        self.counter += 1
-        if (self.counter-1) % self.step == 0:
-            return obj
+        if not self.feed.objectTypes:
+            obj = getattr(self.feed._pump, data["objectType"].capitalize())
         else:
-            return self.next()
+            obj = getattr(self.feed._pump, self.feed.objectTypes)
+        obj = obj.unserialize(data)
+        self.previous_id = obj.id
+        self.itercounter +=1
+        return obj
 
-@implement_to_string
 class Feed(AbstractModel):
-
-    _count = None
-    _offset = None
-    actor = None
-    author = actor
-
+    id = None
+    displayName = None
+    totalItems = None
+    objectTypes = None
+    url = None
+    links = dict()
+    _parent = None
     _ENDPOINT = None
+
     @property
     def ENDPOINT(self):
         if self._ENDPOINT is None:
@@ -82,12 +77,151 @@ class Feed(AbstractModel):
         return self._ENDPOINT
 
     @property
+    def items(self):
+        return ItemList(self)
+
+    def __init__(self, parent, endpoint=None, totalItems=None):
+        self._parent = parent
+        self.totalItems = totalItems if totalItems else self.totalItems
+        self._pump = self._parent._pump
+        if endpoint is not None:
+            self._ENDPOINT = endpoint
+        self.id = self.ENDPOINT
+
+    def __repr__(self):
+        return "<Feed: {type}>".format(
+            type = self.TYPE,
+        )
+
+    def __str__(self):
+        # TODO: Do better
+        if self._parent.TYPE == "person":
+            return "{type} for {user}@{server}".format(
+                type=self.TYPE,
+                user=self._parent.username,
+                server=self._parent.server
+            )
+        else:
+            return "{name}".format(name=self.displayName if self.displayName else self.TYPE)
+
+    def __iter__(self):
+        return ItemList(self)
+
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.__getslice__(key)
+        item = ItemList(self, count=1, start=key, stop=1)
+        try:
+            return item.next()
+        except StopIteration:
+            raise IndexError
+
+    def __getslice__(self, s, e=None):
+        if type(s) is not slice:
+            s = slice(s,e)
+
+        return ItemList(self, start=s.start, stop=s.stop)
+ 
+    def _request(self, offset=None, count=None, since=None, before=None, next=None):
+        params = dict()
+
+        if count is not None:
+            params["count"] = count
+
+        if offset is not None:
+            params["offset"] = offset
+
+        if since is not None:
+            params["since"] = since
+        elif before is not None:
+            params["before"] = before
+
+        if next is not None:
+            url = next
+        else:
+            url = self.ENDPOINT
+
+        #print("feed._request: url: {0}, params: {1}".format(url, params))
+        data = self._pump.request(url, params=params)
+        self.unserialize(data)
+        return data
+
+    def unserialize(self, data):
+        self.displayName = data["displayName"]
+        self.totalItems = data["totalItems"]
+        self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
+        self.url = data["url"]
+        self.links = data["links"]
+
+
+class Followers(Feed):
+    """ Person's followers """
+
+    @property
+    def ENDPOINT(self):
+        return "{proto}://{server}/api/user/{username}/followers".format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
+
+class Following(Feed):
+    """ People followed by Person """
+
+    @property
+    def ENDPOINT(self):
+        return "{proto}://{server}/api/user/{username}/following".format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
+
+class Favorites(Feed):
+    """ Person's favorites """
+
+    @property
+    def ENDPOINT(self):
+        return "{proto}://{server}/api/user/{username}/favorites".format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
+
+class Inbox(Feed):
+    """ Person's inbox """
+
+    _ENDPOINT = "{proto}://{server}/api/user/{username}/inbox"
+
+    def __init__(self, parent, endpoint=None):
+        self._parent = parent
+        self._pump = self._parent._pump
+        if endpoint is not None:
+            self._ENDPOINT = endpoint
+
+
+    @property
+    def ENDPOINT(self):
+        return self._ENDPOINT.format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
+
+    @property
+    def direct(self):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        endpoint += "direct"
+        return self.__class__(parent=self._parent, endpoint=endpoint)
+
+    @property
     def major(self):
         endpoint = self.ENDPOINT
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "major"
-        return self.__class__(username=self.actor, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
     @property
     def minor(self):
@@ -95,117 +229,69 @@ class Feed(AbstractModel):
         if not endpoint.endswith("/"):
             endpoint += "/"
         endpoint += "minor"
-        return self.__class__(username=self.actor, endpoint=endpoint)
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
-    def __init__(self, username=None, endpoint=None):
+
+class Outbox(Feed):
+    """ Person's outbox """
+
+    _ENDPOINT = "{proto}://{server}/api/user/{username}/feed"
+
+    def __init__(self, parent, endpoint=None):
+        self._parent = parent
+        self._pump = self._parent._pump
         if endpoint is not None:
             self._ENDPOINT = endpoint
-        
-        if isinstance(username, self._pump.Person):
-            self.actor = username
-            return
 
-        self.actor = self._pump.Person(username)        
 
-    def __getitem__(self, key):
-        """ Adds Feed[<feed>] """
-        if isinstance(key, slice):
-            return self.__getslice__(key)
-        count = 1
-        offset = key
-        inf = InfiniteFeed(self, offset=offset, count=count, stop=count)
-        return inf.next()
+    @property
+    def ENDPOINT(self):
+        return self._ENDPOINT.format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
 
-    def __getslice__(self, s, e=None):
-        """ Grab multiple items from feed """
-        if type(s) is not slice:
-            s = slice(s,e)
+    @property
+    def major(self):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        endpoint += "major"
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
-        if s.start and s.stop:
-            count = s.stop - s.start
-            offset = s.start
-        elif s.stop:
-            count = s.stop
-            offset = None
-        elif s.start:
-            offset = s.start
-            count = None
-        if s.step:
-            step = s.step
-        else:
-            step = 1
+    @property
+    def minor(self):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        endpoint += "minor"
+        return self.__class__(parent=self._parent, endpoint=endpoint)
 
-        return InfiniteFeed(self, offset=offset, stop=count, step=step)
 
-    def __iter__(self):
-        """ Produces an iterator """
-        return InfiniteFeed(self) 
-    
-    def __repr__(self):
-        if self.author:
-            return "<{type}: {actor}>".format(
-                    actor=self.actor,
-                    type=self.TYPE,
-                    )
-        else:
-            return "<{type}>".format(type=self.TYPE)
-    
-    def __str__(self):
-        return str(repr(self))
+class Lists(Feed):
 
-    def _request(self, offset=None, count=None, since=None, before=None):
-        """ Makes a request """
-        param = dict()
+    @property
+    def ENDPOINT(self):
+        # TODO limited to "person" lists atm
+        # offset and count doesnt work properly, see https://github.com/e14n/pump.io/issues/794
+        return "{proto}://{server}/api/user/{username}/lists/person".format(
+            proto=self._parent._pump.protocol,
+            server=self._parent.server,
+            username=self._parent.username
+        )
 
-        if count is not None:
-            param["count"] = count
+    def create(self, display_name, content=None):
+        """ Creates a new list """
+        activity = {
+            "verb":"create",
+            "object":{
+                "objectType":"collection",
+                "objectTypes":["person"],
+                "displayName":display_name,
+                "content":content
+            }
+        }
 
-        if offset is not None:
-            param["offset"] = offset
+        self._post_activity(activity, unserialize=False)
 
-        if since is not None:
-            param["since"] = before
-        elif before is not None:
-            param["before"] = before
-
-        if self.actor is None:
-            # oh dear, we gotta raise an error
-            raise PyPumpException("No actor defined on {feed}".format(feed=self))
-
-        data = self._pump.request(self.ENDPOINT, params=param)
-
-        return data
-
-    @classmethod
-    def unserialize(cls, data, user=None):
-        """ Produce a List from JOSN data """
-        if type(data) == list:
-            items = data
-        elif type(data) == dict:
-            items = data["items"]
-        else:
-            raise Exception("Unknown type: {type} ('{data}')".format(
-                    type=type(data),
-                    data=data
-                    ))
-
-        unserialized_items = list()
-
-        for v in items:
-            # do we know about it?
-            obj_type = cls.OBJECT_TYPES
-
-            # todo: make less hacky
-            try:
-                obj = getattr(cls._pump, obj_type)
-            except AttributeError:
-                continue # what is this stange type of which you are?
-            
-            try:
-                real_obj = obj.unserialize(v)
-                if real_obj is not None:
-                    unserialized_items.append(real_obj)
-            except TypeError:
-                pass
-
-        return unserialized_items

@@ -38,9 +38,16 @@ class AbstractModel(object):
         if pypump:
             self._pump = pypump
 
-    def _post_activity(self, activity):
+    def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
-        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
+        # I think we always want to post to feed
+        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
+            proto=self._pump.protocol,
+            server=self._pump.server,
+            username=self._pump.nickname
+        )
+
+        data = self._pump.request(feed_url, method="POST", data=activity)
 
         if not data:
             return False
@@ -48,7 +55,13 @@ class AbstractModel(object):
         if "error" in data:
             raise PumpException(data["error"])
 
-        self.unserialize(data["object"], obj=self)
+        if unserialize:
+            if "target" in data:
+                # we probably want to unserialize target if it's there
+                # true for collection.{add,remove}
+                self.unserialize(data["target"], obj=self)
+            else:
+                self.unserialize(data["object"], obj=self)
 
         return True
 
@@ -94,6 +107,8 @@ class AbstractModel(object):
 
         return data
 
+from pypump.models.feed import Feed
+
 class Likeable(object):
     """
         Provides the model with the like and unlike methods as well as
@@ -107,12 +122,7 @@ class Likeable(object):
     def likes(self):
         """ Gets who's liked this object """
         endpoint = self._links["likes"]
-        likes = self._pump.request(endpoint, raw=True)
-        likes_obj = []
-        for l in likes.get("items", likes_obj):
-            likes_obj.append(self._pump.Person.unserialize(l))
-        
-        return likes_obj
+        return Feed(self, endpoint)
 
     favorites = likes
 
@@ -148,6 +158,7 @@ class Likeable(object):
         """ Unfavourite model """
         return self.unlike(verb="unfavorite")
 
+
 class Commentable(object):
     """
         Provides the model with the comment method allowing you to post
@@ -161,16 +172,13 @@ class Commentable(object):
     def comments(self):
         """ Fetches the comment objects for the models """
         endpoint = self._links["replies"]
-        comments = self._pump.request(endpoint, raw=True)
-        comments_obj = []
-        for c in comments.get("items", comments_obj):
-            comments_obj.append(self._pump.Comment.unserialize(c))
-        return comments_obj
+        return Feed(self, endpoint)
 
     def comment(self, comment):
         """ Posts a comment object on model """
         comment.inReplyTo = self
         comment.send()
+
 
 class Shareable(object):
     """
@@ -184,11 +192,7 @@ class Shareable(object):
     def shares(self):
         """ Fetches the people who've shared the model """
         endpoint = self._links["shares"]
-        shares = self._pump.request(endpoint, raw=True)
-        shares_obj = []
-        for p in shares.get("items", shares_obj):
-            shares_obj.append(self._pump.Person.unserialize(p))
-        return shares_obj
+        return Feed(self, endpoint)
 
     def share(self):
         """ Shares the model """
