@@ -29,8 +29,6 @@ from pypump.models import (AbstractModel, Likeable, Shareable, Commentable,
 @implement_to_string
 class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     
-    VERB = "post"
-    
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(
@@ -153,7 +151,7 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
         self._cc = tuple(self._cc)
 
         activity = {
-            "verb":self.VERB,
+            "verb":"post",
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,

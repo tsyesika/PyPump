@@ -25,8 +25,6 @@ from pypump.compatability import *
 @implement_to_string
 class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
-    VERB = "post"
-
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(
@@ -82,7 +80,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     def send(self):
         activity = {
-            "verb":self.VERB,
+            "verb":"post",
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,
