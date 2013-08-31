@@ -54,7 +54,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
-        self.author = self._pump.Person(self._pump.nickname) if author is None else author
+        self.author = self._pump.me if author is None else author
         self._links = dict() if links is None else links
 
     def __repr__(self):
