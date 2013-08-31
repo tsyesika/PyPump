@@ -25,6 +25,8 @@ from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.compatability import *
+from pypump.models.feed import (Followers, Following, Lists,
+                                Favorites, Inbox, Outbox)
 
 @implement_to_string
 class Person(AbstractModel):
@@ -48,10 +50,38 @@ class Person(AbstractModel):
     summary = "" # lil bit about them =]    
     image = None # Image items
 
-    inbox = None
-    outbox = None
-
     is_self = False # is this you?
+
+    _outbox = None
+    _followers = None
+    _following = None
+    _favorites = None
+    _lists = None
+
+    @property
+    def outbox(self):
+        self._outbox = self._outbox or Outbox(self)
+        return self._outbox
+
+    @property
+    def followers(self):
+        self._followers = self._followers or Followers(self)
+        return self._followers
+
+    @property
+    def following(self):
+        self._following = self._following or Following(self)
+        return self._following
+
+    @property
+    def favorites(self):
+        self._favorites = self._favorites or Favorites(self)
+        return self._favorites
+
+    @property
+    def lists(self):
+        self._lists = self._lists or Lists(self)
+        return self._lists
 
     def __init__(self, webfinger=None, id="", username="", url="", summary="", 
                  inbox=None, outbox=None, display_name="", image=None, 
@@ -84,22 +114,18 @@ class Person(AbstractModel):
                 # they probably just gave a username, the assumption is it's on our server!
                 self.username, self.server = webfinger, self._pump.server
             if self.username == self._pump.nickname and self.server == self._pump.server:
-                self.inbox = self._pump.Inbox(self) if inbox is None else inbox
-            self.outbox = self._pump.Outbox(self) if outbox is None else outbox
+                self.inbox = Inbox(self)
             data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
                 proto=self._pump.protocol,
                 server=self.server,
                 username=self.username
             ))
             self.unserialize(data, obj=self)
-            return
 
-        self.id = id
-        self.inbox = self._pump.Inbox(self) if inbox is None else inbox
-        self.username = username
-        self.url = url
-        self.summary = summary
-        self.image = image        
+        self.username = username if username else self.username
+        self.url = url if url else self.url
+        self.summary = summary if summary else self.summary
+        self.image = image if image else self.image
 
         if display_name:
             self.display_name = display_name
@@ -118,7 +144,6 @@ class Person(AbstractModel):
 
         if me and self.id == me.id:
             self.is_self = True
-            self.outbox = self._pump.Outbox(self)
 
     @property
     def webfinger(self):
