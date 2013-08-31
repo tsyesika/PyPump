@@ -73,7 +73,7 @@ class Collection(AbstractModel):
         self._pump.request(self.id, method="DELETE")
 
     def __str__(self):
-        return self.display_name
+        return str(repr(self))
 
     def __repr__(self):
         return "<{type}: {id}>".format(type=self.TYPE, id=self.id)
@@ -81,7 +81,7 @@ class Collection(AbstractModel):
     @classmethod
     def unserialize(cls, data, obj=False):
         obj = obj or cls(data["id"])
-        obj.display_name = data["displayName"]
+        obj.display_name = data["displayName"] if "displayName" in data else None
         obj.content = data["content"] if "content" in data else None
         obj.links = dict()
         for i in ["members",]:
