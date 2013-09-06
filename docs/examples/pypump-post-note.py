@@ -69,7 +69,7 @@ class App(object):
             note_title = ""
         note_content = self.args.note_content
         mynote = self.pump.Note(note_title + note_content)
-        mynote.to = self.pump.Followers
+        mynote.to = self.pump.me.followers
         mynote.cc = self.pump.Public
         if mynote.send():
             return mynote.id

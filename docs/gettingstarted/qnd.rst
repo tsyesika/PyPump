@@ -22,8 +22,7 @@ First time lets do all the oauth stuff::
 
 Super, next, I wanna see my inbox::
 
-    >>> me = pump.Person("me@my.server.org")
-    >>> my_inbox = me.inbox
+    >>> my_inbox = pump.me.inbox
     >>> for activity in my_inbox[:20]:
     ...     print activity
 
@@ -102,13 +101,13 @@ But hold on though, that only sent it to followers? What gives::
 
     >>> awesome_pump = pump.Note("PyPump is really awesome!")
     >>> awesome_pump.to = pump.Public
-    >>> awesome_pump.cc = (pump.Followers, pump.Following, pump.Person("MyFriend@server.com"))
+    >>> awesome_pump.cc = (pump.me.followers, pump.Person("MyFriend@server.com"))
     >>> awesome_pump.send()
 
 Oh cool that's sent to all my friends, So can i make my own lists::
 
-    >>> for my_list in pump.List.all():
-    ...    print my_list.name
+    >>> for my_list in pump.me.lists:
+    ...    print my_list
     Coworkers
     Family
     Friends
@@ -116,13 +115,13 @@ Oh cool that's sent to all my friends, So can i make my own lists::
 Oh are all those my lists that are defined. How do I send a note to them?::
 
     >>> new_note = pump.Note("Work sucks!")
-    >>> new_note.to = pump.List("Coworkers")
-    >>> new_note.cc = pump.List("Friends)
+    >>> new_note.to = pump.me.lists["Coworkers"]
+    >>> new_note.cc = pump.me.lists["Friends"]
 
 So, can i send something to all of of the groups I made? Yep::
 
     >>> another_note = pump.Note("This really goes to everyone in my groups?")
-    >>> another_note.to = pump.List.all()
+    >>> another_note.to = list(pump.me.lists)
     >>> another_note.cc = (pump.Person("moggers87@microca.st"), pump.Person("cwebber@identi.ca"))
     >>> another_note.send()
 

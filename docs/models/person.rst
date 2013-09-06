@@ -46,18 +46,32 @@ This object represents a user on pump.io.
 	        >>> a_person.url
             'https://pump.megworld.co.uk/Tsyesika'
 
+    .. py:attribute:: inbox
+
+        This is a iterable feed of inbox items (only available for the logged in person (Feed object)::
+
+            >>> list(PyPump.me.inbox)
+            [<Activity>, <Activity>]
+
+    .. py:attribute:: outbox
+
+        This is a iterable feed of outbox items (Feed object)::
+
+            >>> list(a_person.outbox)
+            [<Activity>, <Activity>]
+
     .. py:attribute:: followers
 
-        This is a list of their followers (list)::
+        This is a iterable feed of followers (Feed object)::
 
-            >>> a_person.followers
-            [<Person: person1@yep.org>, <Person: person2@pumpit.com>, <Person: someoneelse@example.com>
+            >>> list(a_person.followers)
+            [<Person: person1@yep.org>, <Person: person2@pumpit.com>, <Person: someoneelse@example.com>]
 
     .. py:attribute:: following
 
-        This is a list of all the people they're following::
+        This is a iterable feed of all the people they're following::
 
-            >>> a_person.following
+            >>> list(a_person.following)
             [<Person: TheBestPersonEvah@pump.megworld.co.uk>]
 
     .. py:attribute:: location
