@@ -73,7 +73,7 @@ class Collection(AbstractModel):
         self._pump.request(self.id, method="DELETE")
 
     def __str__(self):
-        return str(repr(self))
+        return self.display_name or self.id
 
     def __repr__(self):
         return "<{type}: {id}>".format(type=self.TYPE, id=self.id)

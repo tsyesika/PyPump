@@ -295,3 +295,12 @@ class Lists(Feed):
 
         self._post_activity(activity, unserialize=False)
 
+    def __getitem__(self, key):
+        if isinstance(key, string_types):
+            lists = list(self)
+            for i in lists:
+                if i.display_name == key:
+                    return i
+        else:
+            return super(Lists, self).__getitem__(key)
+
