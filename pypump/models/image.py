@@ -52,7 +52,7 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
             type=self.TYPE,
-            url=self.actor.webfinger)
+            webfinger=self.actor.webfinger)
 
     def __str__(self):
         return str(repr(self))
