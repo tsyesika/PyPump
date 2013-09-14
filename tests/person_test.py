@@ -32,7 +32,7 @@ class PersonTest(PyPumpTest):
             },
             "favorites": {
                 "url": "http://example.com/api/user/TestUser/favorites",
-                "totalItems": 7,
+                "totalItems": 720,
             },
             "location": {
                 "objectType": "place",
@@ -71,7 +71,30 @@ class PersonTest(PyPumpTest):
         self.assertEquals(person.id, self.request["object"]["id"])
         
         # Ensure object type is correct
-        self.assertEquals(person.objectType, "person")
+        self.assertEquals(person.objectType, self.request["object"]["objectType"])
+
+    def test_unfollow(self):
+        """ Test that you can unfollow a person """
+        person = self.pump.Person("TestUser")
+
+        self.response.data = {"verb": "stop-following", "object": self.response.data}
+        person.unfollow()
+
+        self.assertEquals(self.request["verb"], "stop-following")
+        self.assertEquals(self.request["object"]["id"], person.id)
+        self.assertEquals(self.request["object"]["objectType"], person.objectType) 
+
+    def test_minimal_unserialize(self):
+        """ Test the smallest amount of data can be given to unserialize """
+        self.response.data = {
+            "id": "acct:TestUser@example.com",
+            "objectType": "person",
+        }
+
+        person = self.pump.Person("TestUser")
+
+        self.assertEquals(self.response["id"], person.id)
+        self.assertEquals(self.response["objectType"], person.objectType)
 
     def test_unserialize(self):
         """ Tests person unserialization is successful """
