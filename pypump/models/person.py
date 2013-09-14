@@ -198,6 +198,7 @@ class Person(AbstractModel):
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Person object """
         cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
         if data.get("objectType", "") == "service":
             return cls.unserialize_service(data, obj)
 
@@ -205,10 +206,10 @@ class Person(AbstractModel):
 
         self.id = data["id"]
         self.server = self.id.replace("acct:", "").split("@")[-1]
-        self.username = data["preferredUsername"] if "preferredUsername" in data else None
-        self.display_name = data["displayName"] if "displayName" in data else None
-        self.url = data["url"]
-        self.summary = data["summary"] if "summary" in data else ""
+        self.username = data.get("preferredUsername", None)
+        self.display_name = data.get("displayName", None)
+        self.url = data.get("url", None)
+        self.summary = data.get("summary", None)
         self.updated = parse(data["updated"]) if "updated" in data else None
         self.published = parse(data["published"]) if "published" in data else self.updated
         self.updated = parse(data["updated"]) if "updated" in data else self.published
