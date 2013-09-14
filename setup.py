@@ -16,7 +16,6 @@ setup(
         install_requires=[
                 "requests-oauthlib>=0.3.0",
                 "requests>=1.2.0",
-                "nose",
                 "python-dateutil>=2.1",
                 ],
         classifiers=[
