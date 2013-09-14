@@ -41,6 +41,8 @@ class TestPump(PyPump):
             )
 
         self._response = kwargs.pop("response")
+        self._testcase = kwargs.pop("testcase")
+
         new_kwargs.update(kwargs)
 
         super(TestPump, self).__init__(*args, **new_kwargs)
@@ -55,6 +57,8 @@ class TestPump(PyPump):
 
     def _requester(self, *args, **kwargs):
         """ Instead of requesting to a pump server we'll return the data we've been given """
+        self._testcase.request = Response(kwargs.get("data", None))
+        self._testcase.params = kwargs.get("params", None)
         return self._response
 
 class PyPumpTest(unittest.TestCase):
@@ -71,6 +75,10 @@ class PyPumpTest(unittest.TestCase):
         """ This will setup everything needed to test PyPump """
         # response from server, any string will be treated as a json string
         self.response = Response({})
+        
+        # These will be set when a request is made
+        self.request = None
+        self.params = None
 
         # make the pump object for testing.
-        self.pump = TestPump(response=self.response)
+        self.pump = TestPump(response=self.response, testcase=self)

@@ -3,7 +3,8 @@ from tests import PyPumpTest
 
 class PersonTest(PyPumpTest):
     
-    def test_unserialize(self):
+    def setUp(self):
+        super(PersonTest, self).setUp()
         self.response.data = {
             "id": "acct:TestUser@example.com",
             "preferredUsername": "TestUser",
@@ -54,7 +55,26 @@ class PersonTest(PyPumpTest):
                 "items": [],
             }
         }
+    
+    def test_follow(self):
+        """ Tests that pypump sends correct data when attempting to follow a person """
+        person = self.pump.Person("TestUser")
+        
+        # PyPump now expects the object returned back to it
+        self.response.data = {"verb": "follow", "object": self.response.data}
+        person.follow()
 
+        # Test verb is 'follow'
+        self.assertEquals(self.request["verb"], "follow")
+
+        # Test ID is the correct ID
+        self.assertEquals(person.id, self.request["object"]["id"])
+        
+        # Ensure object type is correct
+        self.assertEquals(person.objectType, "person")
+
+    def test_unserialize(self):
+        """ Tests person unserialization is successful """
         # Make the person object
         person = self.pump.Person("TestUser")
 
