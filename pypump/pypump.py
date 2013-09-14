@@ -55,13 +55,15 @@ class PyPump(object):
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
                 token_secret=None, verifier_callback=None,
-                callback_uri="oob", loglevel="error"):
+                callback_uri="oob", loglevel="error", debug=False):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
 
             Don't forget if you want to use https ensure the secure flag is True
         """
+
+        self.debug = debug
 
         # First, we need to setup the logger
         logginglevel = getattr(logging, loglevel.upper(), None)
@@ -98,10 +100,11 @@ class PyPump(object):
             self.token = token
             self.token_secret = token_secret
 
-        self.me = self.Person("{username}@{server}".format(
-            username = self.nickname,
-            server = self.server)
-        )
+        if not self.debug:
+            self.me = self.Person("{username}@{server}".format(
+                username = self.nickname,
+                server = self.server)
+            )
 
     def populate_models(self):
         # todo: change me

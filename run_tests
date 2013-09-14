@@ -1,12 +1,3 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-TEST_DIR="tests/"
-
-echo "Running PyPump tests!"
-
-if [ -e $TEST_DIR ]; then
-    nosetests -w $TEST_DIR
-else
-    echo $TEST_DIR." could not be found."
-fi
-
+python -m unittest discover -s tests/ -p "*_test.py"

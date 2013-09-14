@@ -60,7 +60,8 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     @classmethod
     def unserialize(cls, data, obj=None):
         cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-        image_id = data["id"]
+
+        image_id = data.get("id", None)
         if "fullImage" in data:
             full_image = data["fullImage"]["url"]
             full_image = cls(id=image_id, url=full_image)
@@ -73,7 +74,7 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
         else:
             image = None
 
-        author = cls._pump.Person.unserialize(data["author"])
+        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
 
         links = dict()
         for i in ["likes", "replies", "shares"]:
@@ -84,20 +85,22 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
                     links[i] = data[i]["url"]
 
         for i in [full_image, image]:
+            if i is None:
+                continue
             i.actor = author
             i.published = parse(data["published"])
             i.updated = parse(data["updated"])
             i.display_name = data.get("displayName", str())
 
         # set the full and normal image on each one
-        full_image.image = image
-        full_image.original = full_image
+        if full_image is not None:
+            full_image.image = image
+            full_image.original = full_image
+            full_image._links = links
 
-        image.image = image
-        image.original = full_image
-
-        # and finally the links
-        full_image._links = links
-        image._links = links
+        if image is not None:
+            image.image = image
+            image.original = full_image
+            image._links = links
 
         return image 
