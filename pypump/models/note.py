@@ -174,6 +174,8 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     @classmethod
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Note object """
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
         id = data.get("id", None)
         content = data.get("content", u"")
 

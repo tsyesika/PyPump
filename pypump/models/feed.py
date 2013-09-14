@@ -147,6 +147,7 @@ class Feed(AbstractModel):
         return data
 
     def unserialize(self, data):
+        self.debug("unserialize({params})", params={"self": self, "data": data})
         self.displayName = data["displayName"]
         self.totalItems = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None

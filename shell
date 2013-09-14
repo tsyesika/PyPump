@@ -157,10 +157,17 @@ if __name__ == "__main__":
             print("The file I should have been writing to is {0}".format(store_path))
         sys.exit(0)
 
+    loglevel = "warn"
+    webfinger = None
+    for ll in sys.argv:
+        if ll.startswith("--loglevel="):
+            loglevel = ll[len("--loglevel="):]
+
+        if not ll.startswith("-"):
+            webfinger = ll
+
     # go find the client info if it exists
     db = open_database(store_path)
-
-    webfinger = "" if len(sys.argv) <= 1 else sys.argv[1]
 
     if db == dict() and webfinger is None:
         print("You must specify a webfinger")
@@ -199,6 +206,7 @@ if __name__ == "__main__":
             client_type=db[webfinger].get("client_type", "native"),
             token=db[webfinger].get("token", None),
             token_secret=db[webfinger].get("token_secret", None),
+            loglevel=loglevel
             )
     
 

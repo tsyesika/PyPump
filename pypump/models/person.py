@@ -197,6 +197,8 @@ class Person(AbstractModel):
     @classmethod
     def unserialize(cls, data, obj=None):
         """ Goes from JSON -> Person object """
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
         if data.get("objectType", "") == "service":
             return cls.unserialize_service(data, obj)
 

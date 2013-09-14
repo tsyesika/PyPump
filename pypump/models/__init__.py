@@ -16,6 +16,7 @@
 ##
 
 import json
+import logging
 
 class AbstractModel(object):
 
@@ -64,6 +65,34 @@ class AbstractModel(object):
                 self.unserialize(data["object"], obj=self)
 
         return True
+
+    @classmethod
+    def debug(cls, message, data=None, params=None, **kwargs):
+        """ Logs as {class}: message.
+            
+            Data expects a string or serializable type, if it's a serializable
+            it will convert it to json and prettyify for printing.
+
+            Params MUST be a dictionary and will be printed:
+            {key}={value}, {key}={value}, ...
+            
+            message MUST contain {data} and {params} if you specify them
+        """
+
+        formatting = {}
+
+        if data is not None and isinstance(data, dict):
+            data = json.dumps(data, indent=4, separators=(',', ': '))
+            formatting["data"] = data
+        
+        if params is not None and isinstance(params, dict):
+            params = ", ".join(["%s=%s" % item for item in dict(params).items()])
+            formatting["params"] = params
+
+        formatting.update(kwargs)
+        message = cls.__name__ + ": " + message.format(**formatting)
+        logging.debug(formatting)
+
 
     def serialize(self, *args, **kwargs):
         """ Changes it from obj -> JSON """

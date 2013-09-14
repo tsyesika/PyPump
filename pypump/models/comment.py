@@ -96,6 +96,8 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     @classmethod
     def unserialize(cls, data, obj=None):
         """ from JSON -> Comment """
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
         content = data["content"] if "content" in data else ""
         id = data["id"] if "id" in data else ""
         published = parse(data["published"])

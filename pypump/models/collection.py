@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License 
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
+import logging
 import json
 
 from pypump.models import AbstractModel
@@ -80,6 +81,8 @@ class Collection(AbstractModel):
 
     @classmethod
     def unserialize(cls, data, obj=False):
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
         obj = obj or cls(data["id"])
         obj.display_name = data["displayName"] if "displayName" in data else None
         obj.content = data["content"] if "content" in data else None
@@ -87,7 +90,6 @@ class Collection(AbstractModel):
         for i in ["members",]:
             if i in data:
                 obj.links[i] = data[i]["url"]
-
         return obj
 
 

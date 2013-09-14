@@ -59,6 +59,7 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
 
     @classmethod
     def unserialize(cls, data, obj=None):
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
         image_id = data["id"]
         if "fullImage" in data:
             full_image = data["fullImage"]["url"]

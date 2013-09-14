@@ -39,8 +39,9 @@ class Location(AbstractModel):
 
     @classmethod
     def unserialize(cls, data, obj=None):
-        name = data.get("displayName", None)
-        
+        cls.debug("unserialieze({params})", params={"cls": cls, "data": data, "obj": obj})
+
+        name = data.get("displayName", None)        
         if ("lon" in data and "lat" in data):
             longitude = float(data["lon"])
             latitude = float(data["lat"])

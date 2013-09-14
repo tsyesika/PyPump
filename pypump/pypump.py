@@ -21,6 +21,7 @@
 from __future__ import absolute_import
 
 import json
+import logging
 
 import requests
 from requests_oauthlib import OAuth1
@@ -54,13 +55,21 @@ class PyPump(object):
     def __init__(self, server, key=None, secret=None, 
                 client_name="", client_type="native", token=None, 
                 token_secret=None, verifier_callback=None,
-                callback_uri="oob"):
+                callback_uri="oob", loglevel="error"):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
 
             Don't forget if you want to use https ensure the secure flag is True
         """
+
+        # First, we need to setup the logger
+        logginglevel = getattr(logging, loglevel.upper(), None)
+        if logginglevel is None:
+            raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
+        logging.basicConfig(level=logginglevel)
+
+
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
         self.verifier_callback = verifier_callback
         self.client_name = client_name
@@ -273,6 +282,11 @@ class PyPump(object):
         else:
             url = endpoint
 
+        logging.debug("Request to {url} with {params}".format(
+                url=url,
+                params=",".join(["%s=%s" % (k, v) for k, v in kwargs.items()])
+                ))
+
         try:
             response = fnc(url, **kwargs)
             return response
@@ -373,6 +387,8 @@ class PyPump(object):
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
             }
 
+        logging.debug("Recieved request tokens. token: %s secret: %s" % data.values())
+
         return data
 
     def request_access(self, **auth_info):
@@ -392,6 +408,8 @@ class PyPump(object):
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
         self.__server_tokens = None # clean up code.
+
+        self.debug("Recieved access tokens. token: %s secret: %s" % (self.token, self.token_secret))
 
 class WebPump(PyPump):
     """

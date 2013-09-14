@@ -15,8 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from dateutil.parser import parse as parse
 import re
+
+from dateutil.parser import parse as parse
 from pypump.models import AbstractModel
 from pypump.compatability import *
 
@@ -108,6 +109,7 @@ class Activity(AbstractModel):
     @classmethod
     def unserialize(cls, data):
         """ From JSON -> Activity object """
+        cls.debug("unserialize({params})", params={"cls": cls, "data": data})
 
         dataobj = data["object"]
         obj_type = dataobj["objectType"].capitalize()
