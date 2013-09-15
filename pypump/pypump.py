@@ -390,8 +390,6 @@ class PyPump(object):
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
             }
 
-        logging.debug("Recieved request tokens. token: %s secret: %s" % data.values())
-
         return data
 
     def request_access(self, **auth_info):
@@ -411,8 +409,6 @@ class PyPump(object):
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
         self.__server_tokens = None # clean up code.
-
-        self.debug("Recieved access tokens. token: %s secret: %s" % (self.token, self.token_secret))
 
 class WebPump(PyPump):
     """
