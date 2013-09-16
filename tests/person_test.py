@@ -73,6 +73,30 @@ class PersonTest(PyPumpTest):
         # Ensure object type is correct
         self.assertEquals(person.objectType, self.request["object"]["objectType"])
 
+    def test_update(self):
+        """ Test that a update works """
+        person = self.pump.Person("TestUser")
+        person.summary = "New summary!"
+        person.display_name = "New user"
+        
+        self.response.data = {
+            "verb": "update",
+            "object": {
+                "id": person.id,
+                "summary": person.summary,
+                "displayName": person.display_name,
+                "objectType": "person",
+            },
+        }
+
+        person.update()
+
+        self.assertEqual(self.request["verb"], "update")
+        self.assertEqual(self.request["object"]["id"], person.id)
+        self.assertEqual(self.request["object"]["objectType"], person.objectType)
+        self.assertEqual(self.request["object"]["summary"], person.summary)
+        self.assertEqual(self.request["object"]["displayName"], person.display_name)
+
     def test_unfollow(self):
         """ Test that you can unfollow a person """
         person = self.pump.Person("TestUser")
