@@ -15,6 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 import datetime
+import mimetypes
+
 from dateutil.parser import parse
 
 from pypump.compatability import *
@@ -37,7 +39,7 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(self._pump.nickname)
 
-    def __init__(self, id, url, content=None, actor=None, width=None, height=None,
+    def __init__(self, id=None, url=None, content=None, actor=None, width=None, height=None,
                  published=None, updated=None, links=None, *args, **kwargs):
         super(Image, self).__init__(self, *args, **kwargs)
 
@@ -50,6 +52,9 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
         self._links = dict() if links is None else links
 
     def __repr__(self):
+        if self.actor is None:
+            return "<{type}>".format(type=self.TYPE)
+
         return "<{type} by {webfinger}>".format(
             type=self.TYPE,
             webfinger=self.actor.webfinger)
@@ -57,6 +62,17 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def __str__(self):
         return str(repr(self))
 
+    def from_filename(self, filename):
+        """ Uploads an image from a filename """
+        mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
+        image = self._pump.request(
+                "/api/user/{0}/uploads".format(self._pump.nickname),
+                method="POST",
+                data=open(filename).read(),
+                content_type=mimetype
+                )
+
+        return self.unserialize(image, obj=self)
     @classmethod
     def unserialize(cls, data, obj=None):
         cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})

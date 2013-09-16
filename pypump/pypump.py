@@ -200,7 +200,8 @@ class PyPump(object):
             self._server_cache[server] = consumer
 
     def request(self, endpoint, method="GET", data="", 
-                raw=False, params=None, attempts=3, client=None):
+                raw=False, params=None, attempts=3, client=None,
+                content_type="application/json"):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
@@ -216,8 +217,6 @@ class PyPump(object):
             # we actually need to make it into a json object as that's what pump.io deals with.
             data = json.dumps(data)
 
-        data = to_unicode(data)
-
         if not raw:
             url = self.build_url(endpoint)
         else:
@@ -228,7 +227,7 @@ class PyPump(object):
             if method == "POST":
                 request = {
                         "auth": client,
-                        "headers": {"Content-Type": "application/json"},
+                        "headers": {"Content-Type": content_type},
                         "params": params,
                         "data": data,
                         }
