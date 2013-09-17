@@ -60,7 +60,7 @@ class OpenID(object):
 
         self.name = client_name
         self.type = application_type
-        self.logo_url = self.logo_url if logo_url is not None else logo_url
+        self.logo_url = logo_url or self.logo_url
 
     def register_client(self):
         """ Sends a client registration request """
@@ -70,7 +70,7 @@ class OpenID(object):
             "application_type":self.type,
         }
 
-        if self.logo_url:
+        if self.logo_url is not None:
             data["logo_url"] = self.logo_url
 
         data = json.dumps(data)
