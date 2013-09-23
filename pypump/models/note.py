@@ -23,11 +23,11 @@ from pypump.exception.PumpException import PumpException
 
 from pypump.compatability import *
 
-from pypump.models import (AbstractModel, Likeable, Shareable, Commentable,
-                           Deleteable)
+from pypump.models import (AbstractModel, Postable, Likeable, Shareable, 
+                           Commentable, Deleteable)
 
 @implement_to_string
-class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
+class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
     @property
     def ENDPOINT(self):
@@ -44,24 +44,18 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     liked = False
     author = None
 
-    # where to?
-    _to = list()
-    _cc = list()
-    
-
     _links = dict()
 
-    def __init__(self, content, id=None, to=None, cc=None, 
-                 published=None, updated=None, links=None, 
-                 deleted=False, liked=False, author=None, *args, **kwargs):
+    def __init__(self, content, id=None, published=None, updated=None, 
+                 links=None,  deleted=False, liked=False, author=None,
+                 *args, **kwargs):
+
         super(Note, self).__init__(*args, **kwargs)
 
         self._links = links if links else dict()
 
         self.id = id if id else None
         self.content = content
-        self._to = list() if to is None else to
-        self._cc = list() if cc is None else cc
 
         if published:
             self.published = published
@@ -72,95 +66,24 @@ class Note(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
             self.updated = updated
         else:
             self.updated = self.published
+
         self.deleted = deleted
         self.liked = liked
         self.author = self._pump.me if author is None else author
 
-    def set_to(self, people):
-        """ Allows you to set/change who it's to """
-        # check if it's been locked
-        if isinstance(self._to, tuple):
-            raise ImmutableError("people", self)
 
-        if type(people) == tuple:
-            people = list(people)
-        if type(people) != list:
-            people = [people]
-
-        for i, item in enumerate(people):
-            if is_class(item):
-                people[i] = item()
-
-            if isinstance(people[i], self._pump.Person):
-                people[i] = {
-                    "id": people[i].id,
-                    "objectType": people[i].objectType,
-                }
-            else:
-                # must be collection/list
-                people[i] = {
-                    "id": people[i].id,
-                    "objectType": "collection",
-                }
-
-        self._to = people
-
-    def get_to(self):
-        return self._to
-
-    to = property(fset=set_to, fget=get_to)
-
-    def set_cc(self, people):
-        """ Allows you to set/change who it's cc'ed to """
-        # check if it's been locked
-        if isinstance(self._cc, tuple):
-            raise ImmutableError("people", self)
-
-        if type(people) == tuple:
-            people = list(people)
-        if type(people) != list:
-            people = [people]
-
-        for i, item in enumerate(people):
-            if is_class(item):
-                people[i] = item()
-
-            if isinstance(people[i], self._pump.Person):
-                people[i] = {
-                    "id": people[i].id,
-                    "objectType": people[i].objectType,
-                    }
-            else:
-                # must be collection/list
-                people[i] = {
-                    "id": people[i].id,
-                    "objectType": "collection",
-                }
-
-        self._cc = people
-
-    def get_cc(self):
-        return self._cc
-
-    cc = property(fset=set_cc, fget=get_cc)
-
-    def send(self):
-        """ Sends the post to the server """
-        # lock the info in
-        self._to = tuple(self._to)
-        self._cc = tuple(self._cc)
-
-        activity = {
+    def serialize(self):
+        """ Convers the post to JSON """
+        data = super(Note, self).serialize()
+        data.update({
             "verb":"post",
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,
-            },
-            "to": self._to,
-            "cc": self._cc,
-        }
+            }
+        })
 
-        return self._post_activity(activity)
+        return data
 
     def __repr__(self):
         return "<{type} by {name}>".format(

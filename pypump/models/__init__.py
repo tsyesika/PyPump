@@ -18,6 +18,8 @@
 import json
 import logging
 
+from pypump.compatability import *
+
 class AbstractModel(object):
 
     @property
@@ -38,33 +40,6 @@ class AbstractModel(object):
         """ Sets up pump instance """
         if pypump:
             self._pump = pypump
-
-    def _post_activity(self, activity, unserialize=True):
-        """ Posts a activity to feed """
-        # I think we always want to post to feed
-        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
-            proto=self._pump.protocol,
-            server=self._pump.server,
-            username=self._pump.nickname
-        )
-
-        data = self._pump.request(feed_url, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        if unserialize:
-            if "target" in data:
-                # we probably want to unserialize target if it's there
-                # true for collection.{add,remove}
-                self.unserialize(data["target"], obj=self)
-            else:
-                self.unserialize(data["object"], obj=self)
-
-        return True
 
     @classmethod
     def debug(cls, message, data=None, params=None, **kwargs):
@@ -93,21 +68,6 @@ class AbstractModel(object):
         message = cls.__name__ + ": " + message.format(**formatting)
         logging.debug(formatting)
 
-
-    def serialize(self, *args, **kwargs):
-        """ Changes it from obj -> JSON """
-        data = {}
-        for item in dir(self):
-            if item.startswith("_"):
-                continue # we don't want
-            
-            value =  getattr(self, item)
-            
-            # we need to double check we're not in mapper
-            item = self.remap(item)
-            data[item] = value
-
-        return json.dumps(data, *args, **kwargs)
 
     @staticmethod
     def unserialize(self, data, *args, **kwargs):
@@ -262,3 +222,112 @@ class Deleteable(object):
 
         self._post_activity(activity)
 
+class Postable(object):
+    """ Adds methods to set to, cc and soon bcc as well as .send() """
+    
+    _to = list()
+    _cc = list()
+    _bto = list()
+    _bcc = list()
+
+    def _post_activity(self, activity, unserialize=True):
+        """ Posts a activity to feed """
+        # I think we always want to post to feed
+        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
+            proto=self._pump.protocol,
+            server=self._pump.server,
+            username=self._pump.nickname
+        )
+
+        data = self._pump.request(feed_url, method="POST", data=activity)
+
+        if not data:
+            return False
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        if unserialize:
+            if "target" in data:
+                # we probably want to unserialize target if it's there
+                # true for collection.{add,remove}
+                self.unserialize(data["target"], obj=self)
+            else:
+                self.unserialize(data["object"], obj=self)
+
+        return True
+
+    def _set_people(self, people):
+        """ Sets who the object is sent to """
+        if hasattr(people, "__iter__"):
+            people = list(people)
+        else:
+            people = [people]
+
+        for i, person in enumerate(people):
+            if is_class(person):
+                people[i] = person()
+            
+            if isinstance(people[i], self._pump.Person):
+                people[i] = {
+                    "id": people[i].id,
+                    "objectType": people[i].objectType,
+                }
+            else:
+                # must be a collection
+                people[i] = {
+                    "id": people[i].id,
+                    "objectType": "collection", 
+                }
+
+        return people
+    # to
+    def _get_to(self):
+        return self._to
+
+    def _set_to(self, *args, **kwargs):
+        self._to = self._set_people(*args, **kwargs)
+
+    to = property(fget=_get_to, fset=_set_to)
+
+    # cc
+    def _get_cc(self):
+        return self._cc
+
+    def _set_cc(self, *args, **kwargs):
+        self._cc = self._set_people(*args, **kwargs)
+
+    cc = property(fget=_get_cc, fset=_set_cc)
+
+    # bto
+    def _get_bto(self):
+        return self.bto
+
+    def _set_bto(self, *args, **kwargs):
+        self._bto = self._set_people(*args, **kwargs)
+
+    bto = property(fget=_get_bto, fset=_set_bto)
+
+    # bcc
+    def _get_bcc(self):
+        return self.bcc
+    def _set_bcc(self, *args, **kwargs):
+        self._bcc = self._set_people(*args, **kwargs)
+
+    bcc = property(fget=_get_bcc, fset=_set_bcc)
+
+    def serialize(self, *args, **kwargs):
+        # now add the to, cc, bto, bcc
+        data = {
+            "to": self._to,
+            "cc": self._cc,
+            "bto": self._bto,
+            "bcc": self._bcc,
+        }
+
+        return data
+
+    def send(self):
+        """ Sends the data to the server """
+        data = self.serialize()
+        self._post_activity(data)

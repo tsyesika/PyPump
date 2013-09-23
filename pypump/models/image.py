@@ -21,11 +21,11 @@ import os
 from dateutil.parser import parse
 
 from pypump.compatability import *
-from pypump.models import (AbstractModel, Likeable, Commentable, Deleteable,
-                           Shareable)
+from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
+                           Deleteable, Shareable)
 
 @implement_to_string
-class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
+class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
     url = None
     actor = None
@@ -85,6 +85,8 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
             "verb": "post",
             "object": image,
         }
+
+        data.update(self.serialize())
 
         # send it to the feed
         image_feed = self._pump.request(
