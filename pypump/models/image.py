@@ -78,7 +78,20 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
                 headers=headers,
                 )
 
-        return self.unserialize(image, obj=self)
+        self.unserialize(image, obj=self)
+
+        # now send it to the feed
+        data = {
+            "verb": "post",
+            "object": image,
+        }
+
+        # send it to the feed
+        image_feed = self._pump.request(
+                "/api/user/{0}/feed".format(self._pump.nickname),
+                method="POST",
+                data=data,
+                )
 
     @classmethod
     def unserialize(cls, data, obj=None):
