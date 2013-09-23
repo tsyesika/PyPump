@@ -16,6 +16,7 @@
 ##
 import datetime
 import mimetypes
+import os
 
 from dateutil.parser import parse
 
@@ -62,17 +63,23 @@ class Image(AbstractModel, Likeable, Shareable, Commentable, Deleteable):
     def __str__(self):
         return str(repr(self))
 
-    def from_filename(self, filename):
+    def from_file(self, filename):
         """ Uploads an image from a filename """
         mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
+        headers = {
+            "Content-Type": mimetype,
+            "Content-Length": os.path.getsize(filename),
+        }
+        
         image = self._pump.request(
                 "/api/user/{0}/uploads".format(self._pump.nickname),
                 method="POST",
                 data=open(filename).read(),
-                content_type=mimetype
+                headers=headers,
                 )
 
         return self.unserialize(image, obj=self)
+
     @classmethod
     def unserialize(cls, data, obj=None):
         cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})

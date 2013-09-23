@@ -201,7 +201,7 @@ class PyPump(object):
 
     def request(self, endpoint, method="GET", data="", 
                 raw=False, params=None, attempts=3, client=None,
-                content_type="application/json"):
+                headers=None):
         """ This will make a request to <self.protocol>://<self.server>/<endpoint> with oauth headers
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
@@ -222,12 +222,14 @@ class PyPump(object):
         else:
             url = endpoint
 
+        headers = headers or {"Content-Type": "application/json"}
+
         lastresponse = ""
         for attempt in range(attempts):
             if method == "POST":
                 request = {
                         "auth": client,
-                        "headers": {"Content-Type": content_type},
+                        "headers": headers,
                         "params": params,
                         "data": data,
                         }
@@ -236,6 +238,7 @@ class PyPump(object):
                 request = {
                         "params": params,
                         "auth": client,
+                        "headers": headers,
                         }
   
                 response = self._requester(requests.get, endpoint, raw, **request)
@@ -243,6 +246,7 @@ class PyPump(object):
                 request = {
                         "params": params,
                         "auth": client,
+                        "headers": headers,
                         }
   
                 response = self._requester(requests.delete, endpoint, raw, **request)
