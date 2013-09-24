@@ -45,13 +45,17 @@ class OpenID(object):
     pypump = None
     server = None
     request = None
-    type = None
     logo_url = None
+    contacts = None
+    redirect_uri = None
+    type = None
 
     consumer = None
 
 
-    def __init__(self, server, client_name, application_type, logo_url=None):
+    def __init__(self, server, application_type, client_name=None,
+                 contacts=None, redirect_uri=None, logo_url=None):
+
         # we don't want the webfinger just the server
         if "@" in server:
             self.server = server.split("@", 1)[1]
@@ -61,18 +65,31 @@ class OpenID(object):
         self.name = client_name
         self.type = application_type
         self.logo_url = logo_url or self.logo_url
+        self.contacts = contacts or list()
+        self.redirect_uri = redirect_uri or list()
 
     def register_client(self):
         """ Sends a client registration request """
         data = {
             "type":"client_associate", 
-            "application_name":self.name,
             "application_type":self.type,
         }
+
+        # Add optional params
+        if self.name is not None:
+            data["application_name"] = self.name
 
         if self.logo_url is not None:
             data["logo_url"] = self.logo_url
 
+        if self.contacts:
+            # space seporated list
+            data["contacts"] = " ".join(self.contacts)
+
+        if self.redirect_uri:
+            data["redirect_uri"] = " ".join(self.redirect_uri)
+
+        # Convert to JSON  and send
         data = json.dumps(data)
 
         if self.server is None:

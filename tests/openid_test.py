@@ -19,7 +19,6 @@ class OpenIDTest(PyPumpTest):
         """ Test client registeration with minimal amount of data """
         openid = OpenID(
             server="TestUser@example.com",
-            client_name="PyPumpTestClient",
             application_type="native",
         )
 

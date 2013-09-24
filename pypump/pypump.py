@@ -53,7 +53,7 @@ class PyPump(object):
     _server_cache = dict()
 
     def __init__(self, server, key=None, secret=None, 
-                client_name="", client_type="native", token=None, 
+                client_name=None, client_type="native", token=None, 
                 token_secret=None, verifier_callback=None,
                 callback_uri="oob", loglevel="error", debug=False):
         """
