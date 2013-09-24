@@ -30,7 +30,8 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
     url = None
     actor = None
     author = actor
-    summary = ""
+    summary = None
+    title = None
     id = None
     updated = None
     published = None
@@ -40,11 +41,14 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(self._pump.nickname)
 
-    def __init__(self, id=None, url=None, content=None, actor=None, width=None, height=None,
-                 published=None, updated=None, links=None, *args, **kwargs):
+    def __init__(self, id=None, url=None, title=None, content=None, actor=None,
+                 width=None, height=None, published=None, updated=None, 
+                 links=None, *args, **kwargs):
+
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
+        self.title = title
         self.content = content
         self.actor = self.actor if actor is None else actor
         self.url = url
@@ -70,12 +74,20 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             "Content-Type": mimetype,
             "Content-Length": os.path.getsize(filename),
         }
+
+        params = {"qqfile": filename}
+
+        if self.title is not None:
+            params["title"] = self.title
+        if self.content is not None:
+            params["description"] = self.content
         
         image = self._pump.request(
                 "/api/user/{0}/uploads".format(self._pump.nickname),
                 method="POST",
                 data=open(filename).read(),
                 headers=headers,
+                params=params,
                 )
 
         self.unserialize(image, obj=self)
