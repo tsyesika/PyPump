@@ -41,6 +41,33 @@ class AbstractModel(object):
         if pypump:
             self._pump = pypump
 
+    def _post_activity(self, activity, unserialize=True):
+        """ Posts a activity to feed """
+        # I think we always want to post to feed
+        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
+            proto=self._pump.protocol,
+            server=self._pump.server,
+            username=self._pump.nickname
+        )
+
+        data = self._pump.request(feed_url, method="POST", data=activity)
+
+        if not data:
+            return False
+
+        if "error" in data:
+            raise PumpException(data["error"])
+
+        if unserialize:
+            if "target" in data:
+                # we probably want to unserialize target if it's there
+                # true for collection.{add,remove}
+                self.unserialize(data["target"], obj=self)
+            else:
+                self.unserialize(data["object"], obj=self)
+
+        return True
+
     @classmethod
     def debug(cls, message, data=None, params=None, **kwargs):
         """ Logs as {class}: message.
@@ -229,33 +256,6 @@ class Postable(object):
     _cc = list()
     _bto = list()
     _bcc = list()
-
-    def _post_activity(self, activity, unserialize=True):
-        """ Posts a activity to feed """
-        # I think we always want to post to feed
-        feed_url = "{proto}://{server}/api/user/{username}/feed".format(
-            proto=self._pump.protocol,
-            server=self._pump.server,
-            username=self._pump.nickname
-        )
-
-        data = self._pump.request(feed_url, method="POST", data=activity)
-
-        if not data:
-            return False
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        if unserialize:
-            if "target" in data:
-                # we probably want to unserialize target if it's there
-                # true for collection.{add,remove}
-                self.unserialize(data["target"], obj=self)
-            else:
-                self.unserialize(data["object"], obj=self)
-
-        return True
 
     def _set_people(self, people):
         """ Sets who the object is sent to """
