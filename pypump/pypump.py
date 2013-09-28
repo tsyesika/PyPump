@@ -71,7 +71,7 @@ class PyPump(object):
         logginglevel = getattr(logging, loglevel.upper(), None)
         if logginglevel is None:
             raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
-        logging.basicConfig(level=logginglevel)
+        _log.setLevel(logginglevel)
 
 
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
