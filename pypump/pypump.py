@@ -261,8 +261,8 @@ class PyPump(object):
             ##
             if response.content != lastresponse:
                 lastresponse = response.content
-                print response
-                print response.content
+                print(response)
+                print(response.content)
  
             if response.status_code == 400:
                 # can't do much
