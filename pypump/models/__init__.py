@@ -19,6 +19,7 @@ import json
 import logging
 
 from pypump.compatability import *
+from pypump.exception import PyPumpException
 
 _log = logging.getLogger(__name__)
 
