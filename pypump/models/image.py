@@ -31,7 +31,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
     actor = None
     author = actor
     summary = None
-    title = None
+    display_name = None
     id = None
     updated = None
     published = None
@@ -41,20 +41,20 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(self._pump.nickname)
 
-    def __init__(self, id=None, url=None, title=None, content=None, actor=None,
-                 width=None, height=None, published=None, updated=None, 
-                 links=None, *args, **kwargs):
+    def __init__(self, id=None, url=None, display_name=None, content=None, 
+                 actor=None, width=None, height=None, published=None,
+                 updated=None, links=None, *args, **kwargs):
 
         super(Image, self).__init__(self, *args, **kwargs)
 
         self.id = id
-        self.title = title
+        self.display_name = display_name
         self.content = content
-        self.actor = self.actor if actor is None else actor
+        self.actor = actor or self.actor
         self.url = url
         self.published = published
         self.updated = updated
-        self._links = dict() if links is None else links
+        self._links = links or []
 
     def __repr__(self):
         if self.actor is None:
@@ -77,8 +77,8 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         params = {"qqfile": filename}
 
-        if self.title is not None:
-            params["title"] = self.title
+        if self.display_name is not None:
+            params["title"] = self.display_name
         if self.content is not None:
             params["description"] = self.content
         
@@ -107,9 +107,14 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 data=data,
                 )
 
+        print image_feed
+        self.unserialize(image_feed, obj=self)
+        return self
+
     @classmethod
     def unserialize(cls, data, obj=None):
         cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
+
 
         image_id = data.get("id", None)
         if "fullImage" in data:
@@ -120,7 +125,12 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         if "image" in data:
             image = data["image"]["url"]
-            image = cls(id=image_id, url=image)
+            if obj is None:
+                image = cls(id=image_id, url=image)
+            else:
+                obj.id = image_id
+                obj.url = image
+                image = obj
         else:
             image = None
 
@@ -140,9 +150,10 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             i.actor = author
             i.published = parse(data["published"])
             i.updated = parse(data["updated"])
-            i.display_name = data.get("displayName", str())
-
-        # set the full and normal image on each one
+            i.display_name = data.get("displayName", u"")
+            i.summary = data.get("summary", u"")
+ 
+       # set the full and normal image on each one
         if full_image is not None:
             full_image.image = image
             full_image.original = full_image
