@@ -11,3 +11,4 @@ Programming Contributors
 - Sibi / psibi (https://github.com/psibi)
 - Jonas Haraldsson / kabniel (https://github.com/kabniel)
 - Benjamin Ooghe-Tabanou / RouxRC (https://github.com/RouxRC)
+- Matt Molyneaux / moggers87 (https://github.com/moggers87)
