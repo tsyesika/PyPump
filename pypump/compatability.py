@@ -66,7 +66,7 @@ elif py_version == 3:
 else:
     def to_bytes(string):
         """ not implemented """
-        raise NotImplemented("Python version %s has no support for to_bytes" % py_version)
+        raise NotImplementedError("Python version %s has no support for to_bytes" % py_version)
 
 
 # types for isinstance(<x>, <type>)
@@ -91,7 +91,7 @@ elif py_version == 3:
         return cls
 else:
     def implement_to_string(cls):
-        raise NotImplemented("Python version %s has no support for implement_to_string" % py_version)
+        raise NotImplementedError("Python version %s has no support for implement_to_string" % py_version)
 
 # is class?
 def is_class(cls):
@@ -107,7 +107,7 @@ elif py_version == 3:
     parse_qs = urllib.parse.parse_qs
 else:
     def parse_qs(*args, **kwargs):
-        raise NotImplemented("Python version %s has no support for parse_qs" % py_version)
+        raise NotImplementedError("Python version %s has no support for parse_qs" % py_version)
 
 # raw_input vs. input
 if py_version == 3:

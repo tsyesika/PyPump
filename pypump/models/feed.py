@@ -77,7 +77,7 @@ class Feed(AbstractModel):
     @property
     def ENDPOINT(self):
         if self._ENDPOINT is None:
-            raise NotImplemented("Definition of the ENDPOINT must be done by subclass")
+            raise NotImplementedError("Definition of the ENDPOINT must be done by subclass")
         return self._ENDPOINT
 
     @property
