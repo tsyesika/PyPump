@@ -68,10 +68,10 @@ class PyPump(object):
         self.debug = debug
 
         # First, we need to setup the logger
-        logginglevel = getattr(_log, loglevel.upper(), None)
+        logginglevel = getattr(logging, loglevel.upper(), None)
         if logginglevel is None:
             raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
-        _log.basicConfig(level=logginglevel)
+        logging.basicConfig(level=logginglevel)
 
 
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
