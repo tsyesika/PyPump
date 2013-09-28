@@ -21,6 +21,8 @@ import logging
 import requests
 from compatability import *
 
+_log = logging.getLogger(__name__)
+
 class OpenIDException(Exception):
     pass
 
@@ -118,7 +120,7 @@ class OpenID(object):
         if "error" in server_data:
             raise OpenIDException(server_data["error"])
 
-        logging.debug("Client registration recieved: {id} {secret} {expire}".format(
+        _log.debug("Client registration recieved: {id} {secret} {expire}".format(
                 id=server_data["client_id"],
                 secret=server_data["client_secret"],
                 expire=server_data["expires_at"]

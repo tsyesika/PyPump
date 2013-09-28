@@ -14,7 +14,9 @@
 # You should have received a copy of the GNU General Public License 
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
+
 import datetime
+import logging
 import mimetypes
 import os
 
@@ -23,6 +25,8 @@ from dateutil.parser import parse
 from pypump.compatability import *
 from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
                            Deleteable, Shareable)
+
+_log = logging.getLogger(__name__)
 
 @implement_to_string
 class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
@@ -107,7 +111,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 data=data,
                 )
 
-        print(image_feed)
+        _log.debug(image_feed)
         self.unserialize(image_feed, obj=self)
         return self
 

@@ -39,6 +39,8 @@ from pypump.models.location import Location
 from pypump.models.activity import Activity
 from pypump.models.collection import Collection, Public
 
+_log = logging.getLogger(__name__)
+
 class PyPump(object):
 
     PARAM_VERIFER = to_bytes("oauth_verifier")
@@ -66,10 +68,10 @@ class PyPump(object):
         self.debug = debug
 
         # First, we need to setup the logger
-        logginglevel = getattr(logging, loglevel.upper(), None)
+        logginglevel = getattr(_log, loglevel.upper(), None)
         if logginglevel is None:
             raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
-        logging.basicConfig(level=logginglevel)
+        _log.basicConfig(level=logginglevel)
 
 
         openid.OpenID.pypump = self # pypump uses PyPump.requester.
@@ -261,8 +263,8 @@ class PyPump(object):
             ##
             if response.content != lastresponse:
                 lastresponse = response.content
-                print(response)
-                print(response.content)
+                _log.error(response)
+                _log.error(response.content)
  
             if response.status_code == 400:
                 # can't do much
@@ -288,7 +290,7 @@ class PyPump(object):
         else:
             url = endpoint
 
-        logging.debug("Request to {url} with {params}".format(
+        _log.debug("Request to {url} with {params}".format(
                 url=url,
                 params=",".join(["%s=%s" % (k, v) for k, v in kwargs.items()])
                 ))

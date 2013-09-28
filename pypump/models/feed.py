@@ -15,9 +15,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+import logging
+
 from pypump.compatability import *
 from pypump.exception import PyPumpException 
 from pypump.models import AbstractModel
+
+_log = logging.getLogger(__name__)
 
 class ItemList(object):
     """ A feed's list of items """
@@ -141,7 +145,7 @@ class Feed(AbstractModel):
         else:
             url = self.ENDPOINT
 
-        #print("feed._request: url: {0}, params: {1}".format(url, params))
+        _log.debug("feed._request: url: {0}, params: {1}".format(url, params))
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data

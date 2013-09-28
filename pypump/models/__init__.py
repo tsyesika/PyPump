@@ -20,6 +20,8 @@ import logging
 
 from pypump.compatability import *
 
+_log = logging.getLogger(__name__)
+
 class AbstractModel(object):
 
     @property
@@ -93,7 +95,7 @@ class AbstractModel(object):
 
         formatting.update(kwargs)
         message = cls.__name__ + ": " + message.format(**formatting)
-        logging.debug(formatting)
+        _log.debug(formatting)
 
 
     @staticmethod
