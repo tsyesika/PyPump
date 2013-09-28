@@ -107,7 +107,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 data=data,
                 )
 
-        print image_feed
+        print(image_feed)
         self.unserialize(image_feed, obj=self)
         return self
 
