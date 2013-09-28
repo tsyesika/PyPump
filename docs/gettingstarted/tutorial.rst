@@ -95,7 +95,7 @@ The inbox supports python-style index slicing::
 We could print out each of the most recent activities like so::
 
     >>> for activity in recent_activities:
-    >>>     print activity
+    >>>     print(activity)
     <Activity: Evan Prodromou posted a note>
     <Activity: jrobb posted a note>
     <Activity: jpope posted a note>
@@ -135,11 +135,11 @@ he's said some interesting things?::
     >>> evan = message.author
     >>> for activity in evan.outbox:
     >>>     message = activity.obj
-    >>>     print message.content
+    >>>     print(message.content)
 
 Prehaps we want to know a bit about Evan::
 
-    >>> print evan.summary  
+    >>> print(evan.summary)
 
 .. Maybe we took a picture, and we want to post that picture to our
 .. public feed so everyone can see it.  We can do this by posting it to
@@ -153,7 +153,7 @@ Prehaps we want to know a bit about Evan::
 Want to see what the model actually looks like?
 All activities in pump.io have a .seralize method::
 
-    >>> print message.to_json(indent=2)
+    >>> print(message.to_json(indent=2))
     {
     "id": "http://coding.example/api/activity/bwkflwken",
     "actor": {

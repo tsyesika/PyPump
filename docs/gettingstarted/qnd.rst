@@ -24,7 +24,7 @@ Super, next, I wanna see my inbox::
 
     >>> my_inbox = pump.me.inbox
     >>> for activity in my_inbox[:20]:
-    ...     print activity
+    ...     print(activity)
 
 .. note:: iterating over the inbox without any slice will iterate until the very first note in your inbox/feed/outbox
 
@@ -36,7 +36,7 @@ Oh, my friend Evan isn't there, I probably need to follow him::
 Awesome. Lets check again::
 
     >>> for activity in my_inbox[:20]:
-    ...     print activity
+    ...     print(activity)
 
 Evan likes PyPump, super!::
 
@@ -59,7 +59,7 @@ Cool! Lets tell them about these docs::
 I wonder what was posted last::
 
     >>> latest_activity = my_inbox[0]
-    >>> print latest_activity
+    >>> print(latest_activity)
     <Activity: jrobb posted an image>
 
 Oh it's an image, lets see the thumb nail::
@@ -73,7 +73,7 @@ Oh it's an image, lets see the thumb nail::
 Hmm, I want to see a bigger version::
 
     >>> large_url = latest_activity.obj.full_url
-    >>> print large_url
+    >>> print(large_url)
     <Image at https://some.server/uploads/somefriend/2013/7/7/JkdX2.png">
     >>> # you will find Images often hold other pump.Image objects, we just need to extra the url
     >>> large_url = large_url.url
@@ -107,7 +107,7 @@ But hold on though, that only sent it to followers? What gives::
 Oh cool that's sent to all my friends, So can i make my own lists::
 
     >>> for my_list in pump.me.lists:
-    ...    print my_list
+    ...    print(my_list)
     Coworkers
     Family
     Friends
