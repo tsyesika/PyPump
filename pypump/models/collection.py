@@ -81,18 +81,14 @@ class Collection(AbstractModel):
     def __repr__(self):
         return "<{type}: {id}>".format(type=self.TYPE, id=self.id)
 
-    @classmethod
-    def unserialize(cls, data, obj=False):
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-
-        obj = obj or cls(data["id"])
-        obj.display_name = data["displayName"] if "displayName" in data else None
-        obj.content = data["content"] if "content" in data else None
-        obj.links = dict()
+    def unserialize(self, data):
+        self.display_name = data["displayName"] if "displayName" in data else None
+        self.content = data["content"] if "content" in data else None
+        self.links = dict()
         for i in ["members",]:
             if i in data:
-                obj.links[i] = data[i]["url"]
-        return obj
+                self.links[i] = data[i]["url"]
+        return self
 
 
 class Public(object):

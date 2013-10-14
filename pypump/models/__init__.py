@@ -37,8 +37,6 @@ class AbstractModel(object):
         "objectType":"TYPE",
     }
 
-    _pump = None
-
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
         if pypump:
@@ -65,9 +63,9 @@ class AbstractModel(object):
             if "target" in data:
                 # we probably want to unserialize target if it's there
                 # true for collection.{add,remove}
-                self.unserialize(data["target"], obj=self)
+                self.unserialize(data["target"])
             else:
-                self.unserialize(data["object"], obj=self)
+                self.unserialize(data["object"])
 
         return True
 
@@ -99,11 +97,9 @@ class AbstractModel(object):
         _log.debug(formatting)
 
 
-    @staticmethod
     def unserialize(self, data, *args, **kwargs):
         """ Changes it from JSON -> obj """
         data = json.loads(data)
-
         klass = self(pypump=self._pump)
 
         for key, value in data.items():

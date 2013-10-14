@@ -109,29 +109,20 @@ class PyPump(object):
             )
 
     def populate_models(self):
-        # todo: change me
-        self.Note = Note
-        self.Note._pump = self
+        def factory(pypump, model):
+            return lambda *args, **kwargs: model(
+                pypump=kwargs.pop("pypump", pypump),
+                *args,
+                **kwargs)
 
-        self.Collection = Collection
-        self.Collection._pump = self
-
-        self.Comment = Comment
-        self.Comment._pump = self
-        
-        self.Image = Image
-        self.Image._pump = self
-
-        self.Person = Person
-        self.Person._pump = self
-
-        self.Location = Location
-        self.Location._pump = self
-
-        self.Public = Public
-
-        self.Activity = Activity
-        self.Activity._pump = self
+        self.Note = factory(self, Note)
+        self.Collection = factory(self, Collection)
+        self.Comment = factory(self, Comment)
+        self.Image = factory(self, Image)
+        self.Person = factory(self, Person)
+        self.Location = factory(self, Location)
+        self.Public = factory(self, Public)
+        self.Activity = factory(self, Activity)
 
     ##
     # getters to expose some data which might be useful

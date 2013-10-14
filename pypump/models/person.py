@@ -115,7 +115,7 @@ class Person(AbstractModel):
                 server=self.server,
                 username=self.username
             ))
-            self.unserialize(data, obj=self)
+            self.unserialize(data)
 
         self.username = username or self.username
         self.url = url or self.url
@@ -174,32 +174,18 @@ class Person(AbstractModel):
     def __str__(self):
         return self.display_name or self.username or self.webfinger
 
-    @classmethod
-    def unserialize_service(cls, data, obj):
+    def unserialize_service(self, data):
         """ Unserializes the data from a service """
-        id = data["id"]
-        display = data["displayName"]
-        updated = parse(data["updated"]) if "updated" in data else datetime.now()
-        published = parse(data["published"]) if "published" in data else updated
+        self.id = data["id"]
+        self.display = data["displayName"]
+        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
+        self.published = parse(data["published"]) if "published" in data else updated
+        return self
 
-        if obj is None:
-            obj = cls()
-
-        obj.id = id
-        obj.display = display
-        obj.updated = updated
-        obj.published = published
-        return obj
-
-    @classmethod
-    def unserialize(cls, data, obj=None):
+    def unserialize(self, data):
         """ Goes from JSON -> Person object """
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-
         if data.get("objectType", "") == "service":
-            return cls.unserialize_service(data, obj)
-
-        self = cls() if obj is None else obj
+            return self.unserialize_service(data, obj)
 
         self.id = data["id"]
         self.server = self.id.replace("acct:", "").split("@")[-1]
@@ -211,7 +197,7 @@ class Person(AbstractModel):
         self.published = parse(data["published"]) if "published" in data else self.updated
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.isme = "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id
-        self.location = cls._pump.Location.unserialize(data["location"]) if "location" in data else None
-        #self.image = cls._pump.Image.unserialize(data["image"]) if "image" in data else None
+        self.location = self._pump.Location().unserialize(data["location"]) if "location" in data else None
+        #self.image = self._pump.Image().unserialize(data["image"]) if "image" in data else None
 
         return self

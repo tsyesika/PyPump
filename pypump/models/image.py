@@ -79,7 +79,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             "Content-Length": os.path.getsize(filename),
         }
 
-        params = {"qqfile": filename}
+        params = {"qqfile": filename.split("/")[-1]}
 
         if self.display_name is not None:
             params["title"] = self.display_name
@@ -112,33 +112,26 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 )
 
         _log.debug(image_feed)
-        self.unserialize(image_feed, obj=self)
+        self.unserialize(image_feed)
         return self
 
-    @classmethod
-    def unserialize(cls, data, obj=None):
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-
-
+    def unserialize(self, data):
         image_id = data.get("id", None)
         if "fullImage" in data:
             full_image = data["fullImage"]["url"]
-            full_image = cls(id=image_id, url=full_image)
+            full_image = type(self)(id=image_id, url=full_image)
         else:
             full_image = None
 
         if "image" in data:
             image = data["image"]["url"]
-            if obj is None:
-                image = cls(id=image_id, url=image)
-            else:
-                obj.id = image_id
-                obj.url = image
-                image = obj
+            obj.id = image_id
+            obj.url = image
+            image = obj
         else:
             image = None
 
-        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
+        author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
 
         links = dict()
         for i in ["likes", "replies", "shares"]:

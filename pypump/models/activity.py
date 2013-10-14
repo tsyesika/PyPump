@@ -36,12 +36,10 @@ class Generator(object):
 
         super(Generator, self).__init__(*args, **kwargs)
 
-    @classmethod
-    def unserialize(cls, data):
-        id = data["id"]
-        display_name = data["displayName"] if "displayName" in data else "Unknown client"
-
-        return cls(id=id, display_name=display_name)
+    def unserialize(self, data):
+        self.id = data["id"]
+        self.display_name = data["displayName"] if "displayName" in data else "Unknown client"
+        return self
 
 #TODO clean up and move to own file
 @implement_to_string
@@ -62,12 +60,10 @@ class Unknown(AbstractModel):
 
         super(Unknown, self).__init__(*args, **kwargs)
 
-    @classmethod
-    def unserialize(cls, data):
-        object_type = data["objectType"] if "objectType" in data else ""
-        display_name = data["displayName"] if "displayName" in data else ""
-
-        return cls(display_name=display_name, object_type=object_type)
+    def unserialize(self, data):
+        self.TYPE = data["objectType"] if "objectType" in data else ""
+        self.display_name = data["displayName"] if "displayName" in data else ""
+        return self
 
 @implement_to_string
 class Activity(AbstractModel):
@@ -81,20 +77,12 @@ class Activity(AbstractModel):
     content = None
     id = None
 
-    def __init__(self, obj, verb, actor, generator,
-                 updated, url, published, content, id, *args, **kwargs):
+    def __init__(self,*args, **kwargs):
 
         super(Activity, self).__init__(*args, **kwargs)
 
-        self.obj = obj
-        self.verb = verb
-        self.actor = actor
-        self.generator = generator
-        self.updated = updated
-        self.url = url
-        self.published = published
-        self.content = content
-        self.id = id
+        for arg, value in kwargs.items():
+            setattr(self, arg, value)
     
     def __repr__(self):
         return '<Activity: {webfinger} {verb}ed {model}>'.format(
@@ -106,11 +94,8 @@ class Activity(AbstractModel):
     def __str__(self):
         return str(self.__repr__())
 
-    @classmethod
-    def unserialize(cls, data):
+    def unserialize(self, data):
         """ From JSON -> Activity object """
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data})
-
         dataobj = data["object"]
         obj_type = dataobj["objectType"].capitalize()
 
@@ -119,21 +104,22 @@ class Activity(AbstractModel):
             dataobj["author"] = data["actor"]
 
         try:
-            objekt = getattr(cls._pump, obj_type)
-            obj = objekt.unserialize(dataobj)
+            objekt = getattr(self._pump, obj_type)()
+            self.obj = objekt.unserialize(dataobj)
         except AttributeError:
-            obj = Unknown.unserialize(dataobj)
+            raise
+            self.obj = Unknown().unserialize(dataobj)
 
-        verb = data["verb"]
-        actor = cls._pump.Person.unserialize(data["actor"])
+        self.verb = data["verb"]
+        self.actor = self._pump.Person().unserialize(data["actor"])
+        
         # generator is not always there (at least not for verb:'update' obj:Person)
-        generator = Generator.unserialize(data["generator"]) if "generator" in data else None
-        updated = parse(data["updated"])
-        url = data["url"]
-        published = parse(data["published"])
-        content = data["content"]
-        id = data["id"]
+        self.generator = Generator().unserialize(data["generator"]) if "generator" in data else None
+        self.updated = parse(data["updated"])
+        self.url = data["url"]
+        self.published = parse(data["published"])
+        self.content = data["content"]
+        self.id = data["id"]
 
-        return cls(obj, verb, actor, generator, updated,
-                   url, published, content, id)
+        return self
 

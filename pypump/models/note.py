@@ -46,7 +46,7 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
 
     _links = dict()
 
-    def __init__(self, content, id=None, published=None, updated=None, 
+    def __init__(self, content=None, id=None, published=None, updated=None, 
                  links=None,  deleted=False, liked=False, author=None,
                  *args, **kwargs):
 
@@ -94,13 +94,10 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     def __str__(self):
         return str(repr(self))
 
-    @classmethod
-    def unserialize(cls, data, obj=None):
+    def unserialize(self, data):
         """ Goes from JSON -> Note object """
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-
-        id = data.get("id", None)
-        content = data.get("content", u"")
+        self.id = data.get("id", None)
+        self.content = data.get("content", u"")
 
         links = dict()
         for i in ["likes", "replies", "shares"]:
@@ -110,32 +107,11 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
                 else:
                     links[i] = data[i]["url"]
 
-        updated=parse(data["updated"])
-        published=parse(data["published"])
-        liked = data["liked"] if "liked" in data else False
-        deleted = parse(data["deleted"]) if "deleted" in data else False
-        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
+        self.updated=parse(data["updated"])
+        self.published=parse(data["published"])
+        self.liked = data["liked"] if "liked" in data else False
+        self.deleted = parse(data["deleted"]) if "deleted" in data else False
+        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
 
-        if obj is None:
-            return cls(
-                    id=id,
-                    content=content,
-                    to=(), # todo still.
-                    cc=(), # todo: ^^
-                    updated=updated,
-                    published=published,
-                    links=links,
-                    liked=liked,
-                    deleted=deleted,
-                    author=author,
-                    )
-        else:
-            obj.content = content
-            obj.id = id
-            obj.updated = updated
-            obj.published = published
-            obj._links = links
-            obj.liked = liked
-            obj.deleted = deleted
-            obj.author = author if author else obj.author
-            return obj
+        self._links = links
+        return self

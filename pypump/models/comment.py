@@ -40,7 +40,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     author = None
     _links = None
 
-    def __init__(self, content, id=None, inReplyTo=None, published=None, updated=None,
+    def __init__(self, content=None, id=None, inReplyTo=None, published=None, updated=None,
                  deleted=False, liked=False, author=None, links=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
@@ -64,20 +64,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     def __str__(self):
         return str(repr(self))
 
-    def _post_activity(self, activity):
-        """ POSTs activity and updates self with new data in response """
-        data = self._pump.request(self.ENDPOINT, method="POST", data=activity)
-
-        if not data:
-            return False        
-
-        if "error" in data:
-            raise PumpException(data["error"])
-
-        self.unserialize(data["object"], obj=self)
-
-        return True
-
     def send(self):
         activity = {
             "verb":"post",
@@ -93,18 +79,15 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
         return self._post_activity(activity)
 
-    @classmethod
-    def unserialize(cls, data, obj=None):
+    def unserialize(self, data):
         """ from JSON -> Comment """
-        cls.debug("unserialize({params})", params={"cls": cls, "data": data, "obj": obj})
-
-        content = data["content"] if "content" in data else ""
-        id = data["id"] if "id" in data else ""
-        published = parse(data["published"])
-        updated = parse(data["updated"]) if "updated" in data else False
-        deleted = parse(data["deleted"]) if "deleted" in data else False
-        liked = data["liked"] if "liked" in data else False
-        author = cls._pump.Person.unserialize(data["author"]) if "author" in data else None
+        self.content = data["content"] if "content" in data else ""
+        self.id = data["id"] if "id" in data else ""
+        self.published = parse(data["published"]) if "publised" in data else False
+        self.updated = parse(data["updated"]) if "updated" in data else False
+        self.deleted = parse(data["deleted"]) if "deleted" in data else False
+        self.liked = data["liked"] if "liked" in data else False
+        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
 
         links = dict()
         for i in ["likes", "replies", "shares"]:
@@ -114,25 +97,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
                 else:
                     links[i] = data[i]["url"]
 
-        if obj is None:
-            return cls(
-                content=content,
-                id=id,
-                published=published,
-                updated=updated,
-                deleted=deleted,
-                liked=liked,
-                author=author,
-                links=links
-                )
-        
-        obj.content = content
-        obj.id = id
-        obj.published = published
-        obj.updated = updated
-        obj.deleted = deleted
-        obj.liked = liked
-        obj.author = author if author else obj.author
-        obj._links = links
-        return obj
+        self._links = links
+        return self
         

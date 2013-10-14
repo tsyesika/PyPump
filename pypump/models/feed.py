@@ -59,7 +59,7 @@ class ItemList(object):
             obj = getattr(self.feed._pump, data["objectType"].capitalize())
         else:
             obj = getattr(self.feed._pump, self.feed.objectTypes)
-        obj = obj.unserialize(data)
+        obj = obj().unserialize(data)
         self.previous_id = obj.id
         self.itercounter +=1
         return obj

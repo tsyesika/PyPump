@@ -25,7 +25,7 @@ class Location(AbstractModel):
     longitude = None
     latitude = None
 
-    def __init__(self, name, longitude, latitude, *args, **kwargs):
+    def __init__(self, name=None, longitude=None, latitude=None, *args, **kwargs):
         super(Location, self).__init__(*args, **kwargs)
         self.name = name
         self.longitude = longitude
@@ -37,36 +37,27 @@ class Location(AbstractModel):
     def __str__(self):
         return str(self.__repr__())
 
-    @classmethod
-    def unserialize(cls, data, obj=None):
-        cls.debug("unserialieze({params})", params={"cls": cls, "data": data, "obj": obj})
-
-        name = data.get("displayName", None)        
+    def unserialize(self, data):
+        self.name = data.get("displayName", None)        
         if ("lon" in data and "lat" in data):
-            longitude = float(data["lon"])
-            latitude = float(data["lat"])
+            self.longitude = float(data["lon"])
+            self.latitude = float(data["lat"])
         
         elif "position" in data:
             position = data["position"][:-1]
             if position[1:].find("+") != -1:
                 latitude = position.lstrip("+").split("+", 1)[0]
-                latitude = float(latitude)
+                self.latitude = float(latitude)
 
-                longitude = float(position[1:].split("+", 1)[1])
+                self.longitude = float(position[1:].split("+", 1)[1])
             else:
                 latitude = position.lstrip("+").split("-", 1)[0]
-                latitude = float(latitude)
+                self.latitude = float(latitude)
 
-                longitude = float(position[1:].split("-", 1)[1])               
+                self.longitude = float(position[1:].split("-", 1)[1])               
 
         else:
-            longitude = None
-            latitude = None
+            self.longitude = None
+            self.latitude = None
 
-        if obj is None:
-            return cls(name=name, longitude=longitude, latitude=latitude)
-        else:
-            obj.name = name
-            obj.longitude = longitude
-            obj.latitude = latitude
-            return obj
+        return self
