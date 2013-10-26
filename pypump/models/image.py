@@ -49,7 +49,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                  actor=None, width=None, height=None, published=None,
                  updated=None, links=None, *args, **kwargs):
 
-        super(Image, self).__init__(self, *args, **kwargs)
+        super(Image, self).__init__(*args, **kwargs)
 
         self.id = id
         self.display_name = display_name
@@ -125,9 +125,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         if "image" in data:
             image = data["image"]["url"]
-            obj.id = image_id
-            obj.url = image
-            image = obj
+            image = type(self)(id=image_id, url=image)
         else:
             image = None
 
