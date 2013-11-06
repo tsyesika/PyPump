@@ -60,7 +60,7 @@ elif py_version == 3:
         """ Convert to unicode object """
         if type(string) is bytes:
             return string.decode("utf-8")
-        if types(string) is str:
+        if type(string) is str:
             return string
         raise TypeError("Unknown type %s" % string)
 else:

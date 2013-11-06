@@ -4,6 +4,7 @@ import unittest
 import json
 
 from pypump import PyPump
+from pypump.compatability import *
 
 class Response(object):
     
@@ -15,7 +16,7 @@ class Response(object):
         return self.json()[key]
 
     def json(self):
-        if isinstance(self.data, basestring):
+        if isinstance(self.data, string_types):
             return json.loads(self.data)
         return self.data
 
