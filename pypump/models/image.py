@@ -94,7 +94,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 params=params,
                 )
 
-        self.unserialize(image, obj=self)
+        self.unserialize(image)
 
         # now send it to the feed
         data = {
