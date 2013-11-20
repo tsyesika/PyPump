@@ -2,9 +2,9 @@ from __future__ import absolute_import
 
 import unittest
 import json
+import six
 
 from pypump import PyPump
-from pypump.compatability import *
 
 class Response(object):
     
@@ -16,7 +16,7 @@ class Response(object):
         return self.json()[key]
 
     def json(self):
-        if isinstance(self.data, string_types):
+        if isinstance(self.data, six.string_types):
             return json.loads(self.data)
         return self.data
 
