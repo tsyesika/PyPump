@@ -351,10 +351,10 @@ class PyPump(object):
         
         if server == self.server:
             self.client = OAuth1(
-                    client_key=six.u(self._server_cache[self.server].key),
-                    client_secret=six.u(self._server_cache[self.server].secret),
-                    resource_owner_key=six.u(self.token),
-                    resource_owner_secret=six.u(self.token_secret)
+                    client_key=self._server_cache[self.server].key,
+                    client_secret=self._server_cache[self.server].secret,
+                    resource_owner_key=self.token,
+                    resource_owner_secret=self.token_secret
                     )
             return self.client
         else:
