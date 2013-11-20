@@ -15,6 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+import six
+
 from datetime import datetime
 from dateutil.parser import parse
 
@@ -24,11 +26,9 @@ from pypump.openid import OpenID
 from pypump import exception
 from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
-from pypump.compatability import *
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
-@implement_to_string
 class Person(AbstractModel):
 
     _mapping = {
@@ -99,7 +99,7 @@ class Person(AbstractModel):
         super(Person, self).__init__(*args, **kwargs)
 
         # okay we need to check if the webfinger is being used
-        if isinstance(webfinger, string_types):
+        if isinstance(webfinger, six.string_types):
             # first clean up
             webfinger = webfinger.strip(" ")
             # okay now we need to look if it's on our servers or not.

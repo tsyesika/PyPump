@@ -22,13 +22,11 @@ import os
 
 from dateutil.parser import parse
 
-from pypump.compatability import *
 from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
                            Deleteable, Shareable)
 
 _log = logging.getLogger(__name__)
 
-@implement_to_string
 class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
     url = None
@@ -68,8 +66,6 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             type=self.TYPE,
             webfinger=self.actor.webfinger)
 
-    def __str__(self):
-        return str(repr(self))
 
     def from_file(self, filename):
         """ Uploads an image from a filename """

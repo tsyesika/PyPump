@@ -16,9 +16,7 @@
 ##
 
 from pypump.models import AbstractModel
-from pypump.compatability import *
 
-@implement_to_string
 class Location(AbstractModel):
 
     name = None
@@ -33,9 +31,6 @@ class Location(AbstractModel):
 
     def __repr__(self):
         return "<{type} {name}>".format(type=self.TYPE, name=self.name)
-
-    def __str__(self):
-        return str(self.__repr__())
 
     def unserialize(self, data):
         self.name = data.get("displayName", None)        

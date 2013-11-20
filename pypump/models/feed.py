@@ -17,7 +17,6 @@
 
 import logging
 
-from pypump.compatability import *
 from pypump.exception import PyPumpException 
 from pypump.models import AbstractModel
 

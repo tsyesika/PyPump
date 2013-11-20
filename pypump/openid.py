@@ -20,8 +20,8 @@ from __future__ import absolute_import
 import json
 import logging
 
+import six
 import requests
-from pypump.compatability import *
 
 _log = logging.getLogger(__name__)
 

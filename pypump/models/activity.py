@@ -19,7 +19,6 @@ import re
 
 from dateutil.parser import parse as parse
 from pypump.models import AbstractModel
-from pypump.compatability import *
 
 #TODO clean up and move to own file
 class Generator(object):
@@ -42,7 +41,6 @@ class Generator(object):
         return self
 
 #TODO clean up and move to own file
-@implement_to_string
 class Unknown(AbstractModel):
     """ This class is used when we can't find a matching object type """
     TYPE = None
@@ -65,7 +63,6 @@ class Unknown(AbstractModel):
         self.display_name = data["displayName"] if "displayName" in data else ""
         return self
 
-@implement_to_string
 class Activity(AbstractModel):
     obj = None
     verb = None
@@ -90,9 +87,6 @@ class Activity(AbstractModel):
                 verb=self.verb.rstrip("e"), # english: e + ed = ed
                 model=self.obj.objectType
                 )
-
-    def __str__(self):
-        return str(self.__repr__())
 
     def unserialize(self, data):
         """ From JSON -> Activity object """

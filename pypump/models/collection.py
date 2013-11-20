@@ -19,12 +19,10 @@ import json
 
 from pypump.models import AbstractModel
 from pypump.exception import PyPumpException
-from pypump.compatability import *
 from pypump.models.feed import Feed
 
 _log = logging.getLogger(__name__)
 
-@implement_to_string
 class Collection(AbstractModel):
     
     def __init__(self, id):

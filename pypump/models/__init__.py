@@ -17,8 +17,8 @@
 
 import json
 import logging
+import six
 
-from pypump.compatability import *
 from pypump.exception import PyPumpException
 
 _log = logging.getLogger(__name__)
@@ -68,6 +68,15 @@ class AbstractModel(object):
                 self.unserialize(data["object"])
 
         return True
+
+    def __unicode__(self):
+        return six.u(str(self))
+
+    def __str__(self):
+        return str(repr(self))
+
+    def __bytes__(self):
+        return self.b(str(self))
 
     @classmethod
     def debug(cls, message, data=None, params=None, **kwargs):
@@ -264,7 +273,7 @@ class Postable(object):
             people = [people]
 
         for i, person in enumerate(people):
-            if is_class(person):
+            if isinstance(person, six.class_types):
                 people[i] = person()
             
             if isinstance(people[i], self._pump.Person):

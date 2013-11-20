@@ -20,9 +20,7 @@ from dateutil.parser import parse
 
 from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
                            Deleteable)
-from pypump.compatability import *
 
-@implement_to_string
 class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     @property
@@ -60,9 +58,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
             type=self.TYPE,
             webfinger=self.author.webfinger
             )
-
-    def __str__(self):
-        return str(repr(self))
 
     def send(self):
         activity = {

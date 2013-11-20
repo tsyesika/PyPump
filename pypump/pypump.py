@@ -24,10 +24,11 @@ import json
 import logging
 
 import requests
-from requests_oauthlib import OAuth1
-import pypump.openid as openid
+import six
 
-from pypump.compatability import *
+from requests_oauthlib import OAuth1
+
+import pypump.openid as openid
 from pypump.exception import PyPumpException
 
 # load models
@@ -43,9 +44,9 @@ _log = logging.getLogger(__name__)
 
 class PyPump(object):
 
-    PARAM_VERIFER = to_bytes("oauth_verifier")
-    PARAM_TOKEN = to_bytes("oauth_token")
-    PARAM_TOKEN_SECRET = to_bytes("oauth_token_secret")
+    PARAM_VERIFER = six.b("oauth_verifier")
+    PARAM_TOKEN = six.b("oauth_token")
+    PARAM_TOKEN_SECRET = six.b("oauth_token_secret")
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
@@ -349,25 +350,25 @@ class PyPump(object):
         
         if server == self.server:
             self.client = OAuth1(
-                    client_key=to_unicode(self._server_cache[self.server].key),
-                    client_secret=to_unicode(self._server_cache[self.server].secret),
-                    resource_owner_key=to_unicode(self.token),
-                    resource_owner_secret=to_unicode(self.token_secret)
+                    client_key=six.u(self._server_cache[self.server].key),
+                    client_secret=six.u(self._server_cache[self.server].secret),
+                    resource_owner_key=six.u(self.token),
+                    resource_owner_secret=six.u(self.token_secret)
                     )
             return self.client
         else:
             return OAuth1(
-                client_key=to_unicode(self._server_cache[server].key),
-                client_secret=to_unicode(self._server_cache[server].secret),
+                client_key=six.u(self._server_cache[server].key),
+                client_secret=six.u(self._server_cache[server].secret),
             )
 
     def get_access(self, url):
         """ this asks the user to let us use their account """
 
-        print("To allow us to use your pump.io please follow the instructions at:")
-        print(url)
+        six.print_("To allow us to use your pump.io please follow the instructions at:")
+        six.print_(url)
 
-        code = raw_input("Verifier Code: ").lstrip(" ").rstrip(" ")
+        code = six.input("Verifier Code: ").lstrip(" ").rstrip(" ")
         return code
 
     def request_token(self):

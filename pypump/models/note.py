@@ -21,12 +21,9 @@ from dateutil.parser import parse
 from pypump.exception.ImmutableException import ImmutableException
 from pypump.exception.PumpException import PumpException
 
-from pypump.compatability import *
-
 from pypump.models import (AbstractModel, Postable, Likeable, Shareable, 
                            Commentable, Deleteable)
 
-@implement_to_string
 class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
     @property
@@ -91,9 +88,6 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
             name=self.author.webfinger
             )
    
-    def __str__(self):
-        return str(repr(self))
-
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
         self.id = data.get("id", None)
