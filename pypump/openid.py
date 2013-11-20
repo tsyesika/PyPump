@@ -140,4 +140,4 @@ class OpenID(object):
         return "<OpenID %s>" % self.server
 
     def __str__(self):
-        return self.__repr__()
+        return repr(self)

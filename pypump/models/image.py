@@ -140,8 +140,9 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             i.actor = author
             i.published = parse(data["published"])
             i.updated = parse(data["updated"])
-            i.display_name = data.get("displayName", u"")
-            i.summary = data.get("summary", u"")
+            i.display_name = data.get("displayName", "")
+            i.summary = data.get("summary", "")
+            i.url = data.get("url", "")
  
        # set the full and normal image on each one
         if full_image is not None:
