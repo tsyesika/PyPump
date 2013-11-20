@@ -19,7 +19,7 @@ import json
 import logging
 import six
 
-from pypump.exception import PyPumpException
+from pypump.exception.PumpException import PumpException
 
 _log = logging.getLogger(__name__)
 

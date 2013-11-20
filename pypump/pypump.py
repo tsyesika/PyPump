@@ -26,6 +26,7 @@ import logging
 import requests
 import six
 
+from six.moves.urllib import parse
 from requests_oauthlib import OAuth1
 
 import pypump.openid as openid
@@ -381,7 +382,7 @@ class PyPump(object):
         
         request = {"auth": client}
         response = self._requester(requests.post, "oauth/request_token", **request)
-        data = parse_qs(response.content)
+        data = parse.parse_qs(response.content)
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
@@ -401,7 +402,7 @@ class PyPump(object):
 
         request = {"auth": client}
         response = self._requester(requests.post, "oauth/access_token", **request)        
-        data = parse_qs(response.content)
+        data = parse.parse_qs(response.content)
 
         self.token = data[self.PARAM_TOKEN][0]
         self.token_secret = data[self.PARAM_TOKEN_SECRET][0]

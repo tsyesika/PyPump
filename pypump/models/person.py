@@ -20,11 +20,6 @@ import six
 from datetime import datetime
 from dateutil.parser import parse
 
-from requests_oauthlib import OAuth1
-
-from pypump.openid import OpenID
-from pypump import exception
-from pypump.exception.PumpException import PumpException
 from pypump.models import AbstractModel
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
@@ -179,13 +174,13 @@ class Person(AbstractModel):
         self.id = data["id"]
         self.display = data["displayName"]
         self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
-        self.published = parse(data["published"]) if "published" in data else updated
+        self.published = parse(data["published"]) if "published" in data else self.updated
         return self
 
     def unserialize(self, data):
         """ Goes from JSON -> Person object """
         if data.get("objectType", "") == "service":
-            return self.unserialize_service(data, obj)
+            return self.unserialize_service(data)
 
         self.id = data["id"]
         self.server = self.id.replace("acct:", "").split("@")[-1]
@@ -198,6 +193,5 @@ class Person(AbstractModel):
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.isme = "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id
         self.location = self._pump.Location().unserialize(data["location"]) if "location" in data else None
-        #self.image = self._pump.Image().unserialize(data["image"]) if "image" in data else None
 
         return self

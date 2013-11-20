@@ -15,9 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from datetime import datetime
 from dateutil.parser import parse
-
 from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
                            Deleteable)
 

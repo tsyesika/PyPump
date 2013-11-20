@@ -15,10 +15,8 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 import logging
-import json
 
 from pypump.models import AbstractModel
-from pypump.exception import PyPumpException
 from pypump.models.feed import Feed
 
 _log = logging.getLogger(__name__)

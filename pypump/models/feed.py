@@ -16,8 +16,8 @@
 ##
 
 import logging
+import six
 
-from pypump.exception import PyPumpException 
 from pypump.models import AbstractModel
 
 _log = logging.getLogger(__name__)
@@ -300,7 +300,7 @@ class Lists(Feed):
         self._post_activity(activity, unserialize=False)
 
     def __getitem__(self, key):
-        if isinstance(key, string_types):
+        if isinstance(key, six.string_types):
             lists = list(self)
             for i in lists:
                 if i.display_name == key:

@@ -18,9 +18,6 @@
 from datetime import datetime
 from dateutil.parser import parse
 
-from pypump.exception.ImmutableException import ImmutableException
-from pypump.exception.PumpException import PumpException
-
 from pypump.models import (AbstractModel, Postable, Likeable, Shareable, 
                            Commentable, Deleteable)
 
