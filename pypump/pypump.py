@@ -26,6 +26,7 @@ import requests
 import six
 
 from six.moves.urllib import parse
+from six.moves import input
 from requests_oauthlib import OAuth1
 
 import pypump.openid as openid
@@ -378,7 +379,7 @@ class PyPump(object):
         six.print_("To authenticate, please open and follow the instructions:")
         six.print_(url)
 
-        code = six.input("Verifier Code: ").lstrip(" ").rstrip(" ")
+        code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
         return code
 
     def request_token(self):
