@@ -61,13 +61,15 @@ class PyPump(object):
 
     loader = None
     protocol = "https"
+    verify_requests = True
     client = None
     _server_cache = dict()
 
     def __init__(self, server, key=None, secret=None,
                 client_name=None, client_type="native", token=None,
                 token_secret=None, verifier_callback=None,
-                callback_uri="oob", loglevel="error", debug=False):
+                callback_uri="oob", loglevel="error", debug=False,
+                verify=True):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -76,6 +78,7 @@ class PyPump(object):
         """
 
         self.debug = debug
+        self.verify_requests = verify
 
         # First, we need to setup the logger
         logginglevel = getattr(logging, loglevel.upper(), None)
@@ -298,6 +301,8 @@ class PyPump(object):
             url = self.build_url(endpoint)
         else:
             url = endpoint
+
+        kwargs.setdefault("verify", self.verify_requests)
 
         try:
             response = fnc(url, **kwargs)
