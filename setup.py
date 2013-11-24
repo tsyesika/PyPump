@@ -6,7 +6,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-if version_info.major == 2:
+if version_info[0] == 2:
     warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
 
 setup(
