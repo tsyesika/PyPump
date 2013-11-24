@@ -22,8 +22,7 @@ import os
 import optparse
 import six
 
-from pypump import PyPump
-from pypump.client import Client
+from pypump import PyPump, Client
 
 try:
     from IPython import embed

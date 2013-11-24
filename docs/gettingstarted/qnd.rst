@@ -14,11 +14,19 @@ Getting connected
 
 So we need to get started::
 
-    >>> from pypump import PyPump
+    >>> from pypump import PyPump, Client
 
-First time lets do all the oauth stuff::
+First we must tell the server about ourselves::
 
-    >>> pump = PyPump("me@my.server.org", client_name="Quick 'n dirty")
+    >>> client = Client(
+        webfinger="me@my.server.tld",
+        name="Quick 'n dirty",
+        type="native" # can be "native" or "web"
+        )
+
+Now make PyPump (the class for talking to pump)::
+
+    >>> pump = PyPump(client=client)
 
 Super, next, I wanna see my inbox::
 

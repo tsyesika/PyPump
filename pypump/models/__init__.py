@@ -47,8 +47,8 @@ class AbstractModel(object):
         # I think we always want to post to feed
         feed_url = "{proto}://{server}/api/user/{username}/feed".format(
             proto=self._pump.protocol,
-            server=self._pump.server,
-            username=self._pump.nickname
+            server=self._pump.client.server,
+            username=self._pump.client.nickname
         )
 
         data = self._pump.request(feed_url, method="POST", data=activity)

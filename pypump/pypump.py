@@ -65,6 +65,7 @@ class PyPump(object):
     verify_requests = True
     client = None
     _server_cache = dict()
+    _unit_testing = False # Is being run in unit tests
 
     def __init__(self, client, token=None, secret=None, verifier_callback=None,
                 callback="oob", loglevel="error", verify=True):
@@ -101,9 +102,10 @@ class PyPump(object):
             self.token = token
             self.secret = secret
 
-        self.me = self.Person("{username}@{server}".format(
-            username = self.client.nickname,
-            server = self.client.server))
+        if not self._unit_testing:
+            self.me = self.Person("{username}@{server}".format(
+                username = self.client.nickname,
+                server = self.client.server))
 
     def populate_models(self):
         def factory(pypump, model):

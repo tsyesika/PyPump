@@ -19,7 +19,7 @@ setup(
         scripts=['pypump-shell'],
         url="https://github.com/xray7224/PyPump",
         packages=["pypump", "pypump.exception", "pypump.models"],
-        license="GPLv3",
+        license="GPLv3+",
         install_requires=[
                 "requests-oauthlib>=0.3.0",
                 "requests>=1.2.0",
@@ -39,7 +39,6 @@ setup(
                 "Operating System :: POSIX",
                 "Operating System :: Microsoft :: Windows",
                 "Operating System :: MacOS :: MacOS X",
-                "Operating System :: BeOS",
                 "Intended Audience :: Developers",
                 "License :: OSI Approved",
                 "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",

@@ -4,7 +4,7 @@ import unittest
 import json
 import six
 
-from pypump import PyPump
+from pypump import PyPump, Client
 
 class Response(object):
     
@@ -27,25 +27,29 @@ class Response(object):
 class TestPump(PyPump):
     
     _response = None
+    _unit_testing = True
 
     def __init__(self, *args, **kwargs):
         # most of the time we don't want to go through oauth
-        new_kwargs = dict(
-            server="Test@example.com",
-            loglevel="critical",
+        client = Client(
+            webfinger="Test@example.com",
             key="AKey",
             secret="ASecret",
-            client_name="PumpTest",
+            name="PumpTest",
+            type="native"
+        )
+
+        new_kwargs = dict(
+            client=client,
+            loglevel="critical",
             token="AToken",
-            token_secret="ATokenSecret",
-            debug=True,
+            secret="ATokenSecret",
             )
 
         self._response = kwargs.pop("response")
         self._testcase = kwargs.pop("testcase")
 
         new_kwargs.update(kwargs)
-
         super(TestPump, self).__init__(*args, **new_kwargs)
 
     def set_status_code(self, status_code):
@@ -80,6 +84,6 @@ class PyPumpTest(unittest.TestCase):
         # These will be set when a request is made
         self.request = None
         self.params = None
-
+        
         # make the pump object for testing.
         self.pump = TestPump(response=self.response, testcase=self)
