@@ -40,7 +40,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
     @property
     def ENDPOINT(self):
-        return "/api/user/{username}/feed".format(self._pump.nickname)
+        return "/api/user/{username}/feed".format(self._pump.client.nickname)
 
     def __init__(self, id=None, url=None, display_name=None, content=None, 
                  actor=None, width=None, height=None, published=None,
@@ -82,7 +82,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             params["description"] = self.content
         
         image = self._pump.request(
-                "/api/user/{0}/uploads".format(self._pump.nickname),
+                "/api/user/{0}/uploads".format(self._pump.client.nickname),
                 method="POST",
                 data=open(filename).read(),
                 headers=headers,
@@ -101,7 +101,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         # send it to the feed
         image_feed = self._pump.request(
-                "/api/user/{0}/feed".format(self._pump.nickname),
+                "/api/user/{0}/feed".format(self._pump.client.nickname),
                 method="POST",
                 data=data,
                 )

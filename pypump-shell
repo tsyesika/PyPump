@@ -28,7 +28,7 @@ try:
     from IPython import embed
     from IPython.config.loader import Config
 except ImportError:
-    print("You need to have ipython installed to run this")
+    six.print_("You need to have ipython installed to run this")
     sys.exit(1)
 
 store_path = os.path.expanduser("~/.pypump_test")
@@ -110,7 +110,7 @@ def open_database(path):
             db = json.loads(fin.read())
             return db
         except Exception:
-            print("There has been a problem parsing the database {0}".format(path))
+            six.print_("There has been a problem parsing the database {0}".format(path))
             sys.exit(1)
 
     else:
@@ -122,15 +122,15 @@ def save_database(db, path):
         try:
             os.remove(path)
         except Exception:
-            print("There was an error removing database from {0}".format(path))
+            six.print_("There was an error removing database from {0}".format(path))
     try:
         fout = open(path, "w")
         db = json.dumps(db, sort_keys=True, indent=4, separators=(",", ": "))
         fout.write(db)
         fout.close()
     except Exception:
-        raise
-        print("There was an error saving the database to {0}".format(path))
+        six.print_("There was an error saving the database to {0}".format(path))
+        sys.exit(1)
 
     return db
 

@@ -52,11 +52,14 @@ mizbunny@example.org.  We want to check what our latest messages
 are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
-      >>> from pypump import PyPump
-      >>> pump = PyPump("mizbunny@example.org", client_name="Test.io")
-      >>> client_credentials = pump.get_registration()
-      # will return [<token>, <secret>]
-      >>> client_tokens = pump.get_token()
+    >>> from pypump import PyPump, Client
+    >>> client = Client(
+    ...     webfinger="mizbunny@example.org",
+    ...     type="native", # Can be "native" or "web"
+    ...     name="Test.io"
+    ...     )
+    >>> client_credentials = pump.get_registration() # will return [<key>, <secret>, <expirey>]
+    >>> client_tokens = pump.get_token() # [<token>, <secret>]
 
 The PyPump call will try to verify with OAuth, You may wish to override how it asks for authentication.
 PyPump by default writes to standard out a URL for the user to click and reads in from standard in for a verification
@@ -65,13 +68,18 @@ code presented by the webserver.
 You should store the client credentials somewhere.  You can now
 reconnect like so::
 
+    >>> client = Client(
+    ...     webfinger="mizbunny@example.org",
+    ...     type="native",
+    ...     name="Test.io",
+    ...     key=client_credentials[0],
+    ...     secret=client_credentials[1],
+    ...     )
     >>> pump = PyPump(
-    ...          "mizbunny@example.org",
-    ...          key=client_credentials[0], # the client key
-    ...          secret=client_credentials[1], # the client secret
-    ...          token=client_tokens[0], # the token key
-    ...          token_secret=client_tokens[1], # the token secret
-    ...          )
+    ...     client=client,
+    ...     token=client_tokens[0], # the token
+    ...     secret=client_tokens[1], # the token secret
+    ...     )
 
 Okay, we're connected!  Next up, we want to check out what our last 30
 items in our inbox are, but first we need to find ourselves::

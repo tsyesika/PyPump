@@ -13,8 +13,13 @@ Example
 -------
 The following will create (for the first time) a connection to a pump.io server for the user Tsyesika@io.theperplexingpariah.co.uk for my client named "Test.io"::
 
-    >>> from pypump import PyPump
-    >>> pump = PyPump("Tsyesika@io.theperplexingpariah.co.uk", client_name="Test.io")
+    >>> from pypump import PyPump, Client
+    >>> client = Client(
+    ...     webfinger="Tsyesika@io.theperplexingpariah.co.uk",
+    ...     name="Test.io",
+    ...     type="native"
+    ...     )
+    >>> pump = PyPump(client=client)
     >>> client_credentials = pump.get_registration() # will return [<client key>, <client secret>, <expirey>]
     >>> client_tokens = pump.get_token() # will return [<token>, <secret>]
 
@@ -22,10 +27,15 @@ The following will create (for the first time) a connection to a pump.io server 
 
 An example of then connecting again (using the same variable names as above). This will produce a PyPump object which will use the same credentials as established above::
 
+    >>> client = Client(
+    ...     webfinger="Tsyesika@io.theperplexingpariah.co.uk",
+    ...     name="Test.io",
+    ...     type="native",     
+    ...     key=client_credentials[0], # client key
+    ...     secret=client_credentials[1] # client secret
+    ...     )
     >>> pump = PyPump(
-    ...          "pump.megworld.co.uk",
-    ...          key=client_credentials[0], # the client key
-    ...          secret=client_credentials[1], # the client secret
-    ...          token=client_tokens[0], # the token key
-    ...          token_secret=client_tokens[1], # the token secret
-    ...          )
+    ...         client=client,          
+    ...         token=client_tokens[0], # the token key
+    ...         secret=client_tokens[1], # the token secret
+    ...         )

@@ -24,7 +24,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(
-            username=self._pump.nickname
+            username=self._pump.client.nickname
             )
 
     id = None

@@ -26,7 +26,7 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(
-            username=self._pump.nickname
+            username=self._pump.client.nickname
             )
 
 
