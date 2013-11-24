@@ -102,8 +102,8 @@ class Person(AbstractModel):
                 self.username, self.server = webfinger.split("@")
             else:
                 # they probably just gave a username, the assumption is it's on our server!
-                self.username, self.server = webfinger, self._pump.server
-            if self.username == self._pump.nickname and self.server == self._pump.server:
+                self.username, self.server = webfinger, self._pump.client.server
+            if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
                 self.inbox = Inbox(self)
             data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
                 proto=self._pump.protocol,
@@ -119,7 +119,7 @@ class Person(AbstractModel):
         self.display_name = display_name or self.display_name
         self.published = published or self.published
         self.updated = updated or self.updated
-        self.isme = (self.username == self._pump.nickname and self.server == self._pump.server)
+        self.isme = (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
 
     @property
     def webfinger(self):
@@ -191,7 +191,7 @@ class Person(AbstractModel):
         self.updated = parse(data["updated"]) if "updated" in data else None
         self.published = parse(data["published"]) if "published" in data else self.updated
         self.updated = parse(data["updated"]) if "updated" in data else self.published
-        self.isme = "acct:%s@%s" % (self._pump.nickname, self._pump.server) == self.id
+        self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
         self.location = self._pump.Location().unserialize(data["location"]) if "location" in data else None
 
         return self

@@ -29,7 +29,7 @@ from six.moves.urllib import parse
 from six.moves import input
 from requests_oauthlib import OAuth1
 
-import pypump.openid as openid
+from pypump.client import Client
 from pypump.exception import PyPumpException
 
 # load models
@@ -39,6 +39,7 @@ from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.location import Location
 from pypump.models.activity import Activity
+
 from pypump.models.collection import Collection, Public
 
 _log = logging.getLogger(__name__)
@@ -65,11 +66,8 @@ class PyPump(object):
     client = None
     _server_cache = dict()
 
-    def __init__(self, server, key=None, secret=None,
-                client_name=None, client_type="native", token=None,
-                token_secret=None, verifier_callback=None,
-                callback_uri="oob", loglevel="error", debug=False,
-                verify=True):
+    def __init__(self, client, token=None, secret=None, verifier_callback=None,
+                callback="oob", loglevel="error", verify=True):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -77,50 +75,35 @@ class PyPump(object):
             Don't forget if you want to use https ensure the secure flag is True
         """
 
-        self.debug = debug
         self.verify_requests = verify
 
         # First, we need to setup the logger
-        logginglevel = getattr(logging, loglevel.upper(), None)
-        if logginglevel is None:
+        log_level = getattr(logging, loglevel.upper(), None)
+        if log_level is None:
             raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
-        _log.setLevel(logginglevel)
+        _log.setLevel(log_level)
 
 
-        openid.OpenID.pypump = self # pypump uses PyPump.requester.
+        self.client = client
+        self.client.set_pump(self)
+        if not self.client.key:
+            self.client.register()
+
+        self._server_cache[self.client.server] = self.client
+
         self.verifier_callback = verifier_callback
-        self.client_name = client_name
-        self.client_type = client_type
-        self.callback_uri = callback_uri
-
-        if "@" in server:
-            # it's a web fingerprint!
-            self.nickname, self.server = server.split("@")
-        else:
-            self.server = server
-            self.nickname = None
-
-        # Fix #24 by checking
-        if (key is None or secret is None) and (token or token_secret):
-            error = "Must provide key and secret with token/token_seceret"
-            raise Exception(error)
-
         self.populate_models()
 
-        self._add_consumer(self.server, key, secret)
-
-        if not (token and token_secret):
+        if not (token and secret):
             # we need to make a new oauth request
             self.oauth_request() # this does NOT return access tokens but None
         else:
             self.token = token
-            self.token_secret = token_secret
+            self.secret = secret
 
-        if not self.debug:
-            self.me = self.Person("{username}@{server}".format(
-                username = self.nickname,
-                server = self.server)
-            )
+        self.me = self.Person("{username}@{server}".format(
+            username = self.client.nickname,
+            server = self.client.server))
 
     def populate_models(self):
         def factory(pypump, model):
@@ -143,21 +126,11 @@ class PyPump(object):
     ##
     def get_registration(self):
         """ Returns client credentials post-registration """
-        return (self._server_cache[self.server].key,
-                self._server_cache[self.server].secret,
-                self._server_cache[self.server].expirey)
+        return (self.client.key, self.client.secret, self.client.expirey)
 
     def get_token(self):
         """ Returns OAuth token and secret post-handshake """
-        return (self.token, self.token_secret)
-
-    def set_nickname(self, nickname):
-        """ This sets the nickname being used """
-        if nickname:
-            self.nickname = str(nickname)
-        else:
-            # they didn't enter a nickname?
-            raise Exception("Nickname can't be of length 0")
+        return (self.token, self.secret)
 
     ##
     # server
@@ -172,7 +145,7 @@ class PyPump(object):
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
                 proto=self.protocol,
-                server=self.server if server is None else server,
+                server=self.client.server if server is None else server,
                 endpoint=endpoint
                 )
         return url
@@ -183,8 +156,8 @@ class PyPump(object):
         server, endpoint = url.split("/", 1)
         return (server, endpoint)
 
-    def _add_consumer(self, url, key=None, secret=None):
-        """ Creates Consumer object with key and secret for server
+    def _add_client(self, url, key=None, secret=None):
+        """ Creates Client object with key and secret for server
         and adds it to _server_cache if it doesnt already exist """
 
         if "://" in url:
@@ -194,17 +167,24 @@ class PyPump(object):
 
         if server not in self._server_cache:
             if not (key and secret):
-                oid = openid.OpenID(
-                    server=server,
-                    client_name=self.client_name,
-                    application_type=self.client_type
+                client = Client(
+                    webfinger=self.client.webfinger,
+                    name=self.client.name,
+                    type=self.client.type
                 )
-                consumer = oid.register_client()
+                client.set_pump(self)
+                client.register()
             else:
-                consumer = openid.Consumer()
-                consumer.key = key
-                consumer.secret = secret
-            self._server_cache[server] = consumer
+                client = Client(
+                        webfinger=self.client.webfinger,
+                        key=key,
+                        secret=secret,
+                        type=self.client.type,
+                        name=self.client.name,
+                        )
+                client.set_pump(self)
+
+            self._server_cache[server] = client
 
     def request(self, endpoint, method="GET", data="",
                 raw=False, params=None, attempts=3, client=None,
@@ -230,7 +210,6 @@ class PyPump(object):
 
         headers = headers or {"Content-Type": "application/json"}
 
-        lastresponse = ""
         for attempt in range(attempts):
             if method == "POST":
                 request = {
@@ -274,7 +253,6 @@ class PyPump(object):
                     **request
                 )
 
-            self._lastresponse = response # for debug purposes
             if response.status_code == 200:
                 # huray!
                 return response.json()
@@ -294,15 +272,15 @@ class PyPump(object):
                     error = "400 - Bad request."
                 raise PyPumpException(error)
 
+
         error = "Failed to make request to {0}".format(url)
         raise PyPumpException(error)
+
     def _requester(self, fnc, endpoint, raw=False, **kwargs):
         if not raw:
             url = self.build_url(endpoint)
         else:
             url = endpoint
-
-        kwargs.setdefault("verify", self.verify_requests)
 
         try:
             response = fnc(url, **kwargs)
@@ -334,11 +312,11 @@ class PyPump(object):
         self.__server_tokens = self.request_token()
 
         self.token = self.__server_tokens["token"]
-        self.token_secret = self.__server_tokens["token_secret"]
+        self.secret = self.__server_tokens["token_secret"]
 
         url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
-                server=self.server,
+                server=self.client.server,
                 token=self.token.decode("utf-8")
                 ))
 
@@ -359,19 +337,19 @@ class PyPump(object):
         if url and "://" in url:
             server, endpoint = self.deconstruct_url(url)
         else:
-            server = self.server
+            server = self.client.server
 
         if server not in self._server_cache:
-            self._add_consumer(server)
+            self._add_client(server)
 
-        if server == self.server:
-            self.client = OAuth1(
-                    client_key=self._server_cache[self.server].key,
-                    client_secret=self._server_cache[self.server].secret,
+        if server == self.client.server:
+            self.oauth = OAuth1(
+                    client_key=self._server_cache[self.client.server].key,
+                    client_secret=self._server_cache[self.client.server].secret,
                     resource_owner_key=self.token,
-                    resource_owner_secret=self.token_secret
+                    resource_owner_secret=self.secret
                     )
-            return self.client
+            return self.oauth
         else:
             return OAuth1(
                 client_key=six.u(self._server_cache[server].key),
@@ -390,8 +368,8 @@ class PyPump(object):
     def request_token(self):
         """ Gets OAuth request token """
         client = OAuth1(
-                client_key=self._server_cache[self.server].key,
-                client_secret=self._server_cache[self.server].secret,
+                client_key=self._server_cache[self.client.server].key,
+                client_secret=self._server_cache[self.client.server].secret,
                 callback_uri=self.callback_uri
                 )
 
@@ -413,8 +391,8 @@ class PyPump(object):
     def request_access(self, **auth_info):
         """ Get OAuth access token so we can make requests """
         client = OAuth1(
-                client_key=self._server_cache[self.server].key,
-                client_secret=self._server_cache[self.server].secret,
+                client_key=self._server_cache[self.client.server].key,
+                client_secret=self._server_cache[self.client.server].secret,
                 resource_owner_key=auth_info['token'],
                 resource_owner_secret=auth_info['token_secret'],
                 verifier=auth_info['verifier']
@@ -430,7 +408,7 @@ class PyPump(object):
         data = parse.parse_qs(response.content)
 
         self.token = data[self.PARAM_TOKEN][0]
-        self.token_secret = data[self.PARAM_TOKEN_SECRET][0]
+        self.secret = data[self.PARAM_TOKEN_SECRET][0]
         self.__server_tokens = None # clean up code.
 
 class WebPump(PyPump):

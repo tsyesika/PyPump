@@ -19,10 +19,14 @@
 import json
 import sys
 import os
+import optparse
+import six
+
 from pypump import PyPump
+from pypump.client import Client
 
 try:
-    from IPython.frontend.terminal.embed import InteractiveShellEmbed
+    from IPython import embed
     from IPython.config.loader import Config
 except ImportError:
     print("You need to have ipython installed to run this")
@@ -132,45 +136,42 @@ def save_database(db, path):
     return db
 
 if __name__ == "__main__":
-    if "-h" in sys.argv or "--help" in sys.argv:
-        print("Usage:")
-        print("     {0} <webfinger> [client_name]".format(sys.argv[0]))
-        sys.exit(0)
+    parser = optparse.OptionParser()
+    parser.add_option("-c", "--clean",
+                      dest="clean",
+                      action="store_true",
+                      default=False,
+                      help="Removes all stored OAuth credentials")
+    
+    parser.add_option("-l", "--loglevel",
+                      dest="loglevel",
+                      default="error",
+                      help="Set level of logging")
 
-    if "-v" in sys.argv or "--version" in sys.argv:
-        if os.path.exists("VERSION"):
-            print(open("VERSION", "r").read())
-        else:
-            print("Unknown.")
-        sys.exit(0)
+    parser.add_option("--no-check-certificate",
+                      dest="verify",
+                      help="Accepts invalid SSL certificates")
 
-    if "--clean" in sys.argv:
-        if not os.path.exists(store_path):
-            print("Nothing to do.")
-            sys.exit(0)
-
-        try:
+    (options, args) = parser.parse_args()
+    
+    if options.clean:
+        if os.path.isfile(store_path):
             os.remove(store_path)
-            print("Removed all files used by PyPump tester")
-        except Exception:
-            print("Something went wrong, probably permissions")
-            print("The file I should have been writing to is {0}".format(store_path))
-        sys.exit(0)
+            six.print_("Successfully removed all OAuth credentials")
+        else:
+            six.print_("No OAuth crendetials found.")
+            sys.exit(1)
 
-    loglevel = "warn"
-    webfinger = None
-    for ll in sys.argv:
-        if ll.startswith("--loglevel="):
-            loglevel = ll[len("--loglevel="):]
+        sys.exit()
 
-        if not ll.startswith("-"):
-            webfinger = ll
-
+    
     # go find the client info if it exists
     db = open_database(store_path)
 
+    webfinger = None if len(args) <= 0 else args[0]
+
     if db == dict() and webfinger is None:
-        print("You must specify a webfinger")
+        six.print_("You must specify a webfinger")
         sys.exit(1)
 
     for wf in db.keys():
@@ -179,34 +180,27 @@ if __name__ == "__main__":
 
     # okay so.
     if webfinger.find("@") == -1:
-        print("Can't find webfinger {0}".format(webfinger))
+        six.print_("Can't find webfinger {0}".format(webfinger))
 
-    if webfinger not in db:
-        if len(sys.argv) <= 2:
-            client_name = "PyPump"
-        else:
-            client_name = sys.argv[2]
-        
-        db[webfinger] = {
-                "client_name": client_name
-                }
+    client = Client(
+            webfinger=webfinger,
+            name="PyPump",
+            type="native"
+            )
 
-    else:
-        client_name = db[webfinger].get("client_name", "PyPump")
-        db[webfinger]["client_name"] = client_name
-
+    if webfinger in db:
+        client.key = db[webfinger]["key"]
+        client.secret = db[webfinger]["secret"]
+        client.expirey = db[webfinger]["expirey"]
     
     sys.stdout.write("-> Setting up PyPump  ")
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
+    
     pump = PyPump(
-            webfinger,
-            client_name=client_name,
-            key=db[webfinger].get("key", None),
-            secret=db[webfinger].get("secret", None),
-            client_type=db[webfinger].get("client_type", "native"),
+            client=client,
             token=db[webfinger].get("token", None),
-            token_secret=db[webfinger].get("token_secret", None),
-            loglevel=loglevel
+            secret=db[webfinger].get("token_secret", None),
+            loglevel=options.loglevel
             )
     
 
@@ -251,10 +245,7 @@ if __name__ == "__main__":
     )
                     
 
-    shell = InteractiveShellEmbed(
-            config=cfg,
-            banner1=welcome_banner,
-            exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues"
-            )
-
-    shell() 
+    embed(
+        config=cfg,
+        banner1=welcome_banner,
+        exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues")
