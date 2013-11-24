@@ -16,6 +16,7 @@ setup(
         long_description=open("README.rst").read(),
         author="Jessica Tallon",
         author_email="tfmyz@inboxen.org",
+        scripts=['pypump-shell'],
         url="https://github.com/xray7224/PyPump",
         packages=["pypump", "pypump.exception", "pypump.models"],
         license="GPLv3",
