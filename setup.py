@@ -24,7 +24,6 @@ setup(
                 "requests-oauthlib>=0.3.0",
                 "requests>=1.2.0",
                 "python-dateutil>=2.1",
-                "discover",
                 ],
         classifiers=[
                 "Development Status :: 3 - Alpha",

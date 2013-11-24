@@ -6,5 +6,5 @@ python:
   - "3.3"
   - "pypy"
 install: python setup.py develop
-script: ./run_tests
+script: python setup.py test
   
