@@ -1,3 +1,6 @@
+from sys import version_info
+from warning import warn
+
 try:
     from setuptools import setup
 except ImportError:
@@ -37,5 +40,8 @@ setup(
                 "License :: OSI Approved",
                 "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
                 "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-                ] 
+                ]
      )
+
+if version_info.major == 2:
+    warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")

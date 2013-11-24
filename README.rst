@@ -7,7 +7,7 @@ PyPump - Python Pump.io Library
 :Keywords: pump.io, library, social, federated
 
 What is Pump.io?
-==============
+================
 
 Pump.io is a socially oriented federated network. It provides a way to post notes and images as well and subscribe to other people to get updates on what they post.
 
@@ -42,6 +42,12 @@ Installation
 You can install it via pip::
 
     $ pip install pypump
+
+If you're using Python 2, you may wish to install the following packages for SNI support::
+
+    $ pip install ndg-httpsclient pyopenssl pyasn1
+
+These packages are not automatually installed due to pyopenssl being a C extension.
 
 Chat with us?
 =============
