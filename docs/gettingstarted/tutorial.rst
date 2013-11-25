@@ -2,8 +2,6 @@
 Tutorial
 ========
 
-.. note:: This tutorial is prep for an API that does not yet actually exist... we're doing the documentation driven development route.  But this is what it should look like! ;)
-
 PyPump and the Pump API
 -----------------------
 
