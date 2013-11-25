@@ -354,8 +354,8 @@ class PyPump(object):
             return self.oauth
         else:
             return OAuth1(
-                client_key=six.u(self._server_cache[server].key),
-                client_secret=six.u(self._server_cache[server].secret),
+                client_key=self._server_cache[server].key,
+                client_secret=self._server_cache[server].secret,
             )
 
     def get_access(self, url):
