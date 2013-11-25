@@ -136,13 +136,20 @@ def save_database(db, path):
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
+
     parser.add_option("-c", "--clean",
                       dest="clean",
                       action="store_true",
                       default=False,
                       help="Removes all stored OAuth credentials")
+
+    parser.add_option("-l", "--list",
+                      dest="list",
+                      action="store_true",
+                      default=False,
+                      help="Lists all stored OAuth credentials")
     
-    parser.add_option("-l", "--loglevel",
+    parser.add_option("--log", "--loglevel",
                       dest="loglevel",
                       default="error",
                       help="Set level of logging")
@@ -162,10 +169,15 @@ if __name__ == "__main__":
             sys.exit(1)
 
         sys.exit()
-
     
     # go find the client info if it exists
     db = open_database(store_path)
+
+    if options.list:
+        for finger in db.keys():
+            six.print_(finger)
+
+        sys.exit()
 
     webfinger = "" if len(args) <= 0 else args[0]
 
