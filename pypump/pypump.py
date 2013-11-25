@@ -72,32 +72,31 @@ class PyPump(object):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
-
-            Don't forget if you want to use https ensure the secure flag is True
         """
 
         self.verify_requests = verify
-
-        # First, we need to setup the logger
+        self.callback = callback
+        self.client = client
+        self.verifier_callback = verifier_callback
+        self._server_cache[self.client.server] = self.client
+        
+        
         log_level = getattr(logging, loglevel.upper(), None)
         if log_level is None:
             raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
         _log.setLevel(log_level)
 
 
-        self.client = client
         self.client.set_pump(self)
         if not self.client.key:
             self.client.register()
 
-        self._server_cache[self.client.server] = self.client
 
-        self.verifier_callback = verifier_callback
         self.populate_models()
 
         if not (token and secret):
             # we need to make a new oauth request
-            self.oauth_request() # this does NOT return access tokens but None
+            self.oauth_request()
         else:
             self.token = token
             self.secret = secret
@@ -275,7 +274,13 @@ class PyPump(object):
                 raise PyPumpException(error)
 
 
-        error = "Failed to make request to {0}".format(url)
+        error = "Request Failed to {url} (response: {data} | status: {status})"
+        error = error.format(
+                url=url,
+                data=response.content,
+                status=response.status_code
+                )
+
         raise PyPumpException(error)
 
     def _requester(self, fnc, endpoint, raw=False, **kwargs):
@@ -372,7 +377,7 @@ class PyPump(object):
         client = OAuth1(
                 client_key=self._server_cache[self.client.server].key,
                 client_secret=self._server_cache[self.client.server].secret,
-                callback_uri=self.callback_uri
+                callback_uri=self.callback
                 )
 
         request = {"auth": client}
