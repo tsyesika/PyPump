@@ -204,13 +204,13 @@ if __name__ == "__main__":
 
     webfinger = "" if len(args) <= 0 else args[0]
 
-    if db == dict() and webfinger == "" or webfinger.find("@") == -1:
-        six.print_("You must specify a webfinger")
-        sys.exit(1)
-
     for wf in db.keys():
         if webfinger in wf:
             webfinger = wf
+
+    if (db == dict() and webfinger == "") or webfinger.find("@") == -1:
+        six.print_("You must specify a webfinger")
+        sys.exit(1)
 
     client = Client(
             webfinger=webfinger,
