@@ -148,6 +148,10 @@ if __name__ == "__main__":
                       action="store_true",
                       default=False,
                       help="Lists all stored OAuth credentials")
+
+    parser.add_option("-r", "--remove",
+                      dest="remove",
+                      help="Remove stored OAuth credentials for selected webfinger")
     
     parser.add_option("--log", "--loglevel",
                       dest="loglevel",
@@ -178,21 +182,25 @@ if __name__ == "__main__":
             six.print_(finger)
 
         sys.exit()
+    elif options.remove:
+        try:
+            del db[options.remove]
+        except KeyError:
+            six.print_("No such webfinger")
+            sys.exit(1)
+
+        save_database(db, store_path)
+        sys.exit()
 
     webfinger = "" if len(args) <= 0 else args[0]
 
-
-    if db == dict() and webfinger == "":
+    if db == dict() and webfinger == "" or webfinger.find("@") == -1:
         six.print_("You must specify a webfinger")
         sys.exit(1)
 
     for wf in db.keys():
         if webfinger in wf:
             webfinger = wf
-
-    # okay so.
-    if webfinger.find("@") == -1:
-        six.print_("Can't find webfinger {0}".format(webfinger))
 
     client = Client(
             webfinger=webfinger,
