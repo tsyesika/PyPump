@@ -101,38 +101,48 @@ def ascii_table(headings, data):
     stable += sepper()
     return stable # few, glad that's over
 
-    
-
 def open_database(path):
     if os.path.exists(path):
         try:
             fin = open(path, "r")
             db = json.loads(fin.read())
-            return db
-        except Exception:
-            six.print_("There has been a problem parsing the database {0}".format(path))
+        except IOError:
+            six.print_("Cannot open file {0}".format(path))
+            sys.exit(1)
+        except ValueError:
+            six.print_("Unalbe to parse database {0}".format(path))
             sys.exit(1)
 
+        return db
     else:
         return {}
 
 def save_database(db, path):
     """ Saves db as JSON to path """
-    if os.path.exists(path):
+    tmp_path = "{0}.tmp".format(path)
+
+    if os.path.exists(tmp_path):
         try:
-            os.remove(path)
-        except Exception:
-            six.print_("There was an error removing database from {0}".format(path))
+            os.remove(tmp_path)
+        except IOerror:
+            pass #whatever
     try:
-        fout = open(path, "w")
+        fout = open(tmp_path, "w")
         db = json.dumps(db, sort_keys=True, indent=4, separators=(",", ": "))
         fout.write(db)
         fout.close()
-    except Exception:
-        six.print_("There was an error saving the database to {0}".format(path))
+    except ValueError:
+        six.print_("Unable to encode data for saving")
+        sys.exit(1)
+    except IOError:
+        six.print_("Cannot save temporary database ".format(tmp_path))
         sys.exit(1)
 
-    return db
+    try:
+        os.rename(tmp_path, path)
+    except IOError:
+        six.print_("Cannot save database ".format(tmp_path))
+        sys.exit(1)
 
 if __name__ == "__main__":
     parser = optparse.OptionParser()
