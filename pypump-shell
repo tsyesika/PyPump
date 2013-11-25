@@ -167,9 +167,10 @@ if __name__ == "__main__":
     # go find the client info if it exists
     db = open_database(store_path)
 
-    webfinger = None if len(args) <= 0 else args[0]
+    webfinger = "" if len(args) <= 0 else args[0]
 
-    if db == dict() and webfinger is None:
+
+    if db == dict() and webfinger == "":
         six.print_("You must specify a webfinger")
         sys.exit(1)
 
