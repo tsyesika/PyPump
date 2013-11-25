@@ -222,6 +222,8 @@ if __name__ == "__main__":
         client.key = db[webfinger]["key"]
         client.secret = db[webfinger]["secret"]
         client.expirey = db[webfinger]["expirey"]
+    else:
+        db[webfinger] = {}
     
     sys.stdout.write("-> Setting up PyPump  ")
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
