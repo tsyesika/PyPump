@@ -56,6 +56,7 @@ your first time, you need to authenticate this client::
     ...     type="native", # Can be "native" or "web"
     ...     name="Test.io"
     ...     )
+    >>> pump = PyPump(client=client) # prints out instructions for verifying
     >>> client_credentials = pump.get_registration() # will return [<key>, <secret>, <expirey>]
     >>> client_tokens = pump.get_token() # [<token>, <secret>]
 
@@ -147,43 +148,47 @@ Prehaps we want to know a bit about Evan::
 
     >>> print(evan.summary)
 
-.. Maybe we took a picture, and we want to post that picture to our
-.. public feed so everyone can see it.  We can do this by posting it to
-.. our outbox:
-.. 
-..   >>> from pypump.activities import Photo
-..   >>> new_photo = Photo(
-..   ...     pump,
-..   ...     subject=
+Maybe we took a picture, and we want to post that picture to our
+public feed so everyone can see it.  We can do this by posting it to
+our outbox::
+
+    >>> img = pump.Image(
+    ...     display_name="Sunset"
+    ...     content="I took this the other day, came out really well!")
+    >>> img.from_file("sunset.jpg")
 
 Want to see what the model actually looks like?
-All activities in pump.io have a .seralize method::
+All activities in pump.io have a .serialize method::
 
-    >>> print(message.to_json(indent=2))
+    >>> output = message.serialize(indent=4)
+    >>> print(output)
     {
-    "id": "http://coding.example/api/activity/bwkflwken",
-    "actor": {
-      "id": "acct:bwk@coding.example",
-      "objectType": "person",
-      "displayName": "Brian Kernighan"
-    },
-    "verb": "follow",
-    "to": [{
-      "id": "acct:ken@coding.example",
-      "objectType": "person"
-    }],
-    "object": {
-      "id": "acct:ken@coding.example",
-      "objectType": "person",
-      "displayName": "Ken Thompson"
-    },
-    "published": "1974-01-01T00:00:00",
-    "links": [
-        {"rel": "self", "href": "http://coding.example/api/activity/bwkflwken"}
-    ]
+        "id": "http://coding.example/api/activity/bwkflwken",
+        "actor": {
+            "id": "acct:bwk@coding.example",
+            "objectType": "person",
+            "displayName": "Brian Kernighan"
+        },
+        "verb": "follow",
+        "to": [
+            {
+                "id": "acct:ken@coding.example",
+                "objectType": "person"
+            }
+        ],
+        "object": {
+            "id": "acct:ken@coding.example",
+            "objectType": "person",
+            "displayName": "Ken Thompson"
+        },
+        "published": "1974-01-01T00:00:00",
+        "links": [
+            {
+                "rel": "self",
+                "href": "http://coding.example/api/activity/bwkflwken"
+            }
+        ]
     }
-
-(The indent attribute here is passed to  to give prettier output.)
 
 .. (Yes, that was stolen from the Pump API docs :))
 
