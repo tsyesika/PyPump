@@ -106,19 +106,19 @@ class Client(object):
         # Convert to JSON  and send
         return json.dumps(data)
 
-    def request(self):
+    def request(self, server=None):
         """ Sends the request """
         request = {
                 "headers": {"Content-Type": "application/json"},
                 "data": self.context,
                 }
 
-        if self.webfinger == self._pump.client.webfinger:
+        if not server and (self.webfinger == self._pump.client.webfinger):
             response = self._pump._requester(requests.post, self.ENDPOINT, **request)
         else:
             url = "{proto}://{server}/{endpoint}".format(
                 proto=self._pump.protocol,
-                server = self.server,
+                server = server or self.server,
                 endpoint = self.ENDPOINT
             )
             response = self._pump._requester(requests.post, url, **request)
@@ -139,12 +139,12 @@ class Client(object):
         
         return server_data
 
-    def register(self):
+    def register(self, server=None):
         """ Sends a client registration request """
         if (self.key or self.secret):
             return self.update()
  
-        server_data = self.request()
+        server_data = self.request(server)
 
         self.key = server_data["client_id"]
         self.secret = server_data["client_secret"]

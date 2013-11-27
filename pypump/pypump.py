@@ -174,7 +174,7 @@ class PyPump(object):
                     type=self.client.type
                 )
                 client.set_pump(self)
-                client.register()
+                client.register(server)
             else:
                 client = Client(
                         webfinger=self.client.webfinger,
