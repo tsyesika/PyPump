@@ -276,7 +276,7 @@ class Postable(object):
             if isinstance(person, six.class_types):
                 people[i] = person()
             
-            if isinstance(people[i], self._pump.Person):
+            if isinstance(people[i], type(self._pump.Person())):
                 people[i] = {
                     "id": people[i].id,
                     "objectType": people[i].objectType,

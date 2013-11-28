@@ -119,7 +119,7 @@ class PyPump(object):
         self.Image = factory(self, Image)
         self.Person = factory(self, Person)
         self.Location = factory(self, Location)
-        self.Public = factory(self, Public)
+        self.Public = Public
         self.Activity = factory(self, Activity)
 
     ##
