@@ -23,7 +23,9 @@ _log = logging.getLogger(__name__)
 
 class Collection(AbstractModel):
     
-    def __init__(self, id):
+    def __init__(self, id=None, *args, **kwargs):
+        super(Collection, self).__init__(*args, **kwargs)
+
         self.id = id
 
     @property
@@ -78,6 +80,7 @@ class Collection(AbstractModel):
         return "<{type}: {id}>".format(type=self.TYPE, id=self.id)
 
     def unserialize(self, data):
+        self.id = data["id"] if "id" in data else None
         self.display_name = data["displayName"] if "displayName" in data else None
         self.content = data["content"] if "content" in data else None
         self.links = dict()
