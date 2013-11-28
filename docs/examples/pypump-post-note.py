@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, json, argparse
-from pypump import PyPump
+from pypump import PyPump, Client
 
 class App(object):
 
@@ -27,10 +27,19 @@ class App(object):
         # from config, if our webfinger is not found in config we will
         # have to authorize the app with our account.
         webfinger = self.args.webfinger
+
+        client=Client(
+            webfinger=webfinger,
+            type='native',
+            name=self.client_name,
+            key=self.config.get(webfinger, {}).get('key'),
+            secret=self.config.get(webfinger, {}).get('secret')
+        )
+
         self.pump = PyPump(
-            webfinger,
-            client_name = self.client_name,
-            **self.config.get(webfinger, {})
+            client=client,
+            token=self.config.get(webfinger, {}).get('token'),
+            secret=self.config.get(webfinger, {}).get('token_secret')
         )
 
         # Add account credentials to config in case we didnt have it already
@@ -71,10 +80,9 @@ class App(object):
         mynote = self.pump.Note(note_title + note_content)
         mynote.to = self.pump.me.followers
         mynote.cc = self.pump.Public
-        if mynote.send():
-            return mynote.id
-        else:
-            return None
+        mynote.send()
+
+        return mynote.id or None
 
 if __name__ == '__main__':
     app = App()
