@@ -37,13 +37,13 @@ class Collection(AbstractModel):
     def ENDPOINT(self):
         return self.id
 
-    def add(self, person):
-        """ Adds a person to the collection """
+    def add(self, obj):
+        """ Adds a member to the collection """
         activity = {
             "verb": "add",
             "object": {
-                "objectType": "person",
-                "id": person.id
+                "objectType": obj.objectType,
+                "id": obj.id
             },
             "target":{
                 "objectType": "collection",
@@ -53,13 +53,13 @@ class Collection(AbstractModel):
 
         self._post_activity(activity)
 
-    def remove(self, person):
-        """ Removes a person from the collection """
+    def remove(self, obj):
+        """ Removes a member from the collection """
         activity = {
             "verb": "remove",
             "object": {
-                "objectType": "person",
-                "id": person.id
+                "objectType": obj.objectType,
+                "id": obj.id
             },
             "target":{
                 "objectType": "collection",

@@ -274,15 +274,17 @@ class Outbox(Feed):
 
 
 class Lists(Feed):
+    # defaults to lists of persons
+    membertype = "person"
 
     @property
     def ENDPOINT(self):
-        # TODO limited to "person" lists atm
         # offset and count doesnt work properly, see https://github.com/e14n/pump.io/issues/794
-        return "{proto}://{server}/api/user/{username}/lists/person".format(
+        return "{proto}://{server}/api/user/{username}/lists/{membertype}".format(
             proto=self._parent._pump.protocol,
             server=self._parent.server,
-            username=self._parent.username
+            username=self._parent.username,
+            membertype=self.membertype
         )
 
     def create(self, display_name, content=None):
@@ -291,7 +293,7 @@ class Lists(Feed):
             "verb":"create",
             "object":{
                 "objectType":"collection",
-                "objectTypes":["person"],
+                "objectTypes":[self.membertype],
                 "displayName":display_name,
                 "content":content
             }
