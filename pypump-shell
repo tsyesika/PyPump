@@ -19,6 +19,7 @@
 import json
 import sys
 import os
+import logging
 import optparse
 import six
 
@@ -165,7 +166,7 @@ if __name__ == "__main__":
     
     parser.add_option("--log", "--loglevel",
                       dest="loglevel",
-                      default="error",
+                      default="warning",
                       help="Set level of logging")
 
     parser.add_option("--no-check-certificate",
@@ -173,7 +174,12 @@ if __name__ == "__main__":
                       help="Accepts invalid SSL certificates")
 
     (options, args) = parser.parse_args()
-    
+
+    log_level = getattr(logging, options.loglevel.upper(), None)
+    if not isinstance(log_level, int):
+        raise ValueError('Invalid log level: %s' % options.loglevel)
+    logging.basicConfig(level=log_level)
+
     if options.clean:
         if os.path.isfile(store_path):
             os.remove(store_path)
@@ -232,7 +238,6 @@ if __name__ == "__main__":
             client=client,
             token=db[webfinger].get("token", None),
             secret=db[webfinger].get("token_secret", None),
-            loglevel=options.loglevel
             )
     
 

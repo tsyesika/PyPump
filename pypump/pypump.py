@@ -68,7 +68,7 @@ class PyPump(object):
     _unit_testing = False # Is being run in unit tests
 
     def __init__(self, client, token=None, secret=None, verifier_callback=None,
-                callback="oob", loglevel="error", verify=True):
+                callback="oob", verify=True):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -79,12 +79,6 @@ class PyPump(object):
         self.client = client
         self.verifier_callback = verifier_callback
         self._server_cache[self.client.server] = self.client
-        
-        
-        log_level = getattr(logging, loglevel.upper(), None)
-        if log_level is None:
-            raise PyPumpException("Unknown loglevel {0!r}".format(loglevel))
-        _log.setLevel(log_level)
 
 
         self.client.set_pump(self)
