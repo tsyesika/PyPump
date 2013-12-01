@@ -267,10 +267,10 @@ class Postable(object):
 
     def _set_people(self, people):
         """ Sets who the object is sent to """
-        if hasattr(people, "__iter__"):
-            people = list(people)
-        else:
+        if hasattr(people, "objectType"):
             people = [people]
+        elif hasattr(people, "__iter__"):
+            people = list(people)
 
         for i, person in enumerate(people):
             if isinstance(person, six.class_types):
