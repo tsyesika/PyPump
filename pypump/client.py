@@ -112,16 +112,14 @@ class Client(object):
                 "headers": {"Content-Type": "application/json"},
                 "data": self.context,
                 }
-
-        if not server and (self.webfinger == self._pump.client.webfinger):
-            response = self._pump._requester(requests.post, self.ENDPOINT, **request)
-        else:
-            url = "{proto}://{server}/{endpoint}".format(
-                proto=self._pump.protocol,
-                server = server or self.server,
-                endpoint = self.ENDPOINT
-            )
-            response = self._pump._requester(requests.post, url, **request)
+        
+        url = "{proto}://{server}/{endpoint}".format(
+            proto=self._pump.protocol,
+            server = server or self.server,
+            endpoint = self.ENDPOINT
+        )
+        
+        response = self._pump._requester(requests.post, url, **request)
         
         try:
             server_data = response.json()
