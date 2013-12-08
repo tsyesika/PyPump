@@ -123,7 +123,7 @@ class Person(AbstractModel):
 
     @property
     def webfinger(self):
-        return self.id[5:]
+        return self.id.replace("acct:", "")
 
     def follow(self): 
         """ Follow person """
