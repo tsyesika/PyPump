@@ -51,7 +51,7 @@ class ItemList(object):
             self.cache = response["items"] if response else None
         data = self.cache.pop(0) if self.cache else None
 
-        if not data or (self.stop and self.itercounter >= self.stop):
+        if not data or (self.stop and self.itercounter >= (self.stop - self.start)):
             raise StopIteration
 
         if not self.feed.objectTypes:
@@ -150,7 +150,8 @@ class Feed(AbstractModel):
         return data
 
     def unserialize(self, data):
-        self.debug("unserialize({params})", params={"self": self, "data": data})
+        # comment out debug as it locks up kabniel's term by printing a 200k char string
+        #self.debug("unserialize({params})", params={"self": self, "data": data})
         self.displayName = data["displayName"]
         self.totalItems = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
