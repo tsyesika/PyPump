@@ -41,7 +41,6 @@ class TestPump(PyPump):
 
         new_kwargs = dict(
             client=client,
-            loglevel="critical",
             token="AToken",
             secret="ATokenSecret",
             )
