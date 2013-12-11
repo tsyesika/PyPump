@@ -129,11 +129,11 @@ class Client(object):
         if "error" in server_data:
             raise ClientException(server_data["error"], self.context)
 
-        _log.debug("Client registration recieved: {id} {secret} {expire}".format(
-                id=server_data["client_id"],
-                secret=server_data["client_secret"],
-                expire=server_data["expires_at"]
-                ))
+        _log.debug("Client registration recieved: %(id)s %(secret)s %(expire)s", {
+                "id": server_data["client_id"],
+                "secret": server_data["client_secret"],
+                "expire": server_data["expires_at"]
+                })
         
         return server_data
 

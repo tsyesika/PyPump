@@ -144,14 +144,12 @@ class Feed(AbstractModel):
         else:
             url = self.ENDPOINT
 
-        _log.debug("feed._request: url: {0}, params: {1}".format(url, params))
+        _log.debug("feed._request: url: %s, params: %s", url, params)
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data
 
     def unserialize(self, data):
-        # comment out debug as it locks up kabniel's term by printing a 200k char string
-        #self.debug("unserialize({params})", params={"self": self, "data": data})
         self.displayName = data["displayName"]
         self.totalItems = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None

@@ -54,7 +54,7 @@ class Mapper(object):
         elif key in self.dates:
             self.set_date(obj, key, data, from_json)
         else:
-            _log.info("ignoring unknown attribute {key!r}".format(key=key))
+            _log.info("ignoring unknown attribute %r", key)
 
     def set_string(self, obj, key, data, from_json):
         setattr(obj, key, data)
