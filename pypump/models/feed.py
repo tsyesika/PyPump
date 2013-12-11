@@ -113,7 +113,7 @@ class Feed(AbstractModel):
     def __getitem__(self, key):
         if isinstance(key, slice):
             return self.__getslice__(key)
-        item = ItemList(self, count=1, start=key, stop=1)
+        item = ItemList(self, count=1, start=key, stop=key+1)
         try:
             return item.next()
         except StopIteration:
