@@ -54,7 +54,7 @@ class Mapper(object):
         elif key in self.dates:
             self.set_date(obj, key, data, from_json)
         else:
-            _log.info("ignoring unknown attribute {key!r} : {value!r}".format(key=key, value=data))
+            _log.info("ignoring unknown attribute {key!r}".format(key=key))
 
     def set_string(self, obj, key, data, from_json):
         setattr(obj, key, data)
@@ -140,7 +140,7 @@ class Activity(AbstractModel):
     
     def __repr__(self):
         return '<Activity: {webfinger} {verb}ed {model}>'.format(
-            webfinger=self.actor.id.lstrip("acct:"),
+            webfinger=self.actor.id.replace("acct:", ""),
             verb=self.verb.rstrip("e"), # english: e + ed = ed
             model=self.obj.objectType
         )
