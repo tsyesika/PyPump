@@ -39,19 +39,46 @@ class ItemList(object):
     def __iter__(self):
         return self
 
+    def _should_stop(self, data):
+        if not data:
+            return True
+
+        if type(self.stop) == int:
+            if type(self.start) == int:
+                # feed[start_int:stop_int]
+                if self.stop and self.itercounter >= (self.stop - self.start):
+                    return True
+            elif self.start is not None:
+                # feed[start_id:count_int]
+                if self.itercounter >= self.stop:
+                    return True
+        elif self.stop is not None:
+            # feed[:stop_id]
+            if self.stop == data["id"]:
+                return True
+
+    def _build_cache(self):
+        if not self.previous_id:
+            if type(self.start) == int:
+                response = self.feed._request(count=self.count, offset=self.start)
+            elif self.start is not None:
+                response = self.feed._request(count=self.count, before=self.start)
+            else:
+                response = self.feed._request(count=self.count)
+        elif "next" in self.feed.links:
+            url = self.feed.links["next"]["href"]
+            response = self.feed._request(count=self.count, next=url)
+        else:
+            response = None
+        
+        self.cache = response["items"] if response else None
+
     def next(self):
         if not self.cache:
-            if not self.previous_id:
-                response = self.feed._request(count=self.count, offset=self.start)
-            elif "next" in self.feed.links:
-                url = self.feed.links["next"]["href"]
-                response = self.feed._request(count=self.count, next=url)
-            else:
-                response = None
-            self.cache = response["items"] if response else None
+            self._build_cache()
         data = self.cache.pop(0) if self.cache else None
 
-        if not data or (self.stop and self.itercounter >= (self.stop - self.start)):
+        if self._should_stop(data):
             raise StopIteration
 
         if not self.feed.objectTypes:
@@ -113,6 +140,8 @@ class Feed(AbstractModel):
     def __getitem__(self, key):
         if isinstance(key, slice):
             return self.__getslice__(key)
+        if type(key) is not int:
+            raise TypeError('index must be integer')
         item = ItemList(self, count=1, start=key, stop=key+1)
         try:
             return item.next()
