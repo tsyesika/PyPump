@@ -67,7 +67,7 @@ class ItemList(object):
                 response = self.feed._request(count=self.count)
         elif "next" in self.feed.links:
             url = self.feed.links["next"]["href"]
-            response = self.feed._request(count=self.count, next=url)
+            response = self.feed._request(count=self.count, feed_url=url)
         else:
             response = None
         
@@ -90,6 +90,7 @@ class ItemList(object):
         self.itercounter +=1
         return obj
 
+
 class Feed(AbstractModel):
     id = None
     displayName = None
@@ -110,13 +111,13 @@ class Feed(AbstractModel):
     def items(self):
         return ItemList(self)
 
-    def __init__(self, parent, endpoint=None, totalItems=None):
-        self._parent = parent
-        self.totalItems = totalItems if totalItems else self.totalItems
-        self._pump = self._parent._pump
-        if endpoint is not None:
-            self._ENDPOINT = endpoint
+    def __init__(self, feed_url=None, *args, **kwargs):
+        super(Feed, self).__init__(*args, **kwargs)
+
+        self._ENDPOINT = feed_url
         self.id = self.ENDPOINT
+
+        tmp = self.totalItems or list(self[:1]) # we do a request on init to get some info
 
     def __repr__(self):
         return "<Feed: {type}>".format(
@@ -124,15 +125,7 @@ class Feed(AbstractModel):
         )
 
     def __str__(self):
-        # TODO: Do better
-        if self._parent.TYPE == "person":
-            return "{type} for {user}@{server}".format(
-                type=self.TYPE,
-                user=self._parent.username,
-                server=self._parent.server
-            )
-        else:
-            return "{name}".format(name=self.displayName if self.displayName else self.TYPE)
+        return "{name}".format(name=self.displayName or self.TYPE)
 
     def __iter__(self):
         return ItemList(self)
@@ -153,30 +146,25 @@ class Feed(AbstractModel):
             s = slice(s,e)
 
         return ItemList(self, start=s.start, stop=s.stop)
- 
-    def _request(self, offset=None, count=None, since=None, before=None, next=None):
+
+    def _request(self, offset=None, count=None, since=None, before=None, feed_url=None):
         params = dict()
+        for i in ["count", "offset", "since", "before"]:
+            if eval(i):
+                params[i] = eval(i)
 
-        if count is not None:
-            params["count"] = count
-
-        if offset is not None:
-            params["offset"] = offset
-
-        if since is not None:
-            params["since"] = since
-        elif before is not None:
-            params["before"] = before
-
-        if next is not None:
-            url = next
-        else:
-            url = self.ENDPOINT
+        url = feed_url or self.ENDPOINT
 
         _log.debug("feed._request: url: %s, params: %s", url, params)
         data = self._pump.request(url, params=params)
         self.unserialize(data)
         return data
+
+    def _subfeed(self, feedname):
+        endpoint = self.ENDPOINT
+        if not endpoint.endswith("/"):
+            endpoint += "/"
+        return endpoint + feedname
 
     def unserialize(self, data):
         self.displayName = data["displayName"]
@@ -189,129 +177,104 @@ class Feed(AbstractModel):
 class Followers(Feed):
     """ Person's followers """
 
-    @property
-    def ENDPOINT(self):
-        return "{proto}://{server}/api/user/{username}/followers".format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username
-        )
-
 class Following(Feed):
     """ People followed by Person """
-
-    @property
-    def ENDPOINT(self):
-        return "{proto}://{server}/api/user/{username}/following".format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username
-        )
 
 class Favorites(Feed):
     """ Person's favorites """
 
-    @property
-    def ENDPOINT(self):
-        return "{proto}://{server}/api/user/{username}/favorites".format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username
-        )
-
 class Inbox(Feed):
     """ Person's inbox """
+    _ENDPOINT = None
+    _direct = None
+    _minor = None
+    _major = None
 
-    _ENDPOINT = "{proto}://{server}/api/user/{username}/inbox"
-
-    def __init__(self, parent, endpoint=None):
-        self._parent = parent
-        self._pump = self._parent._pump
-        if endpoint is not None:
-            self._ENDPOINT = endpoint
-
+    def __init__(self, feed_url=None, *args, **kwargs):
+        super(Inbox, self).__init__(feed_url, *args, **kwargs)
+        if feed_url is not None:
+            self._ENDPOINT = feed_url
 
     @property
     def ENDPOINT(self):
-        return self._ENDPOINT.format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username
-        )
+        return self._ENDPOINT
 
     @property
     def direct(self):
-        endpoint = self.ENDPOINT
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        endpoint += "direct"
-        return self.__class__(parent=self._parent, endpoint=endpoint)
+        endpoint = self._subfeed("direct")
+        if "direct" in self.id or "major" in self.id or "minor" in self.id:
+            return self
+        self._direct = self._direct or self.__class__(endpoint, pypump=self._pump)
+        return self._direct
 
     @property
     def major(self):
-        endpoint = self.ENDPOINT
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        endpoint += "major"
-        return self.__class__(parent=self._parent, endpoint=endpoint)
+        endpoint = self._subfeed("major")
+        if "major" in self.id or "minor" in self.id:
+            return self
+        self._major = self._major or self.__class__(endpoint, pypump=self._pump)
+        return self._major
 
     @property
     def minor(self):
-        endpoint = self.ENDPOINT
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        endpoint += "minor"
-        return self.__class__(parent=self._parent, endpoint=endpoint)
+        endpoint = self._subfeed("minor")
+        if "minor" in self.id or "major" in self.id:
+            return self
+        self._minor = self._minor or self.__class__(endpoint, pypump=self._pump)
+        return self._minor
 
 
 class Outbox(Feed):
     """ Person's outbox """
+    _ENDPOINT = None
+    _major = None
+    _minor = None
 
-    _ENDPOINT = "{proto}://{server}/api/user/{username}/feed"
-
-    def __init__(self, parent, endpoint=None):
-        self._parent = parent
-        self._pump = self._parent._pump
-        if endpoint is not None:
-            self._ENDPOINT = endpoint
-
+    def __init__(self, feed_url=None, *args, **kwargs):
+        super(Outbox, self).__init__(feed_url, *args, **kwargs)
+        if feed_url is not None:
+            self._ENDPOINT = feed_url
 
     @property
     def ENDPOINT(self):
-        return self._ENDPOINT.format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username
-        )
+        return self._ENDPOINT
 
     @property
     def major(self):
-        endpoint = self.ENDPOINT
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        endpoint += "major"
-        return self.__class__(parent=self._parent, endpoint=endpoint)
+        endpoint = self._subfeed("major")
+        if "major" in self.id or "minor" in self.id:
+            return self
+        self._major = self._major or self.__class__(endpoint, pypump=self._pump)
+        return self._major
 
     @property
     def minor(self):
-        endpoint = self.ENDPOINT
-        if not endpoint.endswith("/"):
-            endpoint += "/"
-        endpoint += "minor"
-        return self.__class__(parent=self._parent, endpoint=endpoint)
+        endpoint = self._subfeed("minor")
+        if "major" in self.id or "minor" in self.id:
+            return self
+        self._minor = self._minor or self.__class__(endpoint, pypump=self._pump)
+        return self._minor
 
 
 class Lists(Feed):
     # defaults to lists of persons
-    membertype = "person"
+    _membertype="person"
+
+    @property
+    def membertype(self):
+        return self._membertype
+
+    @membertype.setter
+    def membertype(self, value):
+        self._membertype=value
+        self.id = self.ENDPOINT
+        tmp = list(self[:1]) # request data for new membertype
 
     @property
     def ENDPOINT(self):
         # offset and count doesnt work properly, see https://github.com/e14n/pump.io/issues/794
-        return "{proto}://{server}/api/user/{username}/lists/{membertype}".format(
-            proto=self._parent._pump.protocol,
-            server=self._parent.server,
-            username=self._parent.username,
+        return "{feed_url}/{membertype}".format(
+            feed_url=self._ENDPOINT,
             membertype=self.membertype
         )
 
@@ -326,7 +289,6 @@ class Lists(Feed):
                 "content":content
             }
         }
-
         self._post_activity(activity, unserialize=False)
 
     def __getitem__(self, key):

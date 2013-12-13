@@ -53,27 +53,27 @@ class Person(AbstractModel):
 
     @property
     def outbox(self):
-        self._outbox = self._outbox or Outbox(self)
+        self._outbox = self._outbox or Outbox(self.links['activity_outbox'],pypump=self._pump)
         return self._outbox
 
     @property
     def followers(self):
-        self._followers = self._followers or Followers(self)
+        self._followers = self._followers or Followers(self.links['followers'],pypump=self._pump)
         return self._followers
 
     @property
     def following(self):
-        self._following = self._following or Following(self)
+        self._following = self._following or Following(self.links['following'],pypump=self._pump)
         return self._following
 
     @property
     def favorites(self):
-        self._favorites = self._favorites or Favorites(self)
+        self._favorites = self._favorites or Favorites(self.links['favorites'],pypump=self._pump)
         return self._favorites
 
     @property
     def lists(self):
-        self._lists = self._lists or Lists(self)
+        self._lists = self._lists or Lists(self.links['lists'],pypump=self._pump)
         return self._lists
 
     def __init__(self, webfinger=None, id="", username="", url="", summary="", 
@@ -103,14 +103,22 @@ class Person(AbstractModel):
             else:
                 # they probably just gave a username, the assumption is it's on our server!
                 self.username, self.server = webfinger, self._pump.client.server
-            if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
-                self.inbox = Inbox(self)
-            data = self._pump.request("{proto}://{server}/api/user/{username}/profile".format(
-                proto=self._pump.protocol,
-                server=self.server,
-                username=self.username
-            ))
+
+            # we use this until we get a proper Person.links object
+            self.links = {
+                'self' : "{}://{}/api/user/{}/profile".format(self._pump.protocol,self.server,self.username),
+                'activity_inbox' : "{}://{}/api/user/{}/inbox".format(self._pump.protocol,self.server,self.username),
+                'activity_outbox' : "{}://{}/api/user/{}/feed".format(self._pump.protocol,self.server,self.username),
+                'followers' : "{}://{}/api/user/{}/followers".format(self._pump.protocol,self.server,self.username),
+                'following' : "{}://{}/api/user/{}/following".format(self._pump.protocol,self.server,self.username),
+                'favorites' : "{}://{}/api/user/{}/favorites".format(self._pump.protocol,self.server,self.username),
+                'lists' : "{}://{}/api/user/{}/lists".format(self._pump.protocol,self.server,self.username),
+            }
+
+            data = self._pump.request(self.links['self'])
             self.unserialize(data)
+            if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
+                self.inbox = Inbox(self.links['activity_inbox'], pypump=self._pump)
 
         self.username = username or self.username
         self.url = url or self.url
