@@ -261,7 +261,7 @@ if __name__ == "__main__":
     save_database(db, store_path)
 
     # setup other variables for user. 
-    me = pump.Person(webfinger)
+    me = pump.me
 
     # bring curser back so banner walks over the setup message
     sys.stdout.write("\r")
