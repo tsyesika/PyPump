@@ -34,16 +34,21 @@ class Mapper(object):
     objects = ["generator", "actor", "obj", "author", "in_reply_to"]
     #feeds = ["likes", "shares", "replies"]
 
-    def parse_map(self, obj, mapping, *args, **kwargs):
+    def parse_map(self, obj, mapping=None, ignore_attr=None, *args, **kwargs):
         """ Parses a dictionary of (model_attr, json_attr) items """
+        mapping = mapping or obj._mapping
+        ignore_attr = ignore_attr or obj._ignore_attr
 
         if "jsondata" in kwargs:
             for k, v in mapping.items():
-                if v in kwargs["jsondata"] and k not in obj._ignore_attr:
+                if v in kwargs["jsondata"] and k not in ignore_attr:
                     self.add_attr(obj, k, kwargs["jsondata"][v], from_json=True)
+                #elif k not in ignore_attr:
+                    #_log.debug("Setting attribute %r to None" % k)
+                    #self.set_none(obj, k)
         else:
             for k, v in mapping.items():
-                if k in kwargs and k not in obj.ignore_attr:
+                if k in kwargs and k not in ignore_attr:
                     self.add_attr(obj, k, kwargs[k])
 
     def add_attr(self, obj, key, data, from_json=False):
@@ -54,7 +59,10 @@ class Mapper(object):
         elif key in self.dates:
             self.set_date(obj, key, data, from_json)
         else:
-            _log.info("ignoring unknown attribute %r", key)
+            _log.debug("Ignoring unknown attribute %r", key)
+
+    def set_none(self, obj, key):
+        setattr(obj, key, None)
 
     def set_string(self, obj, key, data, from_json):
         setattr(obj, key, data)
@@ -121,7 +129,11 @@ class ActivityObject(AbstractModel):
 
     def __init__(self, *args, **kwargs):
         super(ActivityObject, self).__init__(*args, **kwargs)
-        Mapper().parse_map(self, ActivityObject._mapping, *args, **kwargs)
+        Mapper().parse_map(self,
+                           mapping=ActivityObject._mapping,
+                           ignore_attr=ActivityObject._ignore_attr,
+                           *args,
+                           **kwargs)
 
 
 class Application(ActivityObject):
@@ -130,10 +142,12 @@ class Application(ActivityObject):
 
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
-        Mapper().parse_map(self, self._mapping, *args, **kwargs)
+        Mapper().parse_map(self, *args, **kwargs)
 
 
 class Activity(AbstractModel):
+    _ignore_attr = list()
+    _mapping = None
 
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
@@ -171,9 +185,7 @@ class Activity(AbstractModel):
             except AttributeError:
                 mapping[model_attr] = json_attr
 
-        for model_attr, json_attr in mapping.items():
-            if json_attr in data:
-                Mapper().add_attr(self, model_attr, data[json_attr], from_json=True)
+        Mapper().parse_map(self, mapping=mapping, jsondata=data)
 
         return self
 
