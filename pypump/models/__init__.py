@@ -115,11 +115,14 @@ class Likeable(object):
         must have _links["likes"]
     """
 
+    _likes = None
+
     @property
     def likes(self):
         """ Gets who's liked this object """
         endpoint = self._links["likes"]
-        return Feed(self, endpoint)
+        self._likes = self._likes or Feed(endpoint, pypump=self._pump)
+        return self._likes
 
     favorites = likes
 
@@ -164,12 +167,14 @@ class Commentable(object):
 
         must have _likes["replies"]
     """
+    _comments = None
 
     @property
     def comments(self):
         """ Fetches the comment objects for the models """
         endpoint = self._links["replies"]
-        return Feed(self, endpoint)
+        self._comments = self._comments or Feed(endpoint, pypump=self._pump)
+        return self._comments
 
     def comment(self, comment):
         """ Posts a comment object on model """
@@ -184,12 +189,14 @@ class Shareable(object):
 
         must have _likes["shares"]
     """
+    _shares = None
 
     @property
     def shares(self):
         """ Fetches the people who've shared the model """
         endpoint = self._links["shares"]
-        return Feed(self, endpoint)
+        self._shares = self._shares or Feed(endpoint, pypump=self._pump)
+        return self._shares
 
     def share(self):
         """ Shares the model """

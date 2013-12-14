@@ -22,6 +22,8 @@ from pypump.models.feed import Feed
 _log = logging.getLogger(__name__)
 
 class Collection(AbstractModel):
+
+    _members = None
     
     def __init__(self, id=None, *args, **kwargs):
         super(Collection, self).__init__(*args, **kwargs)
@@ -30,7 +32,7 @@ class Collection(AbstractModel):
 
     @property
     def members(self):
-        self._members = Feed(self, self.links["members"])
+        self._members = self._members or Feed(self.links["members"], pypump=self._pump)
         return self._members
 
     @property
