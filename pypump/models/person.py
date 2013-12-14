@@ -106,13 +106,13 @@ class Person(AbstractModel):
 
             # we use this until we get a proper Person.links object
             self.links = {
-                'self' : "{}://{}/api/user/{}/profile".format(self._pump.protocol,self.server,self.username),
-                'activity_inbox' : "{}://{}/api/user/{}/inbox".format(self._pump.protocol,self.server,self.username),
-                'activity_outbox' : "{}://{}/api/user/{}/feed".format(self._pump.protocol,self.server,self.username),
-                'followers' : "{}://{}/api/user/{}/followers".format(self._pump.protocol,self.server,self.username),
-                'following' : "{}://{}/api/user/{}/following".format(self._pump.protocol,self.server,self.username),
-                'favorites' : "{}://{}/api/user/{}/favorites".format(self._pump.protocol,self.server,self.username),
-                'lists' : "{}://{}/api/user/{}/lists".format(self._pump.protocol,self.server,self.username),
+                'self' : "{p}://{s}/api/user/{u}/profile".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'activity_inbox' : "{p}://{s}/api/user/{u}/inbox".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'activity_outbox' : "{p}://{s}/api/user/{u}/feed".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'followers' : "{p}://{s}/api/user/{u}/followers".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'following' : "{p}://{s}/api/user/{u}/following".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'favorites' : "{p}://{s}/api/user/{u}/favorites".format(p=self._pump.protocol,s=self.server,u=self.username),
+                'lists' : "{p}://{s}/api/user/{u}/lists".format(p=self._pump.protocol,s=self.server,u=self.username),
             }
 
             data = self._pump.request(self.links['self'])
