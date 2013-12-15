@@ -200,6 +200,6 @@ class Person(AbstractModel):
         self.published = parse(data["published"]) if "published" in data else self.updated
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
-        self.location = self._pump.Location().unserialize(data["location"]) if "location" in data else None
+        self.location = self._pump.Place().unserialize(data["location"]) if "location" in data else None
 
         return self

@@ -37,7 +37,7 @@ from pypump.models.note import Note
 from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
-from pypump.models.location import Location
+from pypump.models.place import Place
 from pypump.models.activity import Activity
 
 from pypump.models.collection import Collection, Public
@@ -112,7 +112,7 @@ class PyPump(object):
         self.Comment = factory(self, Comment)
         self.Image = factory(self, Image)
         self.Person = factory(self, Person)
-        self.Location = factory(self, Location)
+        self.Place = factory(self, Place)
         self.Public = Public
         self.Activity = factory(self, Activity)
 

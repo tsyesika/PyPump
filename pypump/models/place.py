@@ -17,14 +17,14 @@
 
 from pypump.models import AbstractModel
 
-class Location(AbstractModel):
+class Place(AbstractModel):
 
     name = None
     longitude = None
     latitude = None
 
     def __init__(self, name=None, longitude=None, latitude=None, *args, **kwargs):
-        super(Location, self).__init__(*args, **kwargs)
+        super(Place, self).__init__(*args, **kwargs)
         self.name = name
         self.longitude = longitude
         self.latitude = latitude

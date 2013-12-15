@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from tests import PyPumpTest
-from pypump.models.location import Location
+from pypump.models.place import Place
 
 class PersonTest(PyPumpTest):
     
@@ -136,5 +136,5 @@ class PersonTest(PyPumpTest):
         # Test image model was made
         #self.assertTrue(isinstance(person.image, self.pump.Image))
         
-        # Test location model was made
-        self.assertTrue(isinstance(person.location, Location)) 
+        # Test place model was made
+        self.assertTrue(isinstance(person.location, Place)) 
