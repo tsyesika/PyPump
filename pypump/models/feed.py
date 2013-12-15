@@ -19,6 +19,7 @@ import logging
 import six
 
 from pypump.models import AbstractModel
+from pypump.models.activity import Mapper
 
 _log = logging.getLogger(__name__)
 
@@ -34,7 +35,6 @@ class ItemList(object):
         self.cache = list()
         self.count = count
         self.itercounter = 0
-        
 
     def __iter__(self):
         return self
@@ -81,11 +81,14 @@ class ItemList(object):
         if self._should_stop(data):
             raise StopIteration
 
-        if not self.feed.objectTypes:
-            obj = getattr(self.feed._pump, data["objectType"].capitalize())
-        else:
-            obj = getattr(self.feed._pump, self.feed.objectTypes)
-        obj = obj().unserialize(data)
+        try:
+            if not self.feed.objectTypes:
+                obj = getattr(self.feed._pump, data["objectType"].capitalize())
+            else:
+                obj = getattr(self.feed._pump, self.feed.objectTypes)
+            obj = obj().unserialize(data)
+        except AttributeError:
+            obj = Mapper().get_object(data)
         self.previous_id = obj.id
         self.itercounter +=1
         return obj
