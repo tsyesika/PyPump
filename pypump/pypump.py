@@ -214,9 +214,9 @@ class PyPump(object):
                         "data": data,
                         }
                 response = self._requester(
-                    requests.post,
-                    endpoint,
-                    raw,
+                    fnc=requests.post,
+                    endpoint=endpoint,
+                    raw=raw,
                     **request
                 )
 
@@ -228,9 +228,9 @@ class PyPump(object):
                         }
 
                 response = self._requester(
-                    requests.get,
-                    endpoint,
-                    raw,
+                    fnc=requests.get,
+                    endpoint=endpoint,
+                    raw=raw,
                     **request
                 )
 
@@ -242,9 +242,9 @@ class PyPump(object):
                         }
 
                 response = self._requester(
-                    requests.delete,
-                    endpoint,
-                    raw,
+                    fnc=requests.delete,
+                    endpoint=endpoint,
+                    raw=raw,
                     **request
                 )
 

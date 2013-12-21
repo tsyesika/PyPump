@@ -9,9 +9,11 @@ from pypump import PyPump, Client
 
 class Response(object):
     
-    def __init__(self, data, status_code=200):
+    def __init__(self, url, data, params=None, status_code=200):
+        self.url = url
         self.data = data
         self.status_code = status_code
+        self.params = params or {}
 
     def __getitem__(self, key):
         return self.json()[key]
@@ -69,8 +71,11 @@ class TestPump(PyPump):
 
     def _requester(self, *args, **kwargs):
         """ Instead of requesting to a pump server we'll return the data we've been given """
-        self._testcase.request = Response(kwargs.get("data", None))
-        self._testcase.params = kwargs.get("params", None)
+        self._testcase.request = Response(
+            url=kwargs.get("endpoint", None),
+            data=kwargs.get("data", None),
+            params=kwargs.get("params", None)
+        )
         return self._response
 
 class PyPumpTest(unittest.TestCase):
@@ -86,12 +91,11 @@ class PyPumpTest(unittest.TestCase):
     def setUp(self):
         """ This will setup everything needed to test PyPump """
         # response from server, any string will be treated as a json string
-        self.response = Response({})
+        self.response = Response(url=None, data={})
         
         # These will be set when a request is made
         self.request = None
-        self.params = None
-        
+
         # Setup the bucket
         test_directory = os.path.abspath(os.path.dirname(__file__))
         self.bucket = Bucket(
