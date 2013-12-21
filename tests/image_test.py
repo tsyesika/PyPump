@@ -58,12 +58,12 @@ class ImageTest(PyPumpTest):
         # Test unserialization is correct
         self.assertEqual(image.id, self.response["id"])
         self.assertEqual(image.url, self.response["url"])
-        self.assertEqual(image.image.url, self.response["image"]["url"])
+        self.assertEqual(image.thumbnail.url, self.response["image"]["url"])
         self.assertEqual(image.original.url, self.response["fullImage"]["url"])
         self.assertEqual(image.display_name, self.response["displayName"])
         self.assertEqual(image.content, self.response["content"])
-        self.assertEqual(image.image.height, self.response["image"]["height"])
-        self.assertEqual(image.image.width, self.response["image"]["width"])
+        self.assertEqual(image.thumbnail.height, self.response["image"]["height"])
+        self.assertEqual(image.thumbnail.width, self.response["image"]["width"])
         self.assertEqual(image.original.height, self.response["fullImage"]["height"])
         self.assertEqual(image.original.width, self.response["fullImage"]["width"])
 

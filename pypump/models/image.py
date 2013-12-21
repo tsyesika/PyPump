@@ -26,6 +26,19 @@ from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
 
 _log = logging.getLogger(__name__)
 
+class ImageContainer(object):
+    """ Container to hold about a specific image """
+    def __init__(self, url, width, height):
+        self.url = url
+        self.width = width
+        self.height = height
+
+    def __repr__(self):
+        return "<Image {width}x{height}".format(
+            width=self.width,
+            height=self.height
+        )
+
 class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
     url = None
@@ -36,15 +49,13 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
     id = None
     updated = None
     published = None
-    _links = None
 
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(self._pump.client.nickname)
 
     def __init__(self, id=None, url=None, display_name=None, content=None, 
-                 actor=None, width=None, height=None, published=None,
-                 updated=None, links=None, *args, **kwargs):
+                 actor=None, published=None, updated=None, *args, **kwargs):
 
         super(Image, self).__init__(*args, **kwargs)
 
@@ -55,7 +66,6 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         self.url = url
         self.published = published
         self.updated = updated
-        self._links = links or []
 
     def __repr__(self):
         if self.actor is None:
@@ -111,48 +121,38 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         return self
 
     def unserialize(self, data):
-        image_id = data.get("id", None)
+        image = type(self)(id=data.get("id", None))
+
         if "fullImage" in data:
-            full_image = data["fullImage"]["url"]
-            full_image = type(self)(id=image_id, url=full_image)
-        else:
-            full_image = None
-
+            full_image = data["fullImage"]
+            image.original = ImageContainer(
+                url=full_image["url"],
+                height=full_image.get("height"),
+                width=full_image.get("width")
+            )
+            
         if "image" in data:
-            image = data["image"]["url"]
-            image = type(self)(id=image_id, url=image)
-        else:
-            image = None
+            save_point = "original" if image.original is None else "thumbnail"
+            thumbnail = data["image"]
+            setattr(image, save_point, ImageContainer(
+                url=thumbnail["url"],
+                height=thumbnail.get("height"),
+                width=thumbnail.get("width")
+            ))
 
-        author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
+        image.author = self._pump.Person().unserialize(data["author"])
 
-        links = dict()
-        for i in ["likes", "replies", "shares"]:
-            if data.get(i, None):
-                if "pump_io" in data[i]:
-                    links[i] = data[i]["pump_io"]["proxyURL"]
+        for endpoint in ["likes", "replies", "shares"]:
+            if data.get(endpoint) is not None:
+                if "pump_io" in data[endpoint]:
+                    image.add_link(endpoint, data[endpoint]["pump_io"]["proxyURL"])
                 else:
-                    links[i] = data[i]["url"]
+                    image.add_link(endpoint, data[endpoint]["url"])
 
-        for i in [full_image, image]:
-            if i is None:
-                continue
-            i.actor = author
-            i.published = parse(data["published"])
-            i.updated = parse(data["updated"])
-            i.display_name = data.get("displayName", "")
-            i.summary = data.get("summary", "")
-            i.url = data.get("url", "")
+        image.published = parse(data["published"])
+        image.updated = parse(data["updated"])
+        image.display_name = data.get("displayName", "")
+        image.summary = data.get("summary", "")
+        image.url = data["url"]
  
-       # set the full and normal image on each one
-        if full_image is not None:
-            full_image.image = image
-            full_image.original = full_image
-            full_image._links = links
-
-        if image is not None:
-            image.image = image
-            image.original = full_image
-            image._links = links
-
-        return image 
+        return image
