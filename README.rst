@@ -56,9 +56,9 @@ If you've found an issue please report it on the GitHub issue's https://github.c
 
 If you just want to chat and let us know the cool things you're doing with PyPump (or want to do) then we have an IRC channel, we currently have our channel on MegNet:
 
-.. _`MegNet`: https://megworld.co.uk/irc
+_`MegNet`: https://megworld.co.uk/irc
 
-.. _`Webchat`: https://webchat.megworld.co.uk/?channels=#pypump
+_`Webchat`: https://webchat.megworld.co.uk/?channels=#pypump
 
 
 Licence?
