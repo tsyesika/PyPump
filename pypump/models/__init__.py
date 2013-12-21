@@ -25,6 +25,8 @@ _log = logging.getLogger(__name__)
 
 class AbstractModel(object):
 
+    links = None
+
     @property
     def TYPE(self):
         return self.__class__.__name__
@@ -39,6 +41,7 @@ class AbstractModel(object):
 
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
+        self.links = {}
         if pypump:
             self._pump = pypump
 
@@ -78,6 +81,13 @@ class AbstractModel(object):
     def __bytes__(self):
         return self.b(str(self))
 
+    def add_link(self, name, link):
+        """ Adds a link to the model """
+        if name in self.links:
+            return False
+
+        self.links[name] = link
+        return True
 
     def unserialize(self, data, *args, **kwargs):
         """ Changes it from JSON -> obj """
