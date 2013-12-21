@@ -67,3 +67,23 @@ class ImageTest(PyPumpTest):
         self.assertEqual(image.original.height, self.response["fullImage"]["height"])
         self.assertEqual(image.original.width, self.response["fullImage"]["width"])
 
+    def test_upload_file(self):
+        """ Test image can be uploaded succesfully """
+        image = self.pump.Image(
+            display_name="My lovely image",
+            content="This is my sexy description"
+        )
+
+        # Upload an image from the bucket
+        image.from_file(self.bucket.path_to_png)
+        
+        # Check image has my attributs as they were set
+        self.assertEqual(image.display_name, "My lovely image")
+        self.assertEqual(image.content, "This is my sexy description")
+
+        # Test the data sent is correct.
+        upload_request = self.requests[0] # It always happens to be the first request
+        
+        self.assertEqual(image.display_name, upload_request.params["title"])
+        self.assertEqual(image.content, upload_request.params["description"])
+        self.assertTrue(self.bucket.path_to_png.endswith(upload_request.params["qqfile"]))
