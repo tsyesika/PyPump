@@ -10,7 +10,7 @@ PyPump is aiming to implement and interface with the `Pump API
 federation protocol for the web.  You can read the actual Pump API
 docs to get a sense of all that, but here's a high level overview.
 
-The Pump API is all about ActivityStreams and sending json-encoded
+The Pump API is all about ActivityStreams and sending JSON-encoded
 descriptions of activities back and forth across different users on
 different sites.  At the highest conceptual level, it's not too
 different from the idea of email servers sending emails back and
@@ -23,7 +23,7 @@ In the world of email, each user has an email address; in the world of
 Pump, each user has a `webfinger <http://code.google.com/p/webfinger/>`_
 address.  It looks pretty similar, but it's meant for the web.  For
 the sake of this tutorial, you don't need to know how webfinger works;
-the PyPump API will handle that for you.
+the PyPump will handle that for you.
 
 Each user has two main feeds that are used for communication.  In the
 Pump API docs' own wording:
@@ -37,7 +37,7 @@ Pump API docs' own wording:
 
 (We use the inbox/outbox convention fairly strongly in PyPump.)
 
-You should read the Pump spec, but sometimes coding examples are the
+You can read the Pump spec, but sometimes coding examples are the
 best way to learn.  So, that said, let's get into an example of using
 PyPump!
 
@@ -64,8 +64,9 @@ The PyPump call will try to verify with OAuth, You may wish to override how it a
 PyPump by default writes to standard out a URL for the user to click and reads in from standard in for a verification
 code presented by the webserver.
 
-You should store the client credentials somewhere.  You can now
-reconnect like so::
+You should store the client credentials and tokens somewhere but ensure
+you store them somewhere safe with this information anyone can access the
+user's pump.io account!  You can now reconnect like so::
 
     >>> client = Client(
     ...     webfinger="mizbunny@example.org",
@@ -192,11 +193,25 @@ All activities in pump.io have a .serialize method::
 
 .. (Yes, that was stolen from the Pump API docs :))
 
-
 (similarly, all activity classes provide a unserialize class method).
 
+When posting an image or a note you may wish to post it to
+more people than just your followers (which is the default on most pump servers).
+You can easily do this by doing::
+
+    >>> my_note = pump.Note("This will go to everyone!")
+    >>> my_note.to = pump.Public
+    >>> my_note.send()
+
+.. TODO: add explaination of how to list all collections and how to use them
+
+You can also send notes to specific people so if I wanted to send
+a note only to evan to invite him over, I could do something like this::
+
+    >>> my_note = pump.Note("Hey evan, would you like to come over later to check out PyPump")
+    >>> my_note.to = pump.Person("e14n@e14n.org")
+    >>> my_note.send() # Only evan will see this.
+
 .. Things missing:
-   - How to post to your public feed, as opposed to a list of specific
-     people?
    - Show different types of activities
    - Explain how to implement an activity subclass?

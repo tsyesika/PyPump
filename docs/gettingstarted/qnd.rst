@@ -70,9 +70,9 @@ I wonder what was posted last::
     >>> print(latest_activity)
     <Activity: jrobb posted an image>
 
-Oh it's an image, lets see the thumb nail::
+Oh it's an image, lets see the thumbnail::
 
-    >>> url = latest_activity.obj.thumb_url
+    >>> url = latest_activity.obj.thumbnail.url
     >>> fout = open("some_image.{0}".format(url.split(".")[-1], "wb")
     >>> import urllib2 # this will be different with python3
     >>> fout.write(urllib2.urlopen(url).read())
@@ -80,7 +80,7 @@ Oh it's an image, lets see the thumb nail::
 
 Hmm, I want to see a bigger version::
 
-    >>> large_url = latest_activity.obj.full_url
+    >>> large_url = latest_activity.obj.original.url
     >>> print(large_url)
     <Image at https://some.server/uploads/somefriend/2013/7/7/JkdX2.png">
     >>> # you will find Images often hold other pump.Image objects, we just need to extra the url
