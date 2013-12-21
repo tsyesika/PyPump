@@ -34,10 +34,9 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     published = None
     deleted = False
     author = None
-    _links = None
 
     def __init__(self, content=None, id=None, inReplyTo=None, published=None, updated=None,
-                 deleted=False, liked=False, author=None, links=None, *args, **kwargs):
+                 deleted=False, liked=False, author=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
@@ -49,7 +48,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self.deleted = deleted
         self.liked = liked
         self.author = self._pump.me if author is None else author
-        self._links = dict() if links is None else links
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
@@ -81,15 +79,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
         self.liked = data["liked"] if "liked" in data else False
         self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
-
-        links = dict()
-        for i in ["likes", "replies", "shares"]:
-            if data.get(i, None):
-                if "pump_io" in data[i]:
-                    links[i] = data[i]["pump_io"]["proxyURL"]
-                else:
-                    links[i] = data[i]["url"]
-
-        self._links = links
+        self.add_links(data["links"])
         return self
         

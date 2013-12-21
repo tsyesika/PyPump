@@ -89,6 +89,22 @@ class AbstractModel(object):
         self.links[name] = link
         return True
 
+    def add_links(self, links, key="href", proxy_key="proxyURL", endpoints=None):
+        """ Parses and adds block of links """
+        if endpoints is None:
+            endpoints = ["likes", "replies", "shares", "self",]
+        
+        for endpoint in endpoints:
+            if links.get(endpoint, None) is None:
+                continue
+
+            if "pump_io" in links[endpoint]:
+                self.add_link(endpoint, links[endpoint]["pump_io"][proxy_key])
+            else:
+                self.add_link(endpoint, links[endpoint][key])
+        
+        return self.links
+
     def unserialize(self, data, *args, **kwargs):
         """ Changes it from JSON -> obj """
         data = json.loads(data)

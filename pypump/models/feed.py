@@ -100,7 +100,6 @@ class Feed(AbstractModel):
     totalItems = None
     objectTypes = None
     url = None
-    links = dict()
     _parent = None
     _ENDPOINT = None
 
@@ -174,7 +173,6 @@ class Feed(AbstractModel):
         self.totalItems = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
         self.url = data["url"]
-        self.links = data["links"]
 
 
 class Followers(Feed):

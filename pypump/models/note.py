@@ -38,15 +38,11 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     liked = False
     author = None
 
-    _links = dict()
-
     def __init__(self, content=None, id=None, published=None, updated=None, 
-                 links=None,  deleted=False, liked=False, author=None,
+                 deleted=False, liked=False, author=None,
                  *args, **kwargs):
 
         super(Note, self).__init__(*args, **kwargs)
-
-        self._links = links if links else dict()
 
         self.id = id if id else None
         self.content = content
@@ -89,20 +85,10 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
         """ Goes from JSON -> Note object """
         self.id = data.get("id", None)
         self.content = data.get("content", u"")
-
-        links = dict()
-        for i in ["likes", "replies", "shares"]:
-            if data.get(i, None):
-                if "pump_io" in data[i]:
-                    links[i] = data[i]["pump_io"]["proxyURL"]
-                else:
-                    links[i] = data[i]["url"]
-
         self.published = parse(data["published"])
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.liked = data["liked"] if "liked" in data else False
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
-        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
-
-        self._links = links
+        self.author = self._pump.Person().unserialize(data["author"])
+        self.add_links(links=data["links"])
         return self

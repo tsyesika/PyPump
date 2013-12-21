@@ -142,13 +142,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         image.author = self._pump.Person().unserialize(data["author"])
 
-        for endpoint in ["likes", "replies", "shares"]:
-            if data.get(endpoint) is not None:
-                if "pump_io" in data[endpoint]:
-                    image.add_link(endpoint, data[endpoint]["pump_io"]["proxyURL"])
-                else:
-                    image.add_link(endpoint, data[endpoint]["url"])
-
+        image.add_links(data["links"])
         image.published = parse(data["published"])
         image.updated = parse(data["updated"])
         image.display_name = data.get("displayName", "")

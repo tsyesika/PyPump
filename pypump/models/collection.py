@@ -85,10 +85,7 @@ class Collection(AbstractModel):
         self.id = data["id"] if "id" in data else None
         self.display_name = data["displayName"] if "displayName" in data else None
         self.content = data["content"] if "content" in data else None
-        self.links = dict()
-        for i in ["members",]:
-            if i in data:
-                self.links[i] = data[i]["url"]
+        self.add_links(data, endpoints=["members"])
         return self
 
 
