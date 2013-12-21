@@ -148,5 +148,6 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         image.display_name = data.get("displayName", "")
         image.summary = data.get("summary", "")
         image.url = data["url"]
+        image.content = data.get("content", "")
  
         return image
