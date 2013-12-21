@@ -70,12 +70,12 @@ class TestPump(PyPump):
         return self._response.status_code
 
     def _requester(self, *args, **kwargs):
-        """ Instead of requesting to a pump server we'll return the data we've been given """
-        self._testcase.request = Response(
+        """ Instead of requesting to a pump server we'll return the data we've been given """ 
+        self._testcase.requests.append(Response(
             url=kwargs.get("endpoint", None),
             data=kwargs.get("data", None),
             params=kwargs.get("params", None)
-        )
+        ))
         return self._response
 
 class PyPumpTest(unittest.TestCase):
@@ -94,7 +94,7 @@ class PyPumpTest(unittest.TestCase):
         self.response = Response(url=None, data={})
         
         # These will be set when a request is made
-        self.request = None
+        self.requests = []
 
         # Setup the bucket
         test_directory = os.path.abspath(os.path.dirname(__file__))
@@ -104,3 +104,8 @@ class PyPumpTest(unittest.TestCase):
 
         # make the pump object for testing.
         self.pump = TestPump(response=self.response, testcase=self)
+
+    @property
+    def request(self):
+        """ Returns the last (cronologically) request made """
+        return self.requests[-1]
