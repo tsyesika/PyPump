@@ -3,6 +3,7 @@ from __future__ import absolute_import
 import unittest
 import json
 import six
+import os
 
 from pypump import PyPump, Client
 
@@ -23,6 +24,13 @@ class Response(object):
     @property
     def content(self):
         return self.data
+
+class Bucket(object):
+    """ Container for useful test data """
+
+    def __init__(self, **data):
+        for key, value in data.items():
+            setattr(self, key, value)
 
 class TestPump(PyPump):
     
@@ -84,5 +92,11 @@ class PyPumpTest(unittest.TestCase):
         self.request = None
         self.params = None
         
+        # Setup the bucket
+        test_directory = os.path.abspath(os.path.dirname(__file__))
+        self.bucket = Bucket(
+            path_to_png=os.path.join(test_directory, "bucket", "test_image.png")
+        )
+
         # make the pump object for testing.
         self.pump = TestPump(response=self.response, testcase=self)
