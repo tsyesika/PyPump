@@ -1,3 +1,4 @@
+
 ##
 #   Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
 # 
@@ -33,6 +34,7 @@ class ClientException(Exception):
         super(ClientException, self).__init__(message, *args, **kwargs)
 
 class Client(object):
+    """ This represents a client/application which is using the Pump API """
 
     ENDPOINT = "api/client/register"
 
@@ -138,7 +140,7 @@ class Client(object):
         return server_data
 
     def register(self, server=None):
-        """ Sends a client registration request """
+        """ Reigsters the client with the Pump API retriving the id and secret """
         if (self.key or self.secret):
             return self.update()
  
@@ -149,7 +151,7 @@ class Client(object):
         self.expirey = server_data["expires_at"]
 
     def update(self):
-        """ Updates a previously registerd client """
+        """ Updates the information the Pump server has about the client """
         error = ""
 
         if self.key is None:
