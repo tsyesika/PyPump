@@ -1,0 +1,6 @@
+The licences for this file are:
+
+test_image.png:
+    Licence: CC0
+    Source: https://gitorious.org/mediagoblin/mediagoblin/source/eebd8fe3edb3cce4675f58eb02fe1d96229af0d5:mediagoblin/tests/test_submission/good.png
+
