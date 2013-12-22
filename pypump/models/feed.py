@@ -66,7 +66,7 @@ class ItemList(object):
             else:
                 response = self.feed._request(count=self.count)
         elif "next" in self.feed.links:
-            url = self.feed.links["next"]["href"]
+            url = self.feed.links["next"]
             response = self.feed._request(count=self.count, feed_url=url)
         else:
             response = None
@@ -174,6 +174,7 @@ class Feed(AbstractModel):
         self.object_types = data["objectTypes"] if "objectTypes" in data else None
         self.url = data["url"]
         self.author = self._pump.Person().unserialize(data['author']) if 'author' in data else None
+        self.add_links(data)
 
 
 class Followers(Feed):
