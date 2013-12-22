@@ -32,6 +32,7 @@ class Mapper(object):
                "summary", "url", "preferred_username", "verb"]
     dates = ["updated", "published", "deleted"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to"]
+    lists = ["to", "cc", "bcc", "bto",]
     #feeds = ["likes", "shares", "replies"]
 
     def parse_map(self, obj, mapping=None, ignore_attr=None, *args, **kwargs):
@@ -58,6 +59,8 @@ class Mapper(object):
             self.set_object(obj, key, data, from_json)
         elif key in self.dates:
             self.set_date(obj, key, data, from_json)
+        elif key in self.lists:
+            self.set_list(obj, key, data, from_json)
         else:
             _log.debug("Ignoring unknown attribute %r", key)
 
@@ -85,6 +88,13 @@ class Mapper(object):
     def set_date(self, obj, key, data, from_json):
         if from_json:
             setattr(obj, key, dateparse(data))
+
+    def set_list(self, obj, key, data, from_json):
+        if from_json:
+            tmplist = []
+            for i in data:
+                tmplist.append(self.get_object(i))
+            setattr(obj, key, tmplist)
 
 
 class ActivityObject(AbstractModel):
@@ -172,7 +182,8 @@ class Activity(AbstractModel):
             "published":"published",
             "content":"content",
             "id":"id",
-            "to":"to" # TODO not yet in Mapper
+            "to":"to",
+            "cc":"cc",
         }
 
         if "author" not in data["object"]:
