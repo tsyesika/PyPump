@@ -90,5 +90,5 @@ class ImageTest(PyPumpTest):
 
 
         # Test that the data is the same
-        binary_image = open(self.bucket.path_to_png, "r").read()
+        binary_image = open(self.bucket.path_to_png, "rb").read()
         self.assertEqual(upload_request.data, binary_image)
