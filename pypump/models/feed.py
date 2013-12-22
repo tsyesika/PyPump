@@ -173,6 +173,7 @@ class Feed(AbstractModel):
         self.total_items = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
         self.url = data["url"]
+        self.author = self._pump.Person().unserialize(data['author']) if 'author' in data else None
 
 
 class Followers(Feed):
