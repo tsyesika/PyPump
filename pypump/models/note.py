@@ -90,5 +90,5 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
         self.liked = data["liked"] if "liked" in data else False
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
         self.author = self._pump.Person().unserialize(data["author"])
-        self.add_links(links=data["links"])
+        self.add_links(data)
         return self
