@@ -93,16 +93,22 @@ class AbstractModel(object):
         """ Parses and adds block of links """
         if endpoints is None:
             endpoints = ["likes", "replies", "shares", "self",]
-        
+
+        if links.get("links"):
+            for endpoint in links['links']:
+                self.add_link(endpoint, links['links'][endpoint]["href"])
+
         for endpoint in endpoints:
             if links.get(endpoint, None) is None:
                 continue
 
             if "pump_io" in links[endpoint]:
                 self.add_link(endpoint, links[endpoint]["pump_io"][proxy_key])
+            elif "url" in links[endpoint]:
+                self.add_link(endpoint, links[endpoint]["url"])
             else:
                 self.add_link(endpoint, links[endpoint][key])
-        
+
         return self.links
 
     def unserialize(self, data, *args, **kwargs):
@@ -138,7 +144,7 @@ class Likeable(object):
         the property likes which will look up who's liked the model instance
         and return you back a list of user objects
     
-        must have _links["likes"]
+        must have links["likes"]
     """
 
     _likes = None
@@ -146,7 +152,7 @@ class Likeable(object):
     @property
     def likes(self):
         """ Gets who's liked this object """
-        endpoint = self._links["likes"]
+        endpoint = self.links["likes"]
         self._likes = self._likes or Feed(endpoint, pypump=self._pump)
         return self._likes
 
@@ -198,7 +204,7 @@ class Commentable(object):
     @property
     def comments(self):
         """ Fetches the comment objects for the models """
-        endpoint = self._links["replies"]
+        endpoint = self.links["replies"]
         self._comments = self._comments or Feed(endpoint, pypump=self._pump)
         return self._comments
 
@@ -220,7 +226,7 @@ class Shareable(object):
     @property
     def shares(self):
         """ Fetches the people who've shared the model """
-        endpoint = self._links["shares"]
+        endpoint = self.links["shares"]
         self._shares = self._shares or Feed(endpoint, pypump=self._pump)
         return self._shares
 
