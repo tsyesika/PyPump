@@ -53,7 +53,7 @@ class Person(AbstractModel):
 
     @property
     def outbox(self):
-        self._outbox = self._outbox or Outbox(self.links['activity_outbox'],pypump=self._pump)
+        self._outbox = self._outbox or Outbox(self.links['activity-outbox'],pypump=self._pump)
         return self._outbox
 
     @property
@@ -104,21 +104,14 @@ class Person(AbstractModel):
                 # they probably just gave a username, the assumption is it's on our server!
                 self.username, self.server = webfinger, self._pump.client.server
 
-            # we use this until we get a proper Person.links object
-            self.links = {
-                'self' : "{p}://{s}/api/user/{u}/profile".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'activity_inbox' : "{p}://{s}/api/user/{u}/inbox".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'activity_outbox' : "{p}://{s}/api/user/{u}/feed".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'followers' : "{p}://{s}/api/user/{u}/followers".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'following' : "{p}://{s}/api/user/{u}/following".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'favorites' : "{p}://{s}/api/user/{u}/favorites".format(p=self._pump.protocol,s=self.server,u=self.username),
-                'lists' : "{p}://{s}/api/user/{u}/lists".format(p=self._pump.protocol,s=self.server,u=self.username),
-            }
-
+            self.add_link('self', "{0}://{1}/api/user/{2}/profile".format(
+                self._pump.protocol, self.server, self.username)
+            )
             data = self._pump.request(self.links['self'])
             self.unserialize(data)
+
             if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
-                self.inbox = Inbox(self.links['activity_inbox'], pypump=self._pump)
+                self.inbox = Inbox(self.links['activity-inbox'], pypump=self._pump)
 
         self.username = username or self.username
         self.url = url or self.url
@@ -201,5 +194,6 @@ class Person(AbstractModel):
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
         self.location = self._pump.Place().unserialize(data["location"]) if "location" in data else None
+        self.add_links(data)
 
         return self
