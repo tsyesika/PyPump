@@ -94,7 +94,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         image = self._pump.request(
                 "/api/user/{0}/uploads".format(self._pump.client.nickname),
                 method="POST",
-                data=open(filename).read(),
+                data=open(filename, "rb").read(),
                 headers=headers,
                 params=params,
                 )
