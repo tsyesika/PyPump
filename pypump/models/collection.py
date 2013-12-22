@@ -94,4 +94,5 @@ class Public(object):
 
     def __init__(self):
         self.id = self.ENDPOINT
+        self.objectType = 'collection'
 
