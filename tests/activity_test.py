@@ -43,25 +43,47 @@ class ActivityTest(PyPumpTest):
             "id": "https://example.com/api/activity/abc"
         }
 
-    def test_unserialize(self):
-        """ Tests activity unserialization is successful """
-        activity = self.pump.Activity().unserialize(self.response.data)
+        self.activity = self.pump.Activity().unserialize(self.response.data)
 
-        self.assertTrue(isinstance(activity, type(self.pump.Activity())))
+    def test_create_activity(self):
+        self.assertTrue(isinstance(self.activity, type(self.pump.Activity())))
 
-        # Test unserialized object attributes
-        self.assertTrue(isinstance(activity.to[0], type(self.pump.Person())))
-        self.assertTrue(isinstance(activity.cc[0], type(self.pump.Person())))
-        self.assertEqual(activity.verb, self.response["verb"])
-        self.assertTrue(isinstance(activity.generator, Application))
-        self.assertTrue(isinstance(activity.obj, ActivityObject))
-        self.assertTrue(isinstance(activity.actor, type(self.pump.Person())))
-        self.assertTrue(activity.updated, parse(self.response["updated"]))
-        self.assertTrue(activity.links["self"]["href"], self.response["links"]["self"]["href"])
-        self.assertEqual(activity.url, self.response["url"])
-        self.assertTrue(activity.published, parse(self.response["published"]))
-        self.assertEqual(activity.content, self.response["content"])
-        self.assertEqual(activity.id, self.response["id"])
+    def test_activity_attr_to(self):
+        self.assertTrue(hasattr(self.activity, 'to'))
+        self.assertTrue(isinstance(self.activity.to[0], type(self.pump.Person())))
+    def test_activity_attr_cc(self):
+        self.assertTrue(hasattr(self.activity, 'cc'))
+        self.assertTrue(isinstance(self.activity.cc[0], type(self.pump.Person())))
+    def test_activity_attr_verb(self):
+        self.assertTrue(hasattr(self.activity, 'verb'))
+        self.assertEqual(self.activity.verb, self.response["verb"])
+    def test_activity_attr_generator(self):
+        self.assertTrue(hasattr(self.activity, 'generator'))
+        self.assertTrue(isinstance(self.activity.generator, Application))
+    def test_activity_attr_obj(self):
+        self.assertTrue(hasattr(self.activity, 'obj'))
+        self.assertTrue(isinstance(self.activity.obj, ActivityObject))
+    def test_activity_attr_actor(self):
+        self.assertTrue(hasattr(self.activity, 'actor'))
+        self.assertTrue(isinstance(self.activity.actor, type(self.pump.Person())))
+    def test_activity_attr_updated(self):
+        self.assertTrue(hasattr(self.activity, 'updated'))
+        self.assertTrue(self.activity.updated, parse(self.response["updated"]))
+    def test_activity_attr_links(self):
+        self.assertTrue(hasattr(self.activity, 'links'))
+        self.assertTrue(self.activity.links["self"], self.response["links"]["self"]["href"])
+    def test_activity_attr_url(self):
+        self.assertTrue(hasattr(self.activity, 'url'))
+        self.assertEqual(self.activity.url, self.response["url"])
+    def test_activity_attr_published(self):
+        self.assertTrue(hasattr(self.activity, 'published'))
+        self.assertTrue(self.activity.published, parse(self.response["published"]))
+    def test_activity_attr_content(self):
+        self.assertTrue(hasattr(self.activity, 'content'))
+        self.assertEqual(self.activity.content, self.response["content"])
+    def test_activity_attr_id(self):
+        self.assertTrue(hasattr(self.activity, 'id'))
+        self.assertEqual(self.activity.id, self.response["id"])
 
     def test_deleted_image(self):
         """ Activity with deleted image should have image obj with 'deleted' attribute set"""
