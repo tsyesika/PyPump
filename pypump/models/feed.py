@@ -82,10 +82,10 @@ class ItemList(object):
             raise StopIteration
 
         try:
-            if not self.feed.objectTypes:
+            if not self.feed.object_types:
                 obj = getattr(self.feed._pump, data["objectType"].capitalize())
             else:
-                obj = getattr(self.feed._pump, self.feed.objectTypes)
+                obj = getattr(self.feed._pump, self.feed.object_types[0].capitalize())
             obj = obj().unserialize(data)
         except AttributeError:
             obj = Mapper().get_object(data)
@@ -98,7 +98,7 @@ class Feed(AbstractModel):
     id = None
     display_name = None
     total_items = None
-    objectTypes = None
+    object_types = None
     url = None
     _parent = None
     _ENDPOINT = None
@@ -171,7 +171,7 @@ class Feed(AbstractModel):
     def unserialize(self, data):
         self.display_name = data["displayName"]
         self.total_items = data["totalItems"]
-        self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
+        self.object_types = data["objectTypes"] if "objectTypes" in data else None
         self.url = data["url"]
         self.author = self._pump.Person().unserialize(data['author']) if 'author' in data else None
 
