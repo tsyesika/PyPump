@@ -97,7 +97,7 @@ class ItemList(object):
 class Feed(AbstractModel):
     id = None
     display_name = None
-    totalItems = None
+    total_items = None
     objectTypes = None
     url = None
     _parent = None
@@ -119,7 +119,7 @@ class Feed(AbstractModel):
         self._ENDPOINT = feed_url
         self.id = self.ENDPOINT
 
-        tmp = self.totalItems or list(self[:1]) # we do a request on init to get some info
+        tmp = self.total_items or list(self[:1]) # we do a request on init to get some info
 
     def __repr__(self):
         return "<Feed: {type}>".format(
@@ -170,7 +170,7 @@ class Feed(AbstractModel):
 
     def unserialize(self, data):
         self.display_name = data["displayName"]
-        self.totalItems = data["totalItems"]
+        self.total_items = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
         self.url = data["url"]
 
