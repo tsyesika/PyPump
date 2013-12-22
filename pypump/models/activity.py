@@ -113,7 +113,8 @@ class ActivityObject(AbstractModel):
         "summary": "summary",
         "updated": "updated",
         "upstream_duplicates": "upstreamDuplicates",
-        "url": "url"
+        "url": "url",
+        "deleted" : "deleted"
     }
 
     
