@@ -14,7 +14,7 @@ class FeedTest(PyPumpTest):
             "objectTypes": [
                 "person"
             ],
-            "items": [{"objectType" : "person", "id" : "acct:testuser%d@example.com" % i} for i in xrange(20)]
+            "items": [{"objectType" : "person", "id" : "acct:testuser%d@example.com" % i} for i in range(20)]
             ,
             "totalItems": 25,
             "author": { "objectType" : "person", "id" : "acct:testuser@example.com"},
