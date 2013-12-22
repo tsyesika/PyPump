@@ -267,26 +267,16 @@ class Outbox(Feed):
 
 
 class Lists(Feed):
-    # defaults to lists of persons
     _membertype="person"
 
     @property
     def membertype(self):
         return self._membertype
 
-    @membertype.setter
-    def membertype(self, value):
-        self._membertype=value
-        self.id = self.ENDPOINT
-        tmp = list(self[:1]) # request data for new membertype
-
     @property
     def ENDPOINT(self):
         # offset and count doesnt work properly, see https://github.com/e14n/pump.io/issues/794
-        return "{feed_url}/{membertype}".format(
-            feed_url=self._ENDPOINT,
-            membertype=self.membertype
-        )
+        return self._ENDPOINT
 
     def create(self, display_name, content=None):
         """ Creates a new list """
