@@ -198,6 +198,7 @@ class Activity(AbstractModel):
                 mapping[model_attr] = json_attr
 
         Mapper().parse_map(self, mapping=mapping, jsondata=data)
+        self.add_links(data)
 
         return self
 
