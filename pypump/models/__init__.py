@@ -83,8 +83,6 @@ class AbstractModel(object):
 
     def add_link(self, name, link):
         """ Adds a link to the model """
-        if name in self.links:
-            return False
 
         self.links[name] = link
         return True
