@@ -52,6 +52,10 @@ class ItemList(object):
                 # feed[start_id:count_int]
                 if self.itercounter >= self.stop:
                     return True
+            elif self.start is None:
+                if self.itercounter >= self.stop:
+                    return True
+
         elif self.stop is not None:
             # feed[:stop_id]
             if self.stop == data["id"]:
@@ -73,7 +77,7 @@ class ItemList(object):
         
         self.cache = response["items"] if response else None
 
-    def next(self):
+    def __next__(self):
         if not self.cache:
             self._build_cache()
         data = self.cache.pop(0) if self.cache else None
@@ -92,6 +96,9 @@ class ItemList(object):
         self.previous_id = obj.id
         self.itercounter +=1
         return obj
+
+    def next(self):
+        return self.__next__()
 
 
 class Feed(AbstractModel):
