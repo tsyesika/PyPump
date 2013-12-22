@@ -142,12 +142,13 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
 
         image.author = self._pump.Person().unserialize(data["author"])
 
-        image.add_links(data["links"])
+        image.add_links(data)
         image.published = parse(data["published"])
         image.updated = parse(data["updated"])
+        image.deleted = parse(data["deleted"]) if "deleted" in data else None
         image.display_name = data.get("displayName", "")
         image.summary = data.get("summary", "")
-        image.url = data["url"]
+        image.url = data.get("url")
         image.content = data.get("content", "")
  
         return image
