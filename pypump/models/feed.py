@@ -96,7 +96,7 @@ class ItemList(object):
 
 class Feed(AbstractModel):
     id = None
-    displayName = None
+    display_name = None
     totalItems = None
     objectTypes = None
     url = None
@@ -127,7 +127,7 @@ class Feed(AbstractModel):
         )
 
     def __str__(self):
-        return "{name}".format(name=self.displayName or self.TYPE)
+        return "{name}".format(name=self.display_name or self.TYPE)
 
     def __iter__(self):
         return ItemList(self)
@@ -169,7 +169,7 @@ class Feed(AbstractModel):
         return endpoint + feedname
 
     def unserialize(self, data):
-        self.displayName = data["displayName"]
+        self.display_name = data["displayName"]
         self.totalItems = data["totalItems"]
         self.objectTypes = data["objectTypes"][0].capitalize() if "objectTypes" in data else None
         self.url = data["url"]
