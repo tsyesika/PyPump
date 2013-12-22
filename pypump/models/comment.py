@@ -79,6 +79,6 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
         self.liked = data["liked"] if "liked" in data else False
         self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
-        self.add_links(data["links"])
+        self.add_links(data)
         return self
         
