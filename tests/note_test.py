@@ -53,7 +53,7 @@ class NoteTest(PyPumpTest):
         note = self.pump.Note().unserialize(self.minidata)
         self.assertTrue(isinstance(note, type(self.pump.Note())))
     def test_note_unserialize(self):
-        note = self.pump.Note().unserialize(self.response.data)
+        note = self.pump.Note().unserialize(self.maxidata)
         self.assertTrue(isinstance(note, type(self.pump.Note())))
     def test_note_attr_display_name(self):
         self.assertTrue(hasattr(self.maxinote, 'display_name'))
