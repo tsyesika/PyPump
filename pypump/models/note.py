@@ -62,7 +62,7 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,
-                "displayName":self.display_name,
+                "displayName":self.display_name or "",
             }
         })
 
