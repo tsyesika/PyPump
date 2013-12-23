@@ -59,7 +59,7 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
 
         self.deleted = deleted
         self.liked = liked
-        self.author = self._pump.me if author is None else author
+        self.author = author
 
 
     def serialize(self):
@@ -89,6 +89,6 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.liked = data["liked"] if "liked" in data else False
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
-        self.author = self._pump.Person().unserialize(data["author"])
+        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
         self.add_links(data)
         return self
