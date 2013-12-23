@@ -62,9 +62,10 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,
-                "displayName":self.display_name or "",
             }
         })
+        if self.display_name:
+            data["object"]["displayName"] = self.display_name
 
         return data
 
