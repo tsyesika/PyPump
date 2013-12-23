@@ -21,6 +21,7 @@ from datetime import datetime
 from dateutil.parser import parse
 
 from pypump.models import AbstractModel
+from pypump.models.activity import Mapper
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
@@ -46,6 +47,7 @@ class Person(AbstractModel):
     image = None # Image items
 
     _outbox = None
+    _inbox = None
     _followers = None
     _following = None
     _favorites = None
@@ -55,6 +57,13 @@ class Person(AbstractModel):
     def outbox(self):
         self._outbox = self._outbox or Outbox(self.links['activity-outbox'],pypump=self._pump)
         return self._outbox
+
+    @property
+    def inbox(self):
+        if self.isme:
+            self._inbox = self._inbox or Inbox(self.links['activity-inbox'],pypump=self._pump)
+            return self._inbox
+        return None
 
     @property
     def followers(self):
@@ -109,9 +118,6 @@ class Person(AbstractModel):
             )
             data = self._pump.request(self.links['self'])
             self.unserialize(data)
-
-            if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
-                self.inbox = Inbox(self.links['activity-inbox'], pypump=self._pump)
 
         self.username = username or self.username
         self.url = url or self.url
@@ -170,30 +176,27 @@ class Person(AbstractModel):
     def __str__(self):
         return self.display_name or self.username or self.webfinger
 
-    def unserialize_service(self, data):
-        """ Unserializes the data from a service """
-        self.id = data["id"]
-        self.display = data["displayName"]
-        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
-        self.published = parse(data["published"]) if "published" in data else self.updated
-        return self
-
     def unserialize(self, data):
         """ Goes from JSON -> Person object """
         if data.get("objectType", "") == "service":
-            return self.unserialize_service(data)
+            return Mapper().get_object(data)
 
-        self.id = data["id"]
+        self._ignore_attr = list()
+        mapping = {"id":"id",
+                   "username" :"preferredUsername",
+                   "display_name" : "displayName",
+                   "url" : "url",
+                   "summary" : "summary",
+                   "updated" : "updated",
+                   "published" : "published",
+                   "location": "location"}
+
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, jsondata=data)
+
         self.server = self.id.replace("acct:", "").split("@")[-1]
-        self.username = data.get("preferredUsername", None)
-        self.display_name = data.get("displayName", None)
-        self.url = data.get("url", None)
-        self.summary = data.get("summary", None)
-        self.updated = parse(data["updated"]) if "updated" in data else None
-        self.published = parse(data["published"]) if "published" in data else self.updated
-        self.updated = parse(data["updated"]) if "updated" in data else self.published
+        self.published = self.published or self.updated
+        self.updated = self.updated or self.published
         self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
-        self.location = self._pump.Place().unserialize(data["location"]) if "location" in data else None
         self.add_links(data)
 
         return self

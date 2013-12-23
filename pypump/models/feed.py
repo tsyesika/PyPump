@@ -85,14 +85,9 @@ class ItemList(object):
         if self._should_stop(data):
             raise StopIteration
 
-        try:
-            if not self.feed.object_types:
-                obj = getattr(self.feed._pump, data["objectType"].capitalize())
-            else:
-                obj = getattr(self.feed._pump, self.feed.object_types[0].capitalize())
-            obj = obj().unserialize(data)
-        except AttributeError:
-            obj = Mapper().get_object(data)
+        if not data.get("objectType"): # object without an objectType, grr
+            data["objectType"] = self.feed.object_types[0].capitalize()
+        obj = Mapper(pypump=self.feed._pump).get_object(data)
         self.previous_id = obj.id
         self.itercounter +=1
         return obj

@@ -29,11 +29,14 @@ class Mapper(object):
     # TODO probably better to move this into the models,
     # {"json_attr":("model_attr", "datatype"), .. } or similar
     strings = ["content", "display_name", "id", "objectType", "object_type",
-               "summary", "url", "preferred_username", "verb"]
+               "summary", "url", "preferred_username", "verb", "username"]
     dates = ["updated", "published", "deleted"]
-    objects = ["generator", "actor", "obj", "author", "in_reply_to"]
+    objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
     lists = ["to", "cc", "bcc", "bto",]
     #feeds = ["likes", "shares", "replies"]
+
+    def __init__(self, pypump=None, *args, **kwargs):
+        self._pump = pypump
 
     def parse_map(self, obj, mapping=None, ignore_attr=None, *args, **kwargs):
         """ Parses a dictionary of (model_attr, json_attr) items """
@@ -71,15 +74,27 @@ class Mapper(object):
         setattr(obj, key, data)
 
     def get_object(self, data):
-        # We're only looking for models in this file for now.
-        self.models = pypump.models.activity
         try:
-            # Look for suitable model based on objectType
-            objekt = getattr(self.models, data["objectType"].capitalize())
-            return objekt(jsondata=data)
-        except AttributeError:
-            # Fall back to ActivityObject if not found
-            return ActivityObject(jsondata=data)
+            # Look for suitable PyPump model based on objectType
+            obj_type = data.get("objectType").capitalize()
+            obj = getattr(self._pump, obj_type)
+            obj = obj().unserialize(data)
+            _log.debug("Created PyPump model %r" % obj.__class__)
+            return obj
+        except AttributeError, e:
+            _log.debug("Exception: %s" % e)
+            try:
+                # Look for suitable activityobject model based on objectType
+                obj = getattr(pypump.models.activity, data.get("objectType").capitalize())
+                obj = obj(pypump=self._pump, jsondata=data)
+                _log.debug("Created activity.* model: %r" % obj.__class__)
+                return obj
+            except AttributeError, e:
+                # Fall back to ActivityObject
+                _log.debug("Exception: %s" % e)
+                obj = ActivityObject(pypump=self._pump, jsondata=data)
+                _log.debug("Created ActivityObject: %r" % obj)
+                return obj
 
     def set_object(self, obj, key, data, from_json):
         if from_json:
@@ -139,8 +154,9 @@ class ActivityObject(AbstractModel):
         return str(self.__repr__())
 
     def __init__(self, *args, **kwargs):
+        _log.debug("ActivityObject %s init: args: %s, kwargs: %s" % (kwargs["jsondata"]["objectType"],args, kwargs.keys()))
         super(ActivityObject, self).__init__(*args, **kwargs)
-        Mapper().parse_map(self,
+        Mapper(*args, **kwargs).parse_map(self,
                            mapping=ActivityObject._mapping,
                            ignore_attr=ActivityObject._ignore_attr,
                            *args,
@@ -153,7 +169,7 @@ class Application(ActivityObject):
 
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
-        Mapper().parse_map(self, *args, **kwargs)
+        Mapper(*args, **kwargs).parse_map(self, *args, **kwargs)
 
 
 class Activity(AbstractModel):
@@ -184,20 +200,15 @@ class Activity(AbstractModel):
             "id":"id",
             "to":"to",
             "cc":"cc",
+            "actor":"actor",
+            "obj":"object"
         }
 
         if "author" not in data["object"]:
             # add author if not set (true for posted objects in inbox/major)
             data["object"]["author"] = data["actor"]
 
-        for model_attr, json_attr in {"actor":"actor", "obj":"object"}.items():
-            try:
-                objekt = getattr(self._pump, data[json_attr]["objectType"].capitalize())()
-                setattr(self, model_attr, objekt.unserialize(data[json_attr]))
-            except AttributeError:
-                mapping[model_attr] = json_attr
-
-        Mapper().parse_map(self, mapping=mapping, jsondata=data)
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, jsondata=data)
         self.add_links(data)
 
         return self
