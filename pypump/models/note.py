@@ -39,28 +39,20 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     author = None
 
     def __init__(self, content=None, id=None, published=None, updated=None, 
-                 deleted=False, liked=False, author=None,
+                 deleted=False, liked=False, author=None, display_name=None, url=None,
                  *args, **kwargs):
 
         super(Note, self).__init__(*args, **kwargs)
 
-        self.id = id if id else None
         self.content = content
-
-        if published:
-            self.published = published
-        else:
-            self.published = datetime.now()
-
-        if updated:
-            self.updated = updated
-        else:
-            self.updated = self.published
-
+        self.id = id
+        self.published = published
+        self.updated = updated
         self.deleted = deleted
         self.liked = liked
         self.author = author
-
+        self.display_name = display_name
+        self.url = url
 
     def serialize(self):
         """ Convers the post to JSON """
@@ -70,6 +62,7 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
             "object":{
                 "objectType":self.objectType,
                 "content":self.content,
+                "displayName":self.display_name,
             }
         })
 
@@ -84,8 +77,10 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
         self.id = data.get("id", None)
-        self.content = data.get("content", u"")
-        self.published = parse(data["published"])
+        self.url = data.get("url", None)
+        self.display_name = data.get("displayName", "")
+        self.content = data.get("content", "")
+        self.published = parse(data["published"]) if "published" in data else None
         self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.liked = data["liked"] if "liked" in data else False
         self.deleted = parse(data["deleted"]) if "deleted" in data else False
