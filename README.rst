@@ -2,10 +2,6 @@
 PyPump - Python Pump.io Library
 ================================
 
-:Version: 0.4
-:Web: https://github.com/xray7224/PyPump/
-:Keywords: pump.io, library, social, federated
-
 What is Pump.io?
 ================
 
