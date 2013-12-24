@@ -2,8 +2,9 @@
 #
 
 # You can set these variables from the command line.
+PYTHON		  = `which python`
 SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
+SPHINXBUILD   = $(PYTHON) `which sphinx-build`
 PAPER         =
 BUILDDIR      = _build
 

@@ -6,16 +6,17 @@
 PyPump - Python Pump.io Library
 ===============================
 
-PyPump provides a simple, powerful and pythonic way of interfacing with `pump.io <http://pump.io>`_.
-The community for PyPump lives on IRC in the #pypump channel on `MegNet <http://megworld.co.uk/irc>`_.
+PyPump is a simple but powerful and pythonic way of interfacing with the `pump.io <http://pump.io>`_ API.
 
 PyPump is under the `GPLv3 <https://www.gnu.org/licenses/gpl.html>`_. You should probably
-look to see if/how this may impact you and your programs if you desire to use PyPump.
+look to see if/how this may impact you and your programs if you wish to use PyPump. The community
+for PyPump lives on IRC in the #pypump channel on `MegNet <http://megworld.co.uk/irc>`_.
 
 Getting started
 ---------------
-If you're new to PyPump and feeling a bit overwhelmed the :doc:`tutorial` is the best 
-place to go.
+If you're new to PyPump and feeling a bit overwhelmed the :doc:`gettingstarted/tutorial` is the best 
+place to go, however if you're familiar with python and understand pump, check out the
+:doc:`gettingstarted/qnd` guide!
 
 Contents
 --------
