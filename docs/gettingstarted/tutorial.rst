@@ -154,7 +154,7 @@ public feed so everyone can see it.  We can do this by posting it to
 our outbox::
 
     >>> img = pump.Image(
-    ...     display_name="Sunset"
+    ...     display_name="Sunset",
     ...     content="I took this the other day, came out really well!")
     >>> img.from_file("sunset.jpg")
 
