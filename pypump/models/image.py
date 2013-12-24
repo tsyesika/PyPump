@@ -132,7 +132,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             )
             
         if "image" in data:
-            save_point = "original" if image.original is None else "thumbnail"
+            save_point = "original" if not hasattr(image, "original") else "thumbnail"
             thumbnail = data["image"]
             setattr(image, save_point, ImageContainer(
                 url=thumbnail["url"],
@@ -140,11 +140,11 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 width=thumbnail.get("width")
             ))
 
-        image.author = self._pump.Person().unserialize(data["author"])
+        image.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
 
         image.add_links(data)
-        image.published = parse(data["published"])
-        image.updated = parse(data["updated"])
+        image.published = parse(data["published"]) if "published" in data else None
+        image.updated = parse(data["updated"]) if "updated" in data else None
         image.deleted = parse(data["deleted"]) if "deleted" in data else None
         image.display_name = data.get("displayName", "")
         image.summary = data.get("summary", "")

@@ -50,6 +50,20 @@ class ImageTest(PyPumpTest):
             }
         }
 
+        self.mini_data = {
+            "objectType" : "image",
+            "id" : "foo",
+            "image" : {
+                "url": "https://example.com/uploads/testuser/2013/12/24/XMAS13_thumb.jpg",
+                "height": 240,
+                "width": 320
+            }
+        }
+
+    def test_mini_unserialize(self):
+        image = self.pump.Image().unserialize(self.mini_data)
+
+
     def test_unserialize(self):
         """ Tests image unserialization is successful """
         # Make the image object
