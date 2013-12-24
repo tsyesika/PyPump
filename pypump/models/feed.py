@@ -176,6 +176,7 @@ class Feed(AbstractModel):
         self.object_types = data["objectTypes"] if "objectTypes" in data else None
         self.url = data["url"]
         self.author = self._pump.Person().unserialize(data['author']) if 'author' in data else None
+        self.links = {} # we need to delete old links or else we get infinite feeds
         self.add_links(data)
 
 
