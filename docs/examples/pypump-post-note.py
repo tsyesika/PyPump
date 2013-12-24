@@ -73,11 +73,11 @@ class App(object):
     def post_note(self):
         """ Post note and return the URL of the posted note """
         if self.args.note_title:
-            note_title = "<h1>{title}</h1>".format(title=self.args.note_title)
+            note_title = self.args.note_title
         else:
-            note_title = ""
+            note_title = None
         note_content = self.args.note_content
-        mynote = self.pump.Note(note_title + note_content)
+        mynote = self.pump.Note(display_name=note_title, content = note_content)
         mynote.to = self.pump.me.followers
         mynote.cc = self.pump.Public
         mynote.send()
