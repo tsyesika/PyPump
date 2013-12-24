@@ -15,10 +15,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from dateutil.parser import parse as dateparse
+from dateutil.parser import parse
 from pypump.models import AbstractModel
 
-import pypump.models.activity # dodgy
+import pypump.models.activity
+import six
 import logging
 
 _log = logging.getLogger(__name__)
@@ -32,7 +33,8 @@ class Mapper(object):
                "summary", "url", "preferred_username", "verb", "username"]
     dates = ["updated", "published", "deleted"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
-    lists = ["to", "cc", "bcc", "bto",]
+    lists = ["to", "cc", "bcc", "bto","object_types"]
+    numbers = ["total_items"]
     #feeds = ["likes", "shares", "replies"]
 
     def __init__(self, pypump=None, *args, **kwargs):
@@ -43,10 +45,10 @@ class Mapper(object):
         mapping = mapping or obj._mapping
         ignore_attr = ignore_attr or obj._ignore_attr
 
-        if "jsondata" in kwargs:
+        if "data" in kwargs:
             for k, v in mapping.items():
-                if v in kwargs["jsondata"] and k not in ignore_attr:
-                    self.add_attr(obj, k, kwargs["jsondata"][v], from_json=True)
+                if v in kwargs["data"] and k not in ignore_attr:
+                    self.add_attr(obj, k, kwargs["data"][v], from_json=True)
                 #elif k not in ignore_attr:
                     #_log.debug("Setting attribute %r to None" % k)
                     #self.set_none(obj, k)
@@ -58,6 +60,8 @@ class Mapper(object):
     def add_attr(self, obj, key, data, from_json=False):
         if key in self.strings:
             self.set_string(obj, key, data, from_json)
+        elif key in self.numbers:
+            self.set_number(obj, key, data, from_json)
         elif key in self.objects:
             self.set_object(obj, key, data, from_json)
         elif key in self.dates:
@@ -73,6 +77,9 @@ class Mapper(object):
     def set_string(self, obj, key, data, from_json):
         setattr(obj, key, data)
 
+    def set_number(self, obj, key, data, from_json):
+        setattr(obj, key, data)
+
     def get_object(self, data):
         try:
             # Look for suitable PyPump model based on objectType
@@ -86,13 +93,13 @@ class Mapper(object):
             try:
                 # Look for suitable activityobject model based on objectType
                 obj = getattr(pypump.models.activity, data.get("objectType").capitalize())
-                obj = obj(pypump=self._pump, jsondata=data)
+                obj = obj(pypump=self._pump, data=data)
                 _log.debug("Created activity.* model: %r" % obj.__class__)
                 return obj
             except AttributeError, e:
                 # Fall back to ActivityObject
                 _log.debug("Exception: %s" % e)
-                obj = ActivityObject(pypump=self._pump, jsondata=data)
+                obj = ActivityObject(pypump=self._pump, data=data)
                 _log.debug("Created ActivityObject: %r" % obj)
                 return obj
 
@@ -102,13 +109,16 @@ class Mapper(object):
 
     def set_date(self, obj, key, data, from_json):
         if from_json:
-            setattr(obj, key, dateparse(data))
+            setattr(obj, key, parse(data))
 
     def set_list(self, obj, key, data, from_json):
         if from_json:
             tmplist = []
             for i in data:
-                tmplist.append(self.get_object(i))
+                if isinstance(i, six.string_types):
+                    tmplist.append(i)
+                else:
+                    tmplist.append(self.get_object(i))
             setattr(obj, key, tmplist)
 
 
@@ -154,7 +164,7 @@ class ActivityObject(AbstractModel):
         return str(self.__repr__())
 
     def __init__(self, *args, **kwargs):
-        _log.debug("ActivityObject %s init: args: %s, kwargs: %s" % (kwargs["jsondata"]["objectType"],args, kwargs.keys()))
+        _log.debug("ActivityObject %s init: args: %s, kwargs: %s" % (kwargs["data"]["objectType"],args, kwargs.keys()))
         super(ActivityObject, self).__init__(*args, **kwargs)
         Mapper(*args, **kwargs).parse_map(self,
                            mapping=ActivityObject._mapping,
@@ -208,7 +218,7 @@ class Activity(AbstractModel):
             # add author if not set (true for posted objects in inbox/major)
             data["object"]["author"] = data["actor"]
 
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, jsondata=data)
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, data=data)
         self.add_links(data)
 
         return self

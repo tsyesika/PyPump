@@ -9,6 +9,7 @@ class ActivityTest(PyPumpTest):
     def setUp(self):
         super(ActivityTest, self).setUp()
         self.response.data = {
+            "objectType":"activity",
             "to": [{
                 "objectType" : "person",
                 "id" : "acct:testuser@example.com"

@@ -191,7 +191,7 @@ class Person(AbstractModel):
                    "published" : "published",
                    "location": "location"}
 
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, jsondata=data)
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, data=data)
 
         self.server = self.id.replace("acct:", "").split("@")[-1]
         self.published = self.published or self.updated
