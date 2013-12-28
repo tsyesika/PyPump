@@ -110,9 +110,6 @@ class Person(AbstractModel):
             data = self._pump.request(self.links['self'])
             self.unserialize(data)
 
-            if self.username == self._pump.client.nickname and self.server == self._pump.client.server:
-                self.inbox = Inbox(self.links['activity-inbox'], pypump=self._pump)
-
         self.username = username or self.username
         self.url = url or self.url
         self.summary = summary or self.summary
@@ -121,6 +118,10 @@ class Person(AbstractModel):
         self.published = published or self.published
         self.updated = updated or self.updated
         self.isme = (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
+
+    @property
+    def inbox(self):
+        return Inbox(self.links['activity-inbox'], pypump=self._pump)
 
     @property
     def webfinger(self):
