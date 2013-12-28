@@ -45,6 +45,7 @@ class Person(AbstractModel):
     summary = "" # lil bit about them =]    
     image = None # Image items
 
+    _inbox = None
     _outbox = None
     _followers = None
     _following = None
@@ -121,7 +122,8 @@ class Person(AbstractModel):
 
     @property
     def inbox(self):
-        return Inbox(self.links['activity-inbox'], pypump=self._pump)
+        self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)
+        return self._inbox
 
     @property
     def webfinger(self):
