@@ -64,8 +64,9 @@ class PyPump(object):
     protocol = "https"
     verify_requests = True
     client = None
-    _server_cache = dict()
-    _unit_testing = False # Is being run in unit tests
+    _server_cache = None
+    _server_tokens = None # this hold OAuth tokens
+    _me = None
 
     def __init__(self, client, token=None, secret=None, verifier_callback=None,
                 callback="oob", verify=True):
@@ -74,6 +75,8 @@ class PyPump(object):
             this also holds the models.
         """
 
+        self._server_cache = {}
+        self._server_tokens = {}
         self.verify_requests = verify
         self.callback = callback
         self.client = client
@@ -95,10 +98,16 @@ class PyPump(object):
             self.token = token
             self.secret = secret
 
-        if not self._unit_testing:
-            self.me = self.Person("{username}@{server}".format(
-                username = self.client.nickname,
-                server = self.client.server))
+    @property
+    def me(self):
+        if self._me is not None:
+            return self._me
+
+        self._me = self.Person("{username}@{server}".format(
+            username = self.client.nickname,
+            server = self.client.server
+        ))
+        return self._me
 
     def populate_models(self):
         def factory(pypump, model):
@@ -310,10 +319,10 @@ class PyPump(object):
     def oauth_request(self):
         """ Makes a oauth connection """
         # get tokens from server and make a dict of them.
-        self.__server_tokens = self.request_token()
+        self._server_tokens = self.request_token()
 
-        self.token = self.__server_tokens["token"]
-        self.secret = self.__server_tokens["token_secret"]
+        self.token = self._server_tokens["token"]
+        self.secret = self._server_tokens["token_secret"]
 
         url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
@@ -330,8 +339,8 @@ class PyPump(object):
 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
-        self.__server_tokens["verifier"] = verifier
-        self.request_access(**self.__server_tokens)
+        self._server_tokens["verifier"] = verifier
+        self.request_access(**self._server_tokens)
 
     def setup_oauth_client(self, url=None):
         """ Sets up client for requests to pump """
@@ -410,7 +419,7 @@ class PyPump(object):
 
         self.token = data[self.PARAM_TOKEN][0]
         self.secret = data[self.PARAM_TOKEN_SECRET][0]
-        self.__server_tokens = None # clean up code.
+        self._server_tokens = {} # clean up code.
 
 class WebPump(PyPump):
     """
