@@ -15,18 +15,6 @@ import time
 import sys
 import os
 
-# Taken from https://gitorious.org/mediagoblin/mediagoblin/source/eebd9fe3edb3cce4675f58eb02fe1d96229af0d5:docs/source/conf.py#L52
-try:
-    sys.path.insert(0, os.path.abspath(".."))
-    from pypump._version import __version__
-    # The short X.Y version.
-    version = '.'.join(__version__.split('.')[0:2])
-    # The full version, including alpha/beta/rc tags.
-    release = __version__
-except ImportError:
-    version = "unknown"
-    release = "unknown"
-
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -46,6 +34,10 @@ templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
+
+# Versions/Release
+version = "0.5"
+release = "0.5-dev"
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
