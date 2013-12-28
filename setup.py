@@ -6,14 +6,12 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from pypump import _version as version
-
 if version_info[0] == 2:
     warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
 
 setup(
         name="PyPump",
-        version=version.get_version(),
+        version="0.4",
         description="Python Pump.io library",
         long_description=open("README.rst").read(),
         author="Jessica Tallon",
