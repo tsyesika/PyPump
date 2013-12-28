@@ -32,8 +32,13 @@ except ImportError:
     six.print_("You need to have ipython installed to run this")
     sys.exit(1)
 
-store_path = os.path.expanduser("~/.pypump_test")
+# Get configuration file
+config_home = os.environ.get("XDG_CONFIG_HOME", "~/.config")
+store_path = os.path.join(os.path.expanduser(config_home), "pypump")
+if not os.path.isdir(store_path):
+    os.mkdir(store_path)
 
+store_path = os.path.join(store_path, "shell.json")
 
 welcome_banner = """Welcome to the PyPump testing shell,
 We have setup some useful objects for you:
