@@ -88,7 +88,7 @@ class Mapper(object):
             obj = obj().unserialize(data)
             _log.debug("Created PyPump model %r" % obj.__class__)
             return obj
-        except AttributeError, e:
+        except AttributeError as e:
             _log.debug("Exception: %s" % e)
             try:
                 # Look for suitable activityobject model based on objectType
@@ -96,7 +96,7 @@ class Mapper(object):
                 obj = obj(pypump=self._pump, data=data)
                 _log.debug("Created activity.* model: %r" % obj.__class__)
                 return obj
-            except AttributeError, e:
+            except AttributeError as e:
                 # Fall back to ActivityObject
                 _log.debug("Exception: %s" % e)
                 obj = ActivityObject(pypump=self._pump, data=data)
