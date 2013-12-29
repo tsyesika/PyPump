@@ -21,6 +21,7 @@ from datetime import datetime
 from dateutil.parser import parse
 
 from pypump.models import AbstractModel
+from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
@@ -122,6 +123,8 @@ class Person(AbstractModel):
 
     @property
     def inbox(self):
+        if not self.isme:
+            raise PyPumpException("You can't read other people's inboxes")
         self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)
         return self._inbox
 
