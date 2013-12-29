@@ -5,7 +5,7 @@ class ImageTest(PyPumpTest):
     
     def setUp(self):
         super(ImageTest, self).setUp()
-        self.response.data = {
+        self.imgdata = {
             "url": "https://example.com/testuser/image/Pi9rux49S6C1Yhta0zbxyz",
             "content": "<p>I think i killed santa! :O.</p>\n",
             "displayName": "O M G",
@@ -60,6 +60,11 @@ class ImageTest(PyPumpTest):
             }
         }
 
+        self.response.data = {
+            "verb": "post",
+            "object": self.imgdata,
+        }
+
     def test_mini_unserialize(self):
         image = self.pump.Image().unserialize(self.mini_data)
 
@@ -67,19 +72,19 @@ class ImageTest(PyPumpTest):
     def test_unserialize(self):
         """ Tests image unserialization is successful """
         # Make the image object
-        image = self.pump.Image().unserialize(self.response.data)
+        image = self.pump.Image().unserialize(self.imgdata)
 
         # Test unserialization is correct
-        self.assertEqual(image.id, self.response["id"])
-        self.assertEqual(image.url, self.response["url"])
-        self.assertEqual(image.thumbnail.url, self.response["image"]["url"])
-        self.assertEqual(image.original.url, self.response["fullImage"]["url"])
-        self.assertEqual(image.display_name, self.response["displayName"])
-        self.assertEqual(image.content, self.response["content"])
-        self.assertEqual(image.thumbnail.height, self.response["image"]["height"])
-        self.assertEqual(image.thumbnail.width, self.response["image"]["width"])
-        self.assertEqual(image.original.height, self.response["fullImage"]["height"])
-        self.assertEqual(image.original.width, self.response["fullImage"]["width"])
+        self.assertEqual(image.id, self.imgdata["id"])
+        self.assertEqual(image.url, self.imgdata["url"])
+        self.assertEqual(image.thumbnail.url, self.imgdata["image"]["url"])
+        self.assertEqual(image.original.url, self.imgdata["fullImage"]["url"])
+        self.assertEqual(image.display_name, self.imgdata["displayName"])
+        self.assertEqual(image.content, self.imgdata["content"])
+        self.assertEqual(image.thumbnail.height, self.imgdata["image"]["height"])
+        self.assertEqual(image.thumbnail.width, self.imgdata["image"]["width"])
+        self.assertEqual(image.original.height, self.imgdata["fullImage"]["height"])
+        self.assertEqual(image.original.width, self.imgdata["fullImage"]["width"])
 
     def test_upload_file(self):
         """ Test image can be uploaded succesfully """
@@ -88,20 +93,15 @@ class ImageTest(PyPumpTest):
             content="This is my sexy description"
         )
 
-        # Upload an image from the bucket
-        image.from_file(self.bucket.path_to_png)
-        
         # Check image has my attributs as they were set
         self.assertEqual(image.display_name, "My lovely image")
         self.assertEqual(image.content, "This is my sexy description")
 
+        # Upload an image from the bucket
+        image.from_file(self.bucket.path_to_png)
+
         # Test the data sent is correct.
         upload_request = self.requests[0] # It always happens to be the first request
-        
-        self.assertEqual(image.display_name, upload_request.params["title"])
-        self.assertEqual(image.content, upload_request.params["description"])
-        self.assertTrue(self.bucket.path_to_png.endswith(upload_request.params["qqfile"]))
-
 
         # Test that the data is the same
         binary_image = open(self.bucket.path_to_png, "rb").read()
