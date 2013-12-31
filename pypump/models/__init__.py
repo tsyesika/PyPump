@@ -118,8 +118,8 @@ class AbstractModel(object):
             key = self.remap(key)
             if key is None:
                 continue
-
-            setattr(klass, key, value)            
+            else:
+                setattr(klass, key, value)
 
         return klass
 
