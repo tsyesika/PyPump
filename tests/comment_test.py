@@ -38,7 +38,7 @@ class CommentTest(PyPumpTest):
             },
             "url": "https://example.com/testuser/comment/UOsxSKbITXixW5r_HAyO2A",
             "id": "https://example.com/api/comment/UOsxSKbITXixW5r_HAyO2A",
-            "liked": False,
+            "liked": True,
             "pump_io": {
                 "shared": False
             }
