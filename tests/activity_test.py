@@ -40,6 +40,7 @@ class ActivityTest(PyPumpTest):
             },
             "url": "https://example.com/testuser2/activity/xyz",
             "published": "2013-12-24T16:58:42Z",
+            "received": "2013-12-24T16:58:42Z",
             "content": "<a href='https://example.com/testuser2'>testuser2@example.com</a> posted <a href='https://example.com/testuser2/test/xyz'>a test</a>",
             "id": "https://example.com/api/activity/abc"
         }
@@ -79,6 +80,9 @@ class ActivityTest(PyPumpTest):
     def test_activity_attr_published(self):
         self.assertTrue(hasattr(self.activity, 'published'))
         self.assertTrue(self.activity.published, parse(self.response["published"]))
+    def test_activity_attr_received(self):
+        self.assertTrue(hasattr(self.activity, 'received'))
+        self.assertTrue(self.activity.received, parse(self.response["received"]))
     def test_activity_attr_content(self):
         self.assertTrue(hasattr(self.activity, 'content'))
         self.assertEqual(self.activity.content, self.response["content"])
