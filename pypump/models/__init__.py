@@ -208,7 +208,7 @@ class Commentable(object):
 
     def comment(self, comment):
         """ Posts a comment object on model """
-        comment.inReplyTo = self
+        comment.in_reply_to = self
         comment.send()
 
 

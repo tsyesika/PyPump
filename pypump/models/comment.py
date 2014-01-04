@@ -30,20 +30,20 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     id = None
     content = ""
-    inReplyTo = None
+    in_reply_to = None
     updated = None
     published = None
     deleted = False
     author = None
 
-    def __init__(self, content=None, id=None, inReplyTo=None, published=None, updated=None,
+    def __init__(self, content=None, id=None, in_reply_to=None, published=None, updated=None,
                  deleted=False, liked=False, author=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
         self.id = "" if id is None else id
         self.content = content
-        self.inReplyTo = inReplyTo
+        self.in_reply_to = in_reply_to
         self.published = published
         self.updated = updated
         self.deleted = deleted
@@ -63,8 +63,8 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
                 "objectType":self.objectType,
                 "content":self.content,
                 "inReplyTo":{
-                    "id":self.inReplyTo.id,
-                    "objectType":self.inReplyTo.objectType,
+                    "id":self.in_reply_to.id,
+                    "objectType":self.in_reply_to.objectType,
                 },
             },
         }
