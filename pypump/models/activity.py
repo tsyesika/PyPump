@@ -31,7 +31,7 @@ class Mapper(object):
     # {"json_attr":("model_attr", "datatype"), .. } or similar
     strings = ["content", "display_name", "id", "objectType", "object_type",
                "summary", "url", "preferred_username", "verb", "username"]
-    dates = ["updated", "published", "deleted"]
+    dates = ["updated", "published", "deleted", "received"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
     lists = ["to", "cc", "bcc", "bto","object_types"]
     numbers = ["total_items"]
@@ -206,6 +206,7 @@ class Activity(AbstractModel):
             "updated":"updated",
             "url":"url",
             "published":"published",
+            "received":"received",
             "content":"content",
             "id":"id",
             "to":"to",
