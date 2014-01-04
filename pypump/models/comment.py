@@ -18,6 +18,7 @@
 from dateutil.parser import parse
 from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
                            Deleteable)
+from pypump.models.activity import Mapper
 
 class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
@@ -47,12 +48,12 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
-        self.author = self._pump.me if author is None else author
+        self.author = author
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
             type=self.TYPE,
-            webfinger=self.author.webfinger
+            webfinger=getattr(self.author,'webfinger', 'unknown')
             )
 
     def send(self):
@@ -72,13 +73,19 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     def unserialize(self, data):
         """ from JSON -> Comment """
-        self.content = data["content"] if "content" in data else ""
-        self.id = data["id"] if "id" in data else ""
-        self.published = parse(data["published"]) if "publised" in data else False
-        self.updated = parse(data["updated"]) if "updated" in data else False
-        self.deleted = parse(data["deleted"]) if "deleted" in data else False
-        self.liked = data["liked"] if "liked" in data else False
-        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
+        ignore_attr = ["dummyattr",]
+        mapping = {
+            "content": "content",
+            "id": "id",
+            "url": "url",
+            "published": "published",
+            "updated": "updated",
+            "deleted": "deleted",
+            "liked" : "liked",
+            "author" : "author",
+            "in_reply_to" : "inReplyTo"
+        }
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
         self.add_links(data)
         return self
         
