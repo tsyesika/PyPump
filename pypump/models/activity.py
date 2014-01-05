@@ -35,6 +35,7 @@ class Mapper(object):
     objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
     lists = ["to", "cc", "bcc", "bto","object_types"]
     numbers = ["total_items"]
+    bools = ["liked"]
     #feeds = ["likes", "shares", "replies"]
 
     def __init__(self, pypump=None, *args, **kwargs):
@@ -68,11 +69,16 @@ class Mapper(object):
             self.set_date(obj, key, data, from_json)
         elif key in self.lists:
             self.set_list(obj, key, data, from_json)
+        elif key in self.bools:
+            self.set_bool(obj, key, data, from_json)
         else:
             _log.debug("Ignoring unknown attribute %r", key)
 
     def set_none(self, obj, key):
         setattr(obj, key, None)
+
+    def set_bool(self, obj, key, data, from_json):
+        setattr(obj, key, data)
 
     def set_string(self, obj, key, data, from_json):
         setattr(obj, key, data)

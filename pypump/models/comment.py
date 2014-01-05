@@ -37,7 +37,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
     author = None
 
     def __init__(self, content=None, id=None, in_reply_to=None, published=None, updated=None,
-                 deleted=False, liked=False, author=None, *args, **kwargs):
+                 deleted=False, liked=None, author=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
