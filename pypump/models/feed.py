@@ -171,11 +171,16 @@ class Feed(AbstractModel):
         return endpoint + feedname
 
     def unserialize(self, data):
-        self.display_name = data["displayName"]
-        self.total_items = data["totalItems"]
-        self.object_types = data["objectTypes"] if "objectTypes" in data else None
-        self.url = data["url"]
-        self.author = self._pump.Person().unserialize(data['author']) if 'author' in data else None
+        ignore_attr = ["dummyattr",]
+        mapping = {
+            "display_name": "displayName",
+            "total_items": "totalItems",
+            "object_types": "objectTypes",
+            "url": "url",
+            "author": "author"
+        }
+
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
         self.links = {} # we need to delete old links or else we get infinite feeds
         self.add_links(data)
 
