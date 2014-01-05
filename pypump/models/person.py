@@ -24,6 +24,7 @@ from pypump.models import AbstractModel
 from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
+from pypump.models.activity import Mapper
 
 class Person(AbstractModel):
 
@@ -176,30 +177,23 @@ class Person(AbstractModel):
     def __str__(self):
         return self.display_name or self.username or self.webfinger
 
-    def unserialize_service(self, data):
-        """ Unserializes the data from a service """
-        self.id = data["id"]
-        self.display = data["displayName"]
-        self.updated = parse(data["updated"]) if "updated" in data else datetime.now()
-        self.published = parse(data["published"]) if "published" in data else self.updated
-        return self
-
     def unserialize(self, data):
         """ Goes from JSON -> Person object """
-        if data.get("objectType", "") == "service":
-            return self.unserialize_service(data)
+        ignore_attr = ["dummyattr", ]
+        mapping = {
+            "id": "id",
+            "username": "preferredUsername",
+            "display_name": "displayName",
+            "url": "url",
+            "summary": "summary",
+            "updated": "updated",
+            "published":"published",
+            "location":"location",
+        }
 
-        self.id = data["id"]
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
         self.server = self.id.replace("acct:", "").split("@")[-1]
-        self.username = data.get("preferredUsername", None)
-        self.display_name = data.get("displayName", None)
-        self.url = data.get("url", None)
-        self.summary = data.get("summary", None)
-        self.updated = parse(data["updated"]) if "updated" in data else None
-        self.published = parse(data["published"]) if "published" in data else self.updated
-        self.updated = parse(data["updated"]) if "updated" in data else self.published
         self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
-        self.location = self._pump.Place().unserialize(data["location"]) if "location" in data else None
         self.add_links(data)
 
         return self
