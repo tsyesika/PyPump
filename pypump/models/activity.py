@@ -29,13 +29,12 @@ class Mapper(object):
 
     # TODO probably better to move this into the models,
     # {"json_attr":("model_attr", "datatype"), .. } or similar
-    strings = ["content", "display_name", "id", "objectType", "object_type",
-               "summary", "url", "preferred_username", "verb", "username"]
+    literals = ["content", "display_name", "id", "objectType",
+                "object_type", "summary", "url", "preferred_username",
+                "verb", "username", "total_items", "liked",]
     dates = ["updated", "published", "deleted", "received"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
     lists = ["to", "cc", "bcc", "bto","object_types"]
-    numbers = ["total_items"]
-    bools = ["liked"]
     #feeds = ["likes", "shares", "replies"]
 
     def __init__(self, pypump=None, *args, **kwargs):
@@ -59,31 +58,21 @@ class Mapper(object):
                     self.add_attr(obj, k, kwargs[k])
 
     def add_attr(self, obj, key, data, from_json=False):
-        if key in self.strings:
-            self.set_string(obj, key, data, from_json)
-        elif key in self.numbers:
-            self.set_number(obj, key, data, from_json)
-        elif key in self.objects:
+        if key in self.objects:
             self.set_object(obj, key, data, from_json)
         elif key in self.dates:
             self.set_date(obj, key, data, from_json)
         elif key in self.lists:
             self.set_list(obj, key, data, from_json)
-        elif key in self.bools:
-            self.set_bool(obj, key, data, from_json)
+        elif key in self.literals:
+            self.set_literal(obj, key, data, from_json)
         else:
             _log.debug("Ignoring unknown attribute %r", key)
 
     def set_none(self, obj, key):
         setattr(obj, key, None)
 
-    def set_bool(self, obj, key, data, from_json):
-        setattr(obj, key, data)
-
-    def set_string(self, obj, key, data, from_json):
-        setattr(obj, key, data)
-
-    def set_number(self, obj, key, data, from_json):
+    def set_literal(self, obj, key, data, from_json):
         setattr(obj, key, data)
 
     def get_object(self, data):
