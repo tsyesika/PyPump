@@ -20,6 +20,7 @@ from dateutil.parser import parse
 
 from pypump.models import (AbstractModel, Postable, Likeable, Shareable, 
                            Commentable, Deleteable)
+from pypump.models.activity import Mapper
 
 class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
     
@@ -35,11 +36,11 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     updated = None # last time this was updated
     published = None # When this was published
     deleted = False # has the note been deleted
-    liked = False
+    liked = None
     author = None
 
     def __init__(self, content=None, id=None, published=None, updated=None, 
-                 deleted=False, liked=False, author=None, display_name=None, url=None,
+                 deleted=False, liked=None, author=None, display_name=None, url=None,
                  *args, **kwargs):
 
         super(Note, self).__init__(*args, **kwargs)
@@ -72,19 +73,24 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
     def __repr__(self):
         return "<{type} by {name}>".format(
             type=self.TYPE,
-            name=self.author.webfinger
+            name=getattr(self.author, 'webfinger', 'unknown')
             )
    
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
-        self.id = data.get("id", None)
-        self.url = data.get("url", None)
-        self.display_name = data.get("displayName", "")
-        self.content = data.get("content", "")
-        self.published = parse(data["published"]) if "published" in data else None
-        self.updated = parse(data["updated"]) if "updated" in data else self.published
-        self.liked = data["liked"] if "liked" in data else False
-        self.deleted = parse(data["deleted"]) if "deleted" in data else False
-        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
+        ignore_attr = ["dummyattr",]
+        mapping = {
+            "id": "id",
+            "url": "url",
+            "display_name": "displayName",
+            "content": "content",
+            "published": "published",
+            "updated": "updated",
+            "deleted": "deleted",
+            "liked": "liked",
+            "author": "author"
+        }
+
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
         self.add_links(data)
         return self
