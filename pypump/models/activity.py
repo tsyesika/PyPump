@@ -159,7 +159,6 @@ class ActivityObject(AbstractModel):
         return str(self.__repr__())
 
     def __init__(self, *args, **kwargs):
-        _log.debug("ActivityObject %s init: args: %s, kwargs: %s" % (kwargs["data"]["objectType"],args, kwargs.keys()))
         super(ActivityObject, self).__init__(*args, **kwargs)
         Mapper(*args, **kwargs).parse_map(self,
                            mapping=ActivityObject._mapping,
