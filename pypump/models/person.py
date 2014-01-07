@@ -28,23 +28,29 @@ from pypump.models.activity import Mapper
 
 class Person(AbstractModel):
 
+    _ignore_attr = []
     _mapping = {
-        "preferredUsername":"username",
-        "displayName":"display_name",
+        "id": "id",
+        "url": "url",
+        "username": "preferredUsername",
+        "display_name": "displayName",
+        "summary": "summary",
+        "updated": "updated",
+        "published":"published",
+        "location":"location",
     }
-
 
     TYPE = "person"
     ENDPOINT = "/api/user/{username}/feed"
 
-    id = ""
-    username = ""
-    display_name = ""
-    url = "" # url to profile
+    id = None
+    username = None
+    display_name = None
+    url = None # url to profile
     updated = None # Last time this was updated
     published = None # when they joined (I think?)
     location = None # place item
-    summary = "" # lil bit about them =]    
+    summary = None # lil bit about them =]    
     image = None # Image items
 
     _inbox = None
@@ -79,8 +85,19 @@ class Person(AbstractModel):
         self._lists = self._lists or Lists(self.links['lists'],pypump=self._pump)
         return self._lists
 
-    def __init__(self, webfinger=None, id="", username="", url="", summary="", 
-                 display_name="", image=None, 
+    @property
+    def inbox(self):
+        if not self.isme:
+            raise PyPumpException("You can't read other people's inboxes")
+        self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)
+        return self._inbox
+
+    @property
+    def webfinger(self):
+        return self.id.replace("acct:", "")
+
+    def __init__(self, webfinger=None, id=None, username=None, url=None, summary=None, 
+                 display_name=None, image=None, 
                  published=None, updated=None, location=None,
                  *args, **kwargs):
         """
@@ -121,17 +138,6 @@ class Person(AbstractModel):
         self.published = published or self.published
         self.updated = updated or self.updated
         self.isme = (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
-
-    @property
-    def inbox(self):
-        if not self.isme:
-            raise PyPumpException("You can't read other people's inboxes")
-        self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)
-        return self._inbox
-
-    @property
-    def webfinger(self):
-        return self.id.replace("acct:", "")
 
     def follow(self): 
         """ Follow person """
@@ -179,19 +185,8 @@ class Person(AbstractModel):
 
     def unserialize(self, data):
         """ Goes from JSON -> Person object """
-        ignore_attr = ["dummyattr", ]
-        mapping = {
-            "id": "id",
-            "username": "preferredUsername",
-            "display_name": "displayName",
-            "url": "url",
-            "summary": "summary",
-            "updated": "updated",
-            "published":"published",
-            "location":"location",
-        }
 
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
+        Mapper(pypump=self._pump).parse_map(self, data=data)
         self.server = self.id.replace("acct:", "").split("@")[-1]
         self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
         self.add_links(data)
