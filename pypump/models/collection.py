@@ -18,13 +18,24 @@ import logging
 
 from pypump.models import AbstractModel
 from pypump.models.feed import Feed
+from pypump.models.activity import Mapper
 
 _log = logging.getLogger(__name__)
 
 class Collection(AbstractModel):
 
     _members = None
-    
+    _ignore_attr = ["dummyattr", ]
+    _mapping = {
+        "id": "id",
+        "display_name": "displayName",
+        "content": "content",
+        "author": "author",
+        "published": "published",
+        "updated": "updated",
+        "url": "url"
+    }
+
     def __init__(self, id=None, *args, **kwargs):
         super(Collection, self).__init__(*args, **kwargs)
 
@@ -82,10 +93,8 @@ class Collection(AbstractModel):
         return "<{type}: {id}>".format(type=self.TYPE, id=self.id)
 
     def unserialize(self, data):
-        self.id = data["id"] if "id" in data else None
-        self.display_name = data["displayName"] if "displayName" in data else None
-        self.content = data["content"] if "content" in data else None
-        self.add_links(data, endpoints=["members"])
+        Mapper(pypump=self._pump).parse_map(self, data=data)
+        self.add_links(data)
         return self
 
 
