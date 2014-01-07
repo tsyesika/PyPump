@@ -23,6 +23,7 @@ from dateutil.parser import parse
 
 from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
                            Deleteable, Shareable)
+from pypump.models.activity import Mapper
 
 _log = logging.getLogger(__name__)
 
@@ -110,6 +111,19 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         return self
 
     def unserialize(self, data):
+        ignore_attr = ["dummyattr",]
+        mapping = {
+            "author": "author",
+            "id": "id",
+            "published": "published",
+            "updated": "updated",
+            "deleted": "deleted",
+            "display_name": "displayName",
+            "summary": "summary",
+            "url": "url",
+            "content": "content"
+        }
+
         if "fullImage" in data:
             full_image = data["fullImage"]
             self.original = ImageContainer(
@@ -126,16 +140,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 height=thumbnail.get("height"),
                 width=thumbnail.get("width")
             ))
-
-        self.author = self._pump.Person().unserialize(data["author"]) if "author" in data else None
-        self.id = data.get("id", None)
+        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
         self.add_links(data)
-        self.published = parse(data["published"]) if "published" in data else None
-        self.updated = parse(data["updated"]) if "updated" in data else None
-        self.deleted = parse(data["deleted"]) if "deleted" in data else None
-        self.display_name = data.get("displayName", "")
-        self.summary = data.get("summary", "")
-        self.url = data.get("url")
-        self.content = data.get("content", "")
 
         return self
