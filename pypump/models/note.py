@@ -23,6 +23,19 @@ from pypump.models import (AbstractModel, Postable, Likeable, Shareable,
 from pypump.models.activity import Mapper
 
 class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
+
+    _ignore_attr = []
+    _mapping = {
+        "id": "id",
+        "url": "url",
+        "display_name": "displayName",
+        "content": "content",
+        "published": "published",
+        "updated": "updated",
+        "deleted": "deleted",
+        "liked": "liked",
+        "author": "author"
+    }
     
     @property
     def ENDPOINT(self):
@@ -30,12 +43,13 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
             username=self._pump.client.nickname
             )
 
-
-    id = ""
-    content = ""
-    updated = None # last time this was updated
+    id = None
+    url = None
+    display_name = None
+    content = None
     published = None # When this was published
-    deleted = False # has the note been deleted
+    updated = None # last time this was updated
+    deleted = None # has the note been deleted
     liked = None
     author = None
 
@@ -45,15 +59,15 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
 
         super(Note, self).__init__(*args, **kwargs)
 
-        self.content = content
         self.id = id
+        self.url = url
+        self.display_name = display_name
+        self.content = content
         self.published = published
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
         self.author = author
-        self.display_name = display_name
-        self.url = url
 
     def serialize(self):
         """ Convers the post to JSON """
@@ -78,19 +92,6 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
    
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
-        ignore_attr = ["dummyattr",]
-        mapping = {
-            "id": "id",
-            "url": "url",
-            "display_name": "displayName",
-            "content": "content",
-            "published": "published",
-            "updated": "updated",
-            "deleted": "deleted",
-            "liked": "liked",
-            "author": "author"
-        }
-
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
+        Mapper(pypump=self._pump).parse_map(self, data=data)
         self.add_links(data)
         return self
