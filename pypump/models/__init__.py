@@ -90,7 +90,8 @@ class AbstractModel(object):
     def add_links(self, links, key="href", proxy_key="proxyURL", endpoints=None):
         """ Parses and adds block of links """
         if endpoints is None:
-            endpoints = ["likes", "replies", "shares", "self","followers","following","lists","favorites",]
+            endpoints = ["likes", "replies", "shares", "self", "followers",
+                         "following", "lists", "favorites", "members"]
 
         if links.get("links"):
             for endpoint in links['links']:
