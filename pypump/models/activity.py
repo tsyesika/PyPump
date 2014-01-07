@@ -121,7 +121,7 @@ class ActivityObject(AbstractModel):
     """ Super class for activity objects,
         this class is used when we can't find a matching object type
     """
-    _ignore_attr = list()
+    _ignore_attr = []
 
     # Map of (model_attr, json_attr) pairs
     # TODO include attribute type here, see TODO in Mapper
@@ -177,8 +177,21 @@ class Application(ActivityObject):
 
 
 class Activity(AbstractModel):
-    _ignore_attr = list()
-    _mapping = None
+    _ignore_attr = []
+    _mapping = {
+        "verb":"verb",
+        "generator":"generator",
+        "updated":"updated",
+        "url":"url",
+        "published":"published",
+        "received":"received",
+        "content":"content",
+        "id":"id",
+        "to":"to",
+        "cc":"cc",
+        "actor":"actor",
+        "obj":"object"
+    }
 
     def __init__(self, *args, **kwargs):
         super(Activity, self).__init__(*args, **kwargs)
@@ -193,27 +206,11 @@ class Activity(AbstractModel):
     def unserialize(self, data):
         """ From JSON -> Activity object """
 
-        # Attributes we don't need/have proper models for
-        mapping = {
-            "verb":"verb",
-            "generator":"generator",
-            "updated":"updated",
-            "url":"url",
-            "published":"published",
-            "received":"received",
-            "content":"content",
-            "id":"id",
-            "to":"to",
-            "cc":"cc",
-            "actor":"actor",
-            "obj":"object"
-        }
-
         if "author" not in data["object"]:
             # add author if not set (true for posted objects in inbox/major)
             data["object"]["author"] = data["actor"]
 
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, data=data)
+        Mapper(pypump=self._pump).parse_map(self, data=data)
         self.add_links(data)
 
         return self
