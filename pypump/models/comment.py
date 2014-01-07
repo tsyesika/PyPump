@@ -22,6 +22,19 @@ from pypump.models.activity import Mapper
 
 class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
+    _ignore_attr = []
+    _mapping = {
+        "id": "id",
+        "url": "url",
+        "content": "content",
+        "published": "published",
+        "updated": "updated",
+        "deleted": "deleted",
+        "liked" : "liked",
+        "author" : "author",
+        "in_reply_to" : "inReplyTo"
+    }
+
     @property
     def ENDPOINT(self):
         return "/api/user/{username}/feed".format(
@@ -29,26 +42,29 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
             )
 
     id = None
-    content = ""
-    in_reply_to = None
-    updated = None
+    url = None
+    content = None
     published = None
-    deleted = False
+    updated = None
+    deleted = None
+    liked = None
     author = None
+    in_reply_to = None
 
     def __init__(self, content=None, id=None, in_reply_to=None, published=None, updated=None,
-                 deleted=False, liked=None, author=None, *args, **kwargs):
+                 deleted=None, liked=None, author=None, url=None, *args, **kwargs):
 
         super(Comment, self).__init__(*args, **kwargs)
 
-        self.id = "" if id is None else id
+        self.id = id
+        self.url = url
         self.content = content
-        self.in_reply_to = in_reply_to
         self.published = published
         self.updated = updated
         self.deleted = deleted
         self.liked = liked
         self.author = author
+        self.in_reply_to = in_reply_to
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
@@ -73,19 +89,7 @@ class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
 
     def unserialize(self, data):
         """ from JSON -> Comment """
-        ignore_attr = ["dummyattr",]
-        mapping = {
-            "content": "content",
-            "id": "id",
-            "url": "url",
-            "published": "published",
-            "updated": "updated",
-            "deleted": "deleted",
-            "liked" : "liked",
-            "author" : "author",
-            "in_reply_to" : "inReplyTo"
-        }
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
+        Mapper(pypump=self._pump).parse_map(self, data=data)
         self.add_links(data)
         return self
         
