@@ -41,14 +41,29 @@ class ImageContainer(object):
         )
 
 class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable):
-    
-    url = None
-    author = None
-    summary = None
-    display_name = None
+
+    _ignore_attr = []
+    _mapping = {
+        "id": "id",
+        "url": "url",
+        "display_name": "displayName",
+        "summary": "summary",
+        "content": "content",
+        "author": "author",
+        "published": "published",
+        "updated": "updated",
+        "deleted": "deleted",
+    }
+
     id = None
-    updated = None
+    url = None
+    display_name = None
+    summary = None
+    content = None
+    author = None
     published = None
+    updated = None
+    deleted = None
 
     @property
     def ENDPOINT(self):
@@ -111,18 +126,6 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         return self
 
     def unserialize(self, data):
-        ignore_attr = ["dummyattr",]
-        mapping = {
-            "author": "author",
-            "id": "id",
-            "published": "published",
-            "updated": "updated",
-            "deleted": "deleted",
-            "display_name": "displayName",
-            "summary": "summary",
-            "url": "url",
-            "content": "content"
-        }
 
         if "fullImage" in data:
             full_image = data["fullImage"]
@@ -140,7 +143,7 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
                 height=thumbnail.get("height"),
                 width=thumbnail.get("width")
             ))
-        Mapper(pypump=self._pump).parse_map(self, mapping=mapping, ignore_attr=ignore_attr, data=data)
+        Mapper(pypump=self._pump).parse_map(self, data=data)
         self.add_links(data)
 
         return self
