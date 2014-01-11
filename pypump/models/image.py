@@ -112,16 +112,22 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
             "object": image,
         }
         data.update(self.serialize())
-        self._post_activity(data, unserialize=False)
 
-        # update image with display_name and content
-        image['content'] = self.content
-        image['displayName'] = self.display_name
-        data = {
-            "verb": "update",
-            "object": image,
-        }
-        self._post_activity(data)
+        if not self.content and not self.display_name:
+            self._post_activity(data)
+        else:
+            self._post_activity(data, unserialize=False)
+
+            # update image with display_name and content
+            if self.content:
+                image['content'] = self.content
+            if self.display_name:
+                image['displayName'] = self.display_name
+            data = {
+                "verb": "update",
+                "object": image,
+            }
+            self._post_activity(data)
 
         return self
 
