@@ -192,7 +192,7 @@ class PyPump(object):
 
     def request(self, endpoint, method="GET", data="",
                 raw=False, params=None, attempts=1, client=None,
-                headers=None):
+                headers=None, timeout=30):
         """ Make request to endpoint with OAuth
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
@@ -221,7 +221,9 @@ class PyPump(object):
                         "headers": headers,
                         "params": params,
                         "data": data,
+                        "timeout": timeout,
                         }
+                
                 response = self._requester(
                     fnc=requests.post,
                     endpoint=endpoint,
@@ -234,6 +236,7 @@ class PyPump(object):
                         "params": params,
                         "auth": client,
                         "headers": headers,
+                        "timeout": timeout,
                         }
 
                 response = self._requester(
@@ -248,6 +251,7 @@ class PyPump(object):
                         "params": params,
                         "auth": client,
                         "headers": headers,
+                        "timeout": timeout,
                         }
 
                 response = self._requester(
