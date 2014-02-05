@@ -191,7 +191,7 @@ class PyPump(object):
             self._server_cache[server] = client
 
     def request(self, endpoint, method="GET", data="",
-                raw=False, params=None, attempts=3, client=None,
+                raw=False, params=None, attempts=1, client=None,
                 headers=None):
         """ Make request to endpoint with OAuth
         method = GET (default), POST or PUT
