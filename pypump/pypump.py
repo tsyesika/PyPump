@@ -68,8 +68,8 @@ class PyPump(object):
     _server_tokens = None # this hold OAuth tokens
     _me = None
 
-    def __init__(self, client, token=None, secret=None, verifier_callback=None,
-                callback="oob", verify=True):
+    def __init__(self, client, verifier_callback, token=None, secret=None,
+                 callback="oob", verify=True):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -83,11 +83,9 @@ class PyPump(object):
         self.verifier_callback = verifier_callback
         self._server_cache[self.client.server] = self.client
 
-
         self.client.set_pump(self)
         if not self.client.key:
             self.client.register()
-
 
         self.populate_models()
 
@@ -335,11 +333,9 @@ class PyPump(object):
                 ))
 
         # now we need the user to authorize me to use their pump.io account
-        if self.verifier_callback is None:
-            verifier = self.get_access(url)
-            self.verifier(verifier)
-        else:
-            self.verifier_callback(url)
+        result = self.verifier_callback(url)
+        if result is not None:
+            self.verifier(result)
 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
@@ -369,15 +365,6 @@ class PyPump(object):
                 client_key=self._server_cache[server].key,
                 client_secret=self._server_cache[server].secret,
             )
-
-    def get_access(self, url):
-        """ this asks the user to let us use their account """
-
-        six.print_("To authenticate, please open and follow the instructions:")
-        six.print_(url)
-
-        code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
-        return code
 
     def request_token(self):
         """ Gets OAuth request token """

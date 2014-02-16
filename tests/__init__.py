@@ -5,7 +5,7 @@ import json
 import six
 import os
 
-from pypump import PyPump, Client
+from pypump import WebPump, PyPump, Client
 
 class Response(object):
     
@@ -34,14 +34,26 @@ class Bucket(object):
         for key, value in data.items():
             setattr(self, key, value)
 
-class TestPump(PyPump):
+class TestMixin(object):
     
     _response = None
     _unit_testing = True
 
     def __init__(self, *args, **kwargs):
+        self.__oauth_testing = {
+            'request': {
+                'token': 'RequestToken',
+                'token_secret': 'RequestTokenSecret',
+            },
+            'access': {
+                'token': 'AccessToken',
+                'token_secret': 'AccessTokenSecret',
+            },
+            'verifier': 'AVerifier',
+        }
+
         # most of the time we don't want to go through oauth
-        client = Client(
+        self.client = Client(
             webfinger="Test@example.com",
             key="AKey",
             secret="ASecret",
@@ -50,16 +62,27 @@ class TestPump(PyPump):
         )
 
         new_kwargs = dict(
-            client=client,
-            token="AToken",
-            secret="ATokenSecret",
-            )
+            client=self.client,
+        )
 
         self._response = kwargs.pop("response")
         self._testcase = kwargs.pop("testcase")
 
         new_kwargs.update(kwargs)
-        super(TestPump, self).__init__(*args, **new_kwargs)
+
+        super(TestMixin, self).__init__(*args, **new_kwargs)  
+
+    def get_access(self, *args, **kwargs):
+        """ Get verifier """
+        return self.__oauth_testing['verifier']
+
+    def request_token(self, *args, **kwargs):
+        """ Gets request token and token secret """
+        return self.__oauth_testing['request']
+
+    def request_access(self, *args, **kwargs):
+        """ Gets access token and token secret """
+        return self.__oauth_testing['access']
 
     def set_status_code(self, status_code):
         if self._response is None:
@@ -77,6 +100,18 @@ class TestPump(PyPump):
             params=kwargs.get("params", None)
         ))
         return self._response
+
+class TestWebPump(TestMixin, WebPump):
+    pass
+
+class TestPump(TestMixin, PyPump):
+    
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('verifier_callback', self._callback)
+        return super(TestPump, self).__init__(*args, **kwargs)
+
+    def _callback(self, url):
+        return 'a verifier'
 
 class PyPumpTest(unittest.TestCase):
     """
@@ -104,6 +139,7 @@ class PyPumpTest(unittest.TestCase):
 
         # make the pump object for testing.
         self.pump = TestPump(response=self.response, testcase=self)
+        self.webpump = TestWebPump(response=self.response, testcase=self)
 
     @property
     def request(self):
