@@ -154,7 +154,7 @@ def verifier(url):
     six.print_("To authenticate, please open and follow the instructions:")
     six.print_(url)
 
-    code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
+    code = raw_input("Verifier Code: ").lstrip(" ").rstrip(" ")
     return code
 
 if __name__ == "__main__":
