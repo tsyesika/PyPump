@@ -150,6 +150,13 @@ def save_database(db, path):
         six.print_("Cannot save database ".format(tmp_path))
         sys.exit(1)
 
+def verifier(url):
+    six.print_("To authenticate, please open and follow the instructions:")
+    six.print_(url)
+
+    code = input("Verifier Code: ").lstrip(" ").rstrip(" ")
+    return code
+
 if __name__ == "__main__":
     parser = optparse.OptionParser()
 
@@ -246,11 +253,13 @@ if __name__ == "__main__":
     
     sys.stdout.write("-> Setting up PyPump  ")
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
-    
+
+
     pump = PyPump(
             client=client,
             token=db[webfinger].get("token", None),
             secret=db[webfinger].get("token_secret", None),
+            verifier_callback=verifier
             )
     
 
