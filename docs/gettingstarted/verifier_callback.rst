@@ -1,3 +1,6 @@
+.. warning::
+   This is very much out of date - it probably needs rewriting
+
 ================
 Getting Verifier
 ================

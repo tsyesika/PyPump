@@ -51,18 +51,20 @@ are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
     >>> from pypump import PyPump, Client
+    >>> from pypump.utils import simple_verifier
     >>> client = Client(
     ...     webfinger="mizbunny@example.org",
     ...     type="native", # Can be "native" or "web"
     ...     name="Test.io"
     ...     )
-    >>> pump = PyPump(client=client) # prints out instructions for verifying
+    >>> pump = PyPump(client=client, verifier_callback=simple_verifier) # prints out instructions for verifying
     >>> client_credentials = pump.get_registration() # will return [<key>, <secret>, <expirey>]
     >>> client_tokens = pump.get_token() # [<token>, <secret>]
 
-The PyPump call will try to verify with OAuth, You may wish to override how it asks for authentication.
-PyPump by default writes to standard out a URL for the user to click and reads in from standard in for a verification
-code presented by the webserver.
+The PyPump call will try to verify with OAuth. You may wish to change how it
+asks for authentication. PyPump's ``simple_verifier`` by default writes to
+standard out a URL for the user to click and reads in from standard in for a
+verification code presented by the webserver.
 
 You should store the client credentials and tokens somewhere but ensure
 you store them somewhere safe with this information anyone can access the
@@ -79,6 +81,7 @@ user's pump.io account!  You can now reconnect like so::
     ...     client=client,
     ...     token=client_tokens[0], # the token
     ...     secret=client_tokens[1], # the token secret
+    ...     verifier_callback=simple_verifier
     ...     )
 
 Okay, we're connected!  Next up, we want to check out what our last 30

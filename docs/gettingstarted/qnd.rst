@@ -15,6 +15,7 @@ Getting connected
 So we need to get started::
 
     >>> from pypump import PyPump, Client
+    >>> from pypump.utils import simple_verifier
 
 First we must tell the server about ourselves::
 
@@ -26,7 +27,7 @@ First we must tell the server about ourselves::
 
 Now make PyPump (the class for talking to pump)::
 
-    >>> pump = PyPump(client=client)
+    >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
 
 Super, next, I wanna see my inbox::
 

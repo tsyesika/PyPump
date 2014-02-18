@@ -18,6 +18,7 @@
 
 import os, json, argparse
 from pypump import PyPump, Client
+from pypump.utils import simple_verifier
 
 class App(object):
 
@@ -56,6 +57,7 @@ class App(object):
             client=client,
             token=self.config.get(webfinger, {}).get('token'),
             secret=self.config.get(webfinger, {}).get('token_secret')
+            verifier_callback=simple_verifier
         )
 
         # Add account credentials to config in case we didnt have it already
