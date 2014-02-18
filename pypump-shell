@@ -24,6 +24,7 @@ import optparse
 import six
 
 from pypump import PyPump, Client
+from pypump.utils import simple_verifier
 
 try:
     from IPython import embed
@@ -150,13 +151,6 @@ def save_database(db, path):
         six.print_("Cannot save database ".format(tmp_path))
         sys.exit(1)
 
-def verifier(url):
-    six.print_("To authenticate, please open and follow the instructions:")
-    six.print_(url)
-
-    code = raw_input("Verifier Code: ").lstrip(" ").rstrip(" ")
-    return code
-
 if __name__ == "__main__":
     parser = optparse.OptionParser()
 
@@ -259,7 +253,7 @@ if __name__ == "__main__":
             client=client,
             token=db[webfinger].get("token", None),
             secret=db[webfinger].get("token_secret", None),
-            verifier_callback=verifier
+            verifier_callback=simple_verifier
             )
     
 

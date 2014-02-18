@@ -26,7 +26,6 @@ import requests
 import six
 
 from six.moves.urllib import parse
-from six.moves import input
 from requests_oauthlib import OAuth1
 
 from pypump.client import Client
