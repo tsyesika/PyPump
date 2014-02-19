@@ -15,7 +15,18 @@ Getting connected
 So we need to get started::
 
     >>> from pypump import PyPump, Client
-    >>> from pypump.utils import simple_verifier
+
+As Part of our application we will need to ask the user to input a verification code
+from the website to give us access as part of the OAuth mechamism, the function needs
+to take a URL and have the user allow our application this function can either return
+the verification code or you can call pump.verify(code), a simple code::
+
+    >>> def simple_verifier(url):
+    ...     print 'Please follow the instructions at the following URL:'
+    ...     print url
+    ...     return raw_input("Verifier: ") # the verifier is a string
+
+.. note:: If you wish to call pump.verify(<verification code>) return None from your verifier function
 
 First we must tell the server about ourselves::
 
