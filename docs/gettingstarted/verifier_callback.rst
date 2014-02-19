@@ -1,93 +1,86 @@
-.. warning::
-   This is very much out of date - it probably needs rewriting
-
 ================
 Getting Verifier
 ================
 
-The default behavour of PyPump is to ask the user (in english) to click on a link
-and paste in the verifier. It's done via a print statement and raw_input which usually
-occur over standard in and standard out. Often this isn't very useful so PyPump provides
-a very easy way using two callbacks to work with your program to ask them for the verifier.
+As part of OAuth to allow OOB (Out of band) applications to have access to the account
+we have a link that they will click, follow the instructions and then copy the verifier
+into the application which we then relay to the server with other tokens. The server
+will them provide us with the credentials that we can use.
 
-We have a link the user must click, it'll take them to an Authorization page asking
-them to permit your program access, if they allow your program they will be taken to a
-page that will have the verifier on, this needs to be entered into your program.
-
-The default experiance via PyPump
-----------------------------------
-This is how PyPump by default asks::
-
-    To allow us to use your pump.io please follow the instructions at:
-    https://some.server/oauth/authorize?oauth_token=b_Tf-y1yXrPbfkOXj-PhFQ
-
-Callbacks
----------
-
-The callbacks work by you define a callback for when PyPump would like to be
-called with the `url` when PyPump would like you to ask the user for the verifier
-the prototype of the function is::
-
-    def ask_verifier(self, url):
-        """ This should display the url and ask the user to authorize your app """
-        pass
-        # pypump ignores the return value
-
-Once you have the verifier you need to call `verifier`::
-
-    >>> verifier
-    c_Fe-91tXrPbfkOXj-xKFu
-    >>> pypump_instance.verifier(verifier)
+You will need to write a method which takes a URL that the user needs to visit and provide
+some way of the users inputting string value which you will then give to PyPump. This could
+just be a case of printing the link and using raw_input/input to get the verifier or it could
+be a more complex funtion which redraws a GUI and opens a browser. 
 
 
-Example
--------
+Simple verifier
+----------------
 
-I wrote this, it's not a real GUI framework, I didn't want to weight this down
-with a lot of other cruft, this is just to show a rough example of how this might
-work::
+The following is an example of a simple verifier which could be used for a CLI (command line interface)
+application. This method is actually the same function which is used to prompt the user to provide a
+verifier in the PyPump Shell::
 
-    from pypump import PyPump
-    from gui_framework import Window, Widgets    
+    def verifier(url):
+        """ Asks for verification code for OAuth OOB """
+        print "Please open and follow the instructions:"
+        print url
+        return raw_input("Verifier: ")
 
-    class MyGui(object):
+Callback
+--------
 
-        pump = None
+Having a function which is called and then returns back the verification might be more
+difficult in GUI programs or other interfaces. We provide a callback mechamism that you
+can use. If the verifier function returns None then PyPump assumes you will be be then
+calling PyPump.verifier which takes the verifier as the argument.
 
-        def __init__(self):
-            self.window = Window()
-            self.window.add(
-                Widgets.Message("Checking authorization...")
-                )
+Complex GUI example
+-------------------
 
-        def return_verifier(self):
-            """ Hands the verifier back to PyPump """
-            if self.pump is None:
-                raise Exception("You need to set PyPump")
+As an attempt to avoid writing an example which is tied to one GUI library, I have made
+one up in order to demonstrate exactly what might be involved::
 
-            verifier = self.verifier.get()
+    import webbrowser # it's a python module - really, check it out.
+
+    from pypump import Client, PyPump
+
+    class MyWindow(guilib.Window):
+
+        def __init__(self, *args, **kwargs):
+            
+            # Write out to the screen telling them what we're doing
+            self.draw("Please wait, loading...")
+
+            # setup pypump object
+            clinet = Client(
+                webfinger='someone@server.com',
+                type='native',
+                name='An awesome GUI client'
+            )
+
+            self.pump = PyPump(
+                client=client,
+                verifier_callback=self.ask_for_verifier
+            )
+
+
+        def ask_for_verifier(self, url):
+            """ Takes a URL, opens it and asks for a verifier """
+            # Open the URL in a browser
+            webbrowser.open(url)
+
+            # Clear other stuff from window
+            self.clear_window()
+
+            # draw a text input box and a button to submit
+            self.draw(guilib.InputBox('Verifier:', name='verifier'))
+            self.draw(guilib.Button('Verify!', onclick=self.verifier))
+
+        def verifier(self, verifier):
+            """ When the button is clicked it sends the verifier here which we give to PyPump """
             self.pump.verifier(verifier)
-            # Done!
-
-        def ask_verifier(self, url):
-            """ Will display a message with URL and a text box for the verifier """
-            self.window.clear()
-            self.verifier = Widgets.Textbox()
-            self.button = Widgets.Button()
-            self.window.add(
-                Widgets.Message("Please authorize me!"),
-                Widgets.Message(url),
-                self.verifier,
-                button,
-                )
-            self.button.when_clicked(self.return_verifier)
 
 
-    gui = MyGui()
-
-    pump = PyPump(
-        "someome@server.org",
-        client_name="MyClient",
-        verifier_callback=gui.ask_verifier
-        )
-    gui.pump = pump
+If you return anything from your verifier callback, pypump will expect that to be
+the verifier code so unless you're actually using a simple method, ensure you return
+None.

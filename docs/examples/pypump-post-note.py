@@ -16,9 +16,11 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import os, json, argparse
+import os
+import json
+import argparse
+
 from pypump import PyPump, Client
-from pypump.utils import simple_verifier
 
 class App(object):
 
@@ -56,8 +58,8 @@ class App(object):
         self.pump = PyPump(
             client=client,
             token=self.config.get(webfinger, {}).get('token'),
-            secret=self.config.get(webfinger, {}).get('token_secret')
-            verifier_callback=simple_verifier
+            secret=self.config.get(webfinger, {}).get('token_secret'),
+            verifier_callback=self.verifier
         )
 
         # Add account credentials to config in case we didnt have it already
@@ -69,6 +71,16 @@ class App(object):
         }
 
         self.write_config()
+
+    def verifier(self, url):
+        """ Will ask user to click link to accept app and write code """
+        webbrowser.open(url)
+        print('A browser should have opened up with a link to allow us to access')
+        print('your account, follow the instructions on the link and paste the verifier')
+        print('Code into here to give us access, if the browser didn\'t open, the link is:')
+        print(url)
+        print()
+        return input('Verifier: ').lstrip(" ").rstrip(" ")
 
     def write_config(self):
         """ Write config to file """

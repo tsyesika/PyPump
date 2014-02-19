@@ -40,15 +40,13 @@ if not os.path.isdir(store_path):
 
 store_path = os.path.join(store_path, "shell.json")
 
-welcome_banner = """Welcome to the PyPump testing shell,
+welcome_banner = """Welcome to the PyPump Shell,
 We have setup some useful objects for you:
 
 {table}
 
 If you need help please visit our docs:
 https://pypump.readthedocs.org/en/latest
-
-Enjoy!
 """
 
 def ascii_table(headings, data):
@@ -239,7 +237,7 @@ if __name__ == "__main__":
 
     client = Client(
             webfinger=webfinger,
-            name="PyPump",
+            name="PyPump Shell",
             type="native"
             )
 

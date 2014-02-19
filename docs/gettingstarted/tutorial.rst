@@ -51,13 +51,15 @@ are!  But before we can do that, we need to authenticate.  If this is
 your first time, you need to authenticate this client::
 
     >>> from pypump import PyPump, Client
-    >>> from pypump.utils import simple_verifier
     >>> client = Client(
     ...     webfinger="mizbunny@example.org",
     ...     type="native", # Can be "native" or "web"
     ...     name="Test.io"
     ...     )
-    >>> pump = PyPump(client=client, verifier_callback=simple_verifier) # prints out instructions for verifying
+    >>> def simple_verifier(url):
+    ...     print 'Go to: ' + url
+    ...     return raw_input('Verifier: ') # they will get a code back
+    >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
     >>> client_credentials = pump.get_registration() # will return [<key>, <secret>, <expirey>]
     >>> client_tokens = pump.get_token() # [<token>, <secret>]
 
