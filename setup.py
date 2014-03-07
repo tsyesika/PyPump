@@ -28,7 +28,7 @@ if version_info[0] == 2:
 
 setup(
         name="PyPump",
-        version="0.5",
+        version="0.6",
         description="Python Pump.io library",
         long_description=open("README.rst").read(),
         author="Jessica Tallon",
