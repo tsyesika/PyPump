@@ -68,11 +68,13 @@ class PyPump(object):
     _me = None
 
     def __init__(self, client, verifier_callback, token=None, secret=None,
-                 callback="oob", verify=True):
+                 callback="oob", verify=True, retries=1, timeout=30):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
         """
+        self.retries = retries
+        self.timeout = timeout
 
         self._server_cache = {}
         self._server_tokens = {}
@@ -188,12 +190,15 @@ class PyPump(object):
             self._server_cache[server] = client
 
     def request(self, endpoint, method="GET", data="",
-                raw=False, params=None, attempts=1, client=None,
-                headers=None, timeout=30):
+                raw=False, params=None, retries=None, client=None,
+                headers=None, timeout=None):
         """ Make request to endpoint with OAuth
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
         """
+
+        retries = self.retries if retries is None else retries
+        timeout = self.timeout if timeout is None else timeout
 
         # check client has been setup
         if client is None:
@@ -211,7 +216,7 @@ class PyPump(object):
 
         headers = headers or {"Content-Type": "application/json"}
 
-        for attempt in range(attempts):
+        for attempt in range(retries):
             if method == "POST":
                 request = {
                         "auth": client,
@@ -220,7 +225,7 @@ class PyPump(object):
                         "data": data,
                         "timeout": timeout,
                         }
-                
+
                 response = self._requester(
                     fnc=requests.post,
                     endpoint=endpoint,
