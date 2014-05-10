@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 ##
 # Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
-#  
-# This program is free software: you can redistribute it and/or modify 
-# it under the terms of the GNU General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. 
-# 
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-# GNU General Public License for more details. 
 #
-# You should have received a copy of the GNU General Public License 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
@@ -23,6 +23,7 @@ import logging
 import optparse
 import six
 
+import requests
 from pypump import PyPump, Client
 
 try:
@@ -31,14 +32,6 @@ try:
 except ImportError:
     six.print_("You need to have ipython installed to run this")
     sys.exit(1)
-
-# Get configuration file
-config_home = os.environ.get("XDG_CONFIG_HOME", "~/.config")
-store_path = os.path.join(os.path.expanduser(config_home), "pypump")
-if not os.path.isdir(store_path):
-    os.mkdir(store_path)
-
-store_path = os.path.join(store_path, "shell.json")
 
 welcome_banner = """Welcome to the PyPump Shell,
 We have setup some useful objects for you:
@@ -101,52 +94,9 @@ def ascii_table(headings, data):
     stable += sepper()
     for value in table.values():
         stable += value + "\r\n"
-    
+
     stable += sepper()
     return stable # few, glad that's over
-
-def open_database(path):
-    if os.path.exists(path):
-        try:
-            fin = open(path, "r")
-            db = json.loads(fin.read())
-        except IOError:
-            six.print_("Cannot open file {0}".format(path))
-            sys.exit(1)
-        except ValueError:
-            six.print_("Unalbe to parse database {0}".format(path))
-            sys.exit(1)
-
-        return db
-    else:
-        return {}
-
-def save_database(db, path):
-    """ Saves db as JSON to path """
-    tmp_path = "{0}.tmp".format(path)
-
-    if os.path.exists(tmp_path):
-        try:
-            os.remove(tmp_path)
-        except IOerror:
-            pass #whatever
-    try:
-        fout = open(tmp_path, "w")
-        db = json.dumps(db, sort_keys=True, indent=4, separators=(",", ": "))
-        fout.write(db)
-        fout.close()
-    except ValueError:
-        six.print_("Unable to encode data for saving")
-        sys.exit(1)
-    except IOError:
-        six.print_("Cannot save temporary database ".format(tmp_path))
-        sys.exit(1)
-
-    try:
-        os.rename(tmp_path, path)
-    except IOError:
-        six.print_("Cannot save database ".format(tmp_path))
-        sys.exit(1)
 
 def verifier(url):
     """ Asks for verification code for OAuth OOB """
@@ -172,7 +122,7 @@ if __name__ == "__main__":
     parser.add_option("-r", "--remove",
                       dest="remove",
                       help="Remove stored OAuth credentials for selected webfinger")
-    
+
     parser.add_option("--log", "--loglevel",
                       dest="loglevel",
                       default="warning",
@@ -206,73 +156,43 @@ if __name__ == "__main__":
             sys.exit(1)
 
         sys.exit()
-    
-    # go find the client info if it exists
-    db = open_database(store_path)
-
-    if options.list:
-        for finger in db.keys():
-            six.print_(finger)
-
-        sys.exit()
-    elif options.remove:
-        try:
-            del db[options.remove]
-        except KeyError:
-            six.print_("No such webfinger")
-            sys.exit(1)
-
-        save_database(db, store_path)
-        sys.exit()
 
     webfinger = "" if len(args) <= 0 else args[0]
 
-    for wf in db.keys():
-        if webfinger in wf:
-            webfinger = wf
-
-    if (db == dict() and webfinger == "") or webfinger.find("@") == -1:
-        six.print_("You must specify a webfinger")
+    if not webfinger:
+        six.print_("You must specify a webfinger.")
         sys.exit(1)
 
     client = Client(
-            webfinger=webfinger,
-            name="PyPump Shell",
-            type="native"
-            )
+        webfinger=webfinger,
+        name="PyPump Shell",
+        type="native"
+    )
 
-    if webfinger in db:
-        client.key = db[webfinger]["key"]
-        client.secret = db[webfinger]["secret"]
-        client.expirey = db[webfinger]["expirey"]
-    else:
-        db[webfinger] = {}
-    
     sys.stdout.write("-> Setting up PyPump  ")
     sys.stdout.flush() # actually get it on the screen - most terms wait for \n
 
 
-    pump = PyPump(
-            client=client,
-            token=db[webfinger].get("token", None),
-            secret=db[webfinger].get("token_secret", None),
-            verifier_callback=verifier
-            )
-    
+    try:
+        pump = PyPump(client=client, verifier_callback=verifier)
+    except requests.exceptions.SSLError:
+        # This is caused when there has been an invalid certificate.
+        # We should ask the user if they want to continue (common to use
+        # self-signed/invalid certificates in dev enviroment).
+        six.print_("Couldn't validate SSL/TLS certificate for {0}".format(webfinger.split("@", 1)[1]))
+        answer = None
+        while answer not in ["y", "n"]:
+            if answer is not None:
+                six.print_("Sorry, please type 'y' or 'n' (Ctrl-C to exit).")
 
-    client = pump.get_registration()
-    db[webfinger]["key"] = client[0]
-    db[webfinger]["secret"] = client[1]
-    db[webfinger]["expirey"] = client[2]
+            answer = raw_input("Would you like to accept the invalid/untrusted certificate (y/n): ").lower()
+            answer = answer.replace(" ", "")
 
-    tokens = pump.get_token()
-    db[webfinger]["token"] = tokens[0]
-    db[webfinger]["token_secret"] = tokens[1]
-    
-    save_database(db, store_path)
+        if answer == "n":
+            sys.exit(0)
 
-    # setup other variables for user. 
-    me = pump.me
+        # Create the same PyPump object as above but without ssl verification
+        pump = PyPump(client=client, verifier_callback=verifier, verify=False)
 
     # bring curser back so banner walks over the setup message
     sys.stdout.write("\r")
@@ -280,28 +200,24 @@ if __name__ == "__main__":
     # drop them into a shell
     cfg = Config()
     cfg.InteractiveShell.confirm_exit = False
-    
+
     # prep the welcome banner
     welcome_banner = welcome_banner.format(
-            table=ascii_table(
-                    ["Variable", "Representation", "Type"],
-                    [
-                        {
-                            "Variable": "pump",
-                            "Representation": str(repr(pump)),
-                            "Type": type(pump).__name__,
-                        },
-                        {
-                            "Variable": "me",
-                            "Representation": str(repr(me)),
-                            "Type": type(me).__name__,
-                        }
-                    ]
-            )
+        table=ascii_table(
+            ["Variable", "Representation", "Type"],
+            [
+                {
+                    "Variable": "pump",
+                    "Representation": str(repr(pump)),
+                    "Type": type(pump).__name__,
+                },
+            ]
+        )
     )
-                    
+
 
     embed(
         config=cfg,
         banner1=welcome_banner,
-        exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues")
+        exit_msg="Remeber! Report any bugs to https://github.com/xray7224/PyPump/issues"
+    )

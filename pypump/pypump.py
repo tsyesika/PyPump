@@ -28,6 +28,7 @@ import six
 from six.moves.urllib import parse
 from requests_oauthlib import OAuth1
 
+from pypump.store import Store
 from pypump.client import Client
 from pypump.exception import PyPumpException
 
@@ -55,10 +56,7 @@ class PyPump(object):
     - verifier_callback: If this is our first time registering the
       client, this function will be called with a single argument, the
       url one can post to for completing verification.
-    - token: this is the token that this machine accesses this user's
-      account from.
-    - secret: the secret that the machine users to authenticate with.
-      Do not share this!
+    - store: this is the store instance to save any data persistantly.
     - verifier_callback: the URI that is used for redirecting a user
       after they authenticate this client... assuming this is
       happening over the web.  If not, the callback is "oob", or "out
@@ -75,11 +73,13 @@ class PyPump(object):
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
-    def __init__(self, client, verifier_callback, token=None, secret=None,
-                 callback="oob", verify_requests=True, retries=1, timeout=30):
+    store_class = Store
+
+    def __init__(self, client, verifier_callback, store=None, callback="oob",
+                 verify_requests=True, retries=1, timeout=30):
         """
-            This is the main pump instance, this handles the oauth,
-            this also holds the models.
+        This is the main pump instance, this handles the oauth,
+        this also holds the models.
         """
         self._me = None
         self.protocol = "https"
@@ -95,18 +95,35 @@ class PyPump(object):
         self.verifier_callback = verifier_callback
         self._server_cache[self.client.server] = self.client
 
+        # Setup store object
+        if store is None:
+            self.store = self.create_store()
+
+        # Setup variables for client
         self.client.set_pump(self)
+        if "client-key" in self.store:
+            self.client.key = self.store["client-key"]
+
+        if "client-secret" in self.store:
+            self.client.secret = self.store["client-secret"]
+
+        if "client-expirey" in self.store:
+            self.client.expirey = self.store["client-expirey"]
+
+
         if not self.client.key:
             self.client.register()
+            # Save the info back to the store
+
+            self.store["client-key"] = self.client.key
+            self.store["client-secret"] = self.client.secret
+            self.store["client-expirey"] = self.client.expirey
 
         self.populate_models()
 
-        if not (token and secret):
-            # we need to make a new oauth request
+        if not ("oauth-access-token" in self.store and "oauth-access-secret" in self.store):
+            # we Need to make a new oauth request
             self.oauth_request()
-        else:
-            self.token = token
-            self.secret = secret
 
     @property
     def me(self):
@@ -118,6 +135,13 @@ class PyPump(object):
             server = self.client.server
         ))
         return self._me
+
+    def create_store(self):
+        """ Creates store object """
+        if self.store_class is not None:
+            return self.store_class.load(self.client.webfinger, self)
+
+        raise NotImplemented("You need to specify PyPump.store_class or override PyPump.create_store method.")
 
     def populate_models(self):
         def factory(pypump, model):
@@ -135,20 +159,6 @@ class PyPump(object):
         self.Public = Public()
         self.Activity = factory(self, Activity)
 
-    ##
-    # getters to expose some data which might be useful
-    ##
-    def get_registration(self):
-        """ Returns client credentials post-registration """
-        return (self.client.key, self.client.secret, self.client.expirey)
-
-    def get_token(self):
-        """ Returns OAuth token and secret post-handshake """
-        return (self.token, self.secret)
-
-    ##
-    # server
-    ##
     def build_url(self, endpoint):
         """ Returns a fully qualified URL """
         server = None
@@ -309,6 +319,8 @@ class PyPump(object):
         else:
             url = endpoint
 
+        kwargs["verify"] = self.verify_requests
+
         try:
             response = fnc(url, **kwargs)
             return response
@@ -338,13 +350,13 @@ class PyPump(object):
         # get tokens from server and make a dict of them.
         self._server_tokens = self.request_token()
 
-        self.token = self._server_tokens["token"]
-        self.secret = self._server_tokens["token_secret"]
+        self.store["oauth-request-token"] = self._server_tokens["token"]
+        self.store["oauth-request-secret"] = self._server_tokens["token_secret"]
 
         url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.client.server,
-                token=self.token.decode("utf-8")
+                token=self.store["oauth-request-token"].decode("utf-8")
                 ))
 
         # now we need the user to authorize me to use their pump.io account
@@ -369,10 +381,10 @@ class PyPump(object):
 
         if server == self.client.server:
             self.oauth = OAuth1(
-                    client_key=self._server_cache[self.client.server].key,
-                    client_secret=self._server_cache[self.client.server].secret,
-                    resource_owner_key=self.token,
-                    resource_owner_secret=self.secret
+                    client_key=self.store["client-key"],
+                    client_secret=self.store["client-secret"],
+                    resource_owner_key=self.store["oauth-access-token"],
+                    resource_owner_secret=self.store["oauth-access-secret"]
                     )
             return self.oauth
         else:
@@ -423,8 +435,8 @@ class PyPump(object):
 
         data = parse.parse_qs(response.content)
 
-        self.token = data[self.PARAM_TOKEN][0]
-        self.secret = data[self.PARAM_TOKEN_SECRET][0]
+        self.store["oauth-access-token"] = data[self.PARAM_TOKEN][0]
+        self.store["oauth-access-secret"] = data[self.PARAM_TOKEN_SECRET][0]
         self._server_tokens = {} # clean up code.
 
 class WebPump(PyPump):
