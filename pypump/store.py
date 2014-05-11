@@ -45,14 +45,15 @@ class AbstractStore(dict):
             return key
 
         # Don't prefix key if it already has it
-        if key.startswith(self.prefix):
+        if key.startswith(self.prefix + "-"):
             return key
 
         return "{0}-{1}".format(self.prefix, key)
 
     def __setitem__(self, key, *args, **kwargs):
         key = self.__prefix_key(key)
-        return super(AbstractStore, self).__setitem__(key, *args, **kwargs)
+        super(AbstractStore, self).__setitem__(key, *args, **kwargs)
+        self.save()
 
     def __getitem__(self, key, *args, **kwargs):
         key = self.__prefix_key(key)
@@ -81,11 +82,6 @@ class Store(AbstractStore):
 
     def update(self, *args, **kwargs):
         return_value = super(Store, self).update(*args, **kwargs)
-        self.save()
-        return return_value
-
-    def __setitem__(self, *args, **kwargs):
-        return_value = super(Store, self).__setitem__(*args, **kwargs)
         self.save()
         return return_value
 

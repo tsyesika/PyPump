@@ -38,7 +38,7 @@ class ClientTest(PyPumpTest):
         """ Test a full client registration can take place """
         logo = "https://a.website.com/some_picture.png"
         contacts = ["dead@beef.com", "beef@dead.com"]
-        
+
         client = Client(
             webfinger="TestUser@example.com",
             name="PyPumpTestClient",
@@ -52,9 +52,9 @@ class ClientTest(PyPumpTest):
 
         # Check data was sent correctly
         self.assertEqual(self.request["type"], "client_associate")
-        self.assertEqual(self.request["logo_url"], logo) 
+        self.assertEqual(self.request["logo_url"], logo)
         self.assertEqual(self.request["contacts"], " ".join(contacts))
-        
+
         # Check we get back what we should
         self.assertEqual(self.response.data["client_id"], client.key)
         self.assertEqual(self.response.data["client_secret"], client.secret)

@@ -5,8 +5,7 @@ import json
 import six
 import os
 
-from pypump.store import AbstractStore
-from pypump import WebPump, PyPump, Client
+from pypump import WebPump, PyPump, Client, AbstractStore
 
 class Response(object):
 
