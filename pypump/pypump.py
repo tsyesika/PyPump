@@ -141,7 +141,7 @@ class PyPump(object):
         if self.store_class is not None:
             return self.store_class.load(self.client.webfinger, self)
 
-        raise NotImplemented("You need to specify PyPump.store_class or override PyPump.create_store method.")
+        raise NotImplementedError("You need to specify PyPump.store_class or override PyPump.create_store method.")
 
     def populate_models(self):
         def factory(pypump, model):

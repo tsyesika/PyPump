@@ -64,12 +64,12 @@ class AbstractStore(dict):
 
     def save(self):
         """ Save all attributes in store """
-        raise NotImplemented()
+        raise NotImplementedError("This is a dummy class, abstract")
 
     @classmethod
     def load(self):
         """ This create and populate a store object """
-        raise NotImplemented()
+        raise NotImplementedError("This is a dummy class, abstract")
 
 class Store(AbstractStore):
     """
