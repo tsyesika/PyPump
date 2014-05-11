@@ -75,7 +75,7 @@ class Store(AbstractStore):
     """
         Persistant dictionary-like storage
 
-        Will write out all changes to disk as their made
+        Will write out all changes to disk as they're made
         NB: Will overwrite any changes made to disk not on class.
     """
 

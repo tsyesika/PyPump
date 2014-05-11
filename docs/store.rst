@@ -61,9 +61,9 @@ pass it in when you create the PyPump object e.g::
   >>> pump = PyPump(store=my_store, ...)
 
 If no storage object is passed, PyPump will call the .create_store
-method on the class. This will by default call .load(webfinger,
-pypump) on whatever class is in store_class on PyPump. You can provide
-your own class there::
+method on itself. This will by default call .load(webfinger, pypump)
+on whatever class is in store_class on PyPump. You can provide your
+own class there::
 
   >>> class MyPump(PyPump):
   ...     store_class = MyStore
@@ -76,10 +76,10 @@ can always override the .create_store method::
   class MyPump(PyPump):
       def create_store(self):
           """ This should create and return the store object """
-	  return MyStore.load(
-	      webfinger=self.client.webfinger,
-	      pump=self
-	  )
+          return MyStore.load(
+              webfinger=self.client.webfinger,
+              pump=self
+          )
 
-By default PyPump has the JSON persistant storage class which is
-provided with PyPump.
+For convenience, PyPump comes with a simple JSON store class,
+`pypump.store.Store`.
