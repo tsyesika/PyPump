@@ -44,13 +44,29 @@ from pypump.models.collection import Collection, Public
 _log = logging.getLogger(__name__)
 
 class PyPump(object):
-    """
-        Main class to interface with PyPump.
+    """Main class to interface with PyPump.
 
-        This class keeps everything together and is responsible
-        for making requests to the server on it's own behalf and
-        on the bahalf of the other clients as well as handling the
-        OAuth requests.
+    This class keeps everything together and is responsible for making
+    requests to the server on it's own behalf and on the bahalf of the
+    other clients as well as handling the OAuth requests.
+
+    Attributes / init args::
+    - client: an instance of `pypump.Client()`
+    - verifier_callback: If this is our first time registering the
+      client, this function will be called with a single argument, the
+      url one can post to for completing verification.
+    - token: this is the token that this machine accesses this user's
+      account from.
+    - secret: the secret that the machine users to authenticate with.
+      Do not share this!
+    - verifier_callback: the URI that is used for redirecting a user
+      after they authenticate this client... assuming this is
+      happening over the web.  If not, the callback is "oob", or "out
+      of band".
+    - verify_requests: Jessica should fill this in :)
+    - retries: number of times to retry if a request fails
+    - timeout: how long to give on a timeout for an http request, in
+      seconds
     """
 
     PARAM_VERIFER = six.b("oauth_verifier")
@@ -62,13 +78,12 @@ class PyPump(object):
     loader = None
     protocol = "https"
     verify_requests = True
-    client = None
     _server_cache = None
     _server_tokens = None # this hold OAuth tokens
     _me = None
 
     def __init__(self, client, verifier_callback, token=None, secret=None,
-                 callback="oob", verify=True, retries=1, timeout=30):
+                 callback="oob", verify_requests=True, retries=1, timeout=30):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
@@ -78,7 +93,7 @@ class PyPump(object):
 
         self._server_cache = {}
         self._server_tokens = {}
-        self.verify_requests = verify
+        self.verify_requests = verify_requests
         self.callback = callback
         self.client = client
         self.verifier_callback = verifier_callback
