@@ -75,19 +75,15 @@ class PyPump(object):
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
-    loader = None
-    protocol = "https"
-    verify_requests = True
-    _server_cache = None
-    _server_tokens = None # this hold OAuth tokens
-    _me = None
-
     def __init__(self, client, verifier_callback, token=None, secret=None,
                  callback="oob", verify_requests=True, retries=1, timeout=30):
         """
             This is the main pump instance, this handles the oauth,
             this also holds the models.
         """
+        self._me = None
+        self.protocol = "https"
+
         self.retries = retries
         self.timeout = timeout
 
