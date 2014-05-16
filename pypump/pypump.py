@@ -28,7 +28,7 @@ import six
 from six.moves.urllib import parse
 from requests_oauthlib import OAuth1
 
-from pypump.store import Store
+from pypump.store import JSONStore
 from pypump.client import Client
 from pypump.exception import PyPumpException
 
@@ -73,7 +73,7 @@ class PyPump(object):
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
-    store_class = Store
+    store_class = JSONStore
 
     def __init__(self, client, verifier_callback, store=None, callback="oob",
                  verify_requests=True, retries=1, timeout=30):

@@ -40,6 +40,7 @@ class AbstractStore(dict):
     prefix = None
 
     def __prefix_key(self, key):
+        """ This will add the prefix to the key if one exists on the store """
         # If there isn't a prefix don't bother
         if self.prefix is None:
             return key
@@ -67,12 +68,25 @@ class AbstractStore(dict):
         """ Save all attributes in store """
         raise NotImplementedError("This is a dummy class, abstract")
 
+    def export(self):
+        """ Exports as dictionary """
+        data = {}
+        for key, value in self.items():
+            data[key] = value
+
+        return data
+
     @classmethod
-    def load(self):
+    def load(cls, webfinger, pypump):
         """ This create and populate a store object """
         raise NotImplementedError("This is a dummy class, abstract")
 
-class Store(AbstractStore):
+    def __str__(self):
+        return str(self.export())
+
+
+
+class JSONStore(AbstractStore):
     """
         Persistant dictionary-like storage
 
@@ -80,36 +94,41 @@ class Store(AbstractStore):
         NB: Will overwrite any changes made to disk not on class.
     """
 
+    def __init__(self, data=None, filename=None, *args, **kwargs):
+        if filename is None:
+            filename = self.get_filename()
+        self.filename = filename
+
+        if data is None:
+            data = {}
+
+        super(JSONStore, self).__init__(data, *args, **kwargs)
+
     def update(self, *args, **kwargs):
-        return_value = super(Store, self).update(*args, **kwargs)
+        return_value = super(JSONStore, self).update(*args, **kwargs)
         self.save()
         return return_value
 
     def save(self):
         """ Saves dictionary to disk in JSON format. """
         if self.filename is None:
-            raise StoreException("A filename must be set to write storage to disk")
-
-        # This seems a hack, is there a better way?
-        prefix = self.prefix
-        self.prefix = None
-        data = json.dumps(self)
-        self.prefix = prefix
+            raise StoreException("Filename must be set to write store to disk")
 
         fout = open(self.filename, "w")
-        fout.write(data)
+        fout.write(json.dumps(self.export()))
         fout.close()
 
     @classmethod
     def get_filename(cls):
-        XDG_CONFIG_HOME = os.environ.get("XDG_CONFIG_HOME", "~/.config")
-        XDG_CONFIG_HOME = os.path.expanduser(XDG_CONFIG_HOME)
+        """ Gets filename of store on disk """
+        config_home = os.environ.get("XDG_CONFIG_HOME", "~/.config")
+        config_home = os.path.expanduser(config_home)
 
-        CONFIG_BASE = os.path.join(XDG_CONFIG_HOME, "PyPump")
-        if not os.path.isdir(CONFIG_BASE):
-            os.mkdir(CONFIG_BASE)
+        base_path = os.path.join(config_home, "PyPump")
+        if not os.path.isdir(base_path):
+            os.mkdir(base_path)
 
-        return os.path.join(CONFIG_BASE, "credentials.json")
+        return os.path.join(base_path, "credentials.json")
 
     @classmethod
     def load(cls, webfinger, pypump):
@@ -119,10 +138,9 @@ class Store(AbstractStore):
         if os.path.isfile(filename):
             data = open(filename).read()
             data = json.loads(data)
-            store = cls(data)
+            store = cls(data, filename=filename)
         else:
-            store = cls()
+            store = cls(filename=filename)
 
-        store.filename = filename
         store.prefix = webfinger
         return store
