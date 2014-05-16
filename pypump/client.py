@@ -46,10 +46,8 @@ class Client(object):
       would put "CoolCommunicator" here.
     - contacts: Who wrote this application?  List of email addresses
       of those who authored this client.
-    - redirect: a list of redirect URIs for in-band communication, ie
-      if you might redirect a user back to your site.
-      The authors of this documentation aren't sure why you'd list
-      multiple of them, but that's the spec... :)
+    - redirect: a list of URIs as callbacks for the authorization
+      server
     - logo: URI of your application's logo.
 
     Additionally, the following init args should only be supplied if
@@ -61,6 +59,12 @@ class Client(object):
     - secret: This is your secret token that authorizes you to connect
       to the pump instance (the `client_secret`).
     - expirey: When our token expires (`espires_at`)
+
+    Note that the above three are not the same as the oauth
+    permissions verifying the user has access to post, this is related
+    to permissions and identification of the client software to post.
+    For the premission related to the access of the account, see
+    PyPump.key and PyPump.secret.
     """
 
     ENDPOINT = "api/client/register"
