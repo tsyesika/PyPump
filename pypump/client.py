@@ -33,25 +33,43 @@ class ClientException(Exception):
         super(ClientException, self).__init__(message, *args, **kwargs)
 
 class Client(object):
-    """ This represents a client/application which is using the Pump API """
+    """This represents a client/application which is using the Pump API
+
+    Attributes / init args::
+    - webfinger: webfinger id of this user, ie "mary@example.org"
+      This is probably your username @ the domain of the pump instance
+      you're using.
+    - type: whether this is a "web" or "native" client.  Unless you're
+      using pypump as part of a web service, you should choose "native".
+    - name: The name of this client, ie your application's name.  For
+      example, if you were using PyPump to write CoolCommunicator, you
+      would put "CoolCommunicator" here.
+    - contacts: Who wrote this application?  List of email addresses
+      of those who authored this client.
+    - redirect: a list of URIs as callbacks for the authorization
+      server
+    - logo: URI of your application's logo.
+
+    Additionally, the following init args should only be supplied if
+    you've already registered this client with the server.  If not,
+    these will be filled in during the `self.register()` step::
+    - key: If This is the token (the `client_id`) we got back that
+      identifies our client, assuming we've already registered our
+      client.
+    - secret: This is your secret token that authorizes you to connect
+      to the pump instance (the `client_secret`).
+    - expirey: When our token expires (`espires_at`)
+
+    Note that the above three are not the same as the oauth
+    permissions verifying the user has access to post, this is related
+    to permissions and identification of the client software to post.
+    For the premission related to the access of the account, see
+    PyPump.key and PyPump.secret.
+    """
 
     ENDPOINT = "api/client/register"
 
-    _pump = None
-
-    webfinger = None
-    request = None
-    logo = None
-    contacts = None
-    redirect = None
-    type = None
-
-    key = None
-    secret = None
-    expirey = 0 # never
-
-
-    def __init__(self, webfinger, type, name=None, contacts=None, redirect=None, 
+    def __init__(self, webfinger, type, name=None, contacts=None, redirect=None,
                  logo=None, key=None, secret=None, expirey=None):
 
         self.webfinger = webfinger
@@ -61,9 +79,11 @@ class Client(object):
         self.contacts = contacts or []
         self.redirect = redirect or []
 
-        self.key = key or self.key
-        self.secret = secret or self.secret
-        self.expirey = expirey or self.expirey
+        self.key = key
+        self.secret = secret
+        self.expirey = expirey
+
+        self._pump = None
 
     @property
     def server(self):
