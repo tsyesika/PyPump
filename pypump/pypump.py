@@ -128,8 +128,6 @@ class PyPump(object):
             # we Need to make a new oauth request
             self.oauth_request()
 
-        self.construct_oauth_url()
-
     @property
     def me(self):
         if self._me is not None:
@@ -217,7 +215,7 @@ class PyPump(object):
 
     def request(self, endpoint, method="GET", data="",
                 raw=False, params=None, retries=None, client=None,
-                headers=None, timeout=None):
+                headers=None, timeout=None, **kwargs):
         """ Make request to endpoint with OAuth
         method = GET (default), POST or PUT
         attempts = this is how many times it'll try re-attempting
@@ -252,6 +250,7 @@ class PyPump(object):
                         "timeout": timeout,
                         }
 
+                request.update(kwargs)
                 response = self._requester(
                     fnc=requests.post,
                     endpoint=endpoint,
@@ -267,6 +266,7 @@ class PyPump(object):
                         "timeout": timeout,
                         }
 
+                request.update(kwargs)
                 response = self._requester(
                     fnc=requests.get,
                     endpoint=endpoint,
@@ -282,6 +282,7 @@ class PyPump(object):
                         "timeout": timeout,
                         }
 
+                request.update(kwargs)
                 response = self._requester(
                     fnc=requests.delete,
                     endpoint=endpoint,
@@ -308,6 +309,8 @@ class PyPump(object):
                     error = "400 - Bad request."
                 raise PyPumpException(error)
 
+            if response.ok:
+                return response
 
         error = "Request Failed to {url} (response: {data} | status: {status})"
         error = error.format(
@@ -358,19 +361,18 @@ class PyPump(object):
         self.store["oauth-request-token"] = self._server_tokens["token"]
         self.store["oauth-request-secret"] = self._server_tokens["token_secret"]
 
+        # now we need the user to authorize me to use their pump.io account
+        result = self.verifier_callback(self.construct_oauth_url())
+        if result is not None:
+            self.verifier(result)
 
     def construct_oauth_url(self):
         """ Constructs verifier OAuth URL """
-        url = self.build_url("oauth/authorize?oauth_token={token}".format(
+        return self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.client.server,
                 token=self.store["oauth-request-token"].decode("utf-8")
                 ))
-
-        # now we need the user to authorize me to use their pump.io account
-        result = self.verifier_callback(url)
-        if result is not None:
-            self.verifier(result)
 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
@@ -471,7 +473,28 @@ class WebPump(PyPump):
         """
         kwargs["verifier_callback"] = self._callback_verifier
         super(WebPump, self).__init__(*args, **kwargs)
+        self.url = self.construct_oauth_url()
 
     def _callback_verifier(self, url):
         """ This is used to catch the url and store it at `self.url` """
         self.url = url
+
+    @property
+    def logged_in(self):
+        """ Return boolean if is logged in """
+        if "oauth-access-token" not in self.store:
+            return False
+
+        # if it redirects to the profile it'll raise an exception as
+        # it doesn't sign the redirection request.
+        response = self.request("/api/whoami", allow_redirects=False)
+
+        # It should response with a redirect to our profile if it's logged in
+        if response.status_code != 302:
+            return False
+
+        # the location should be the profile we have
+        if response.headers["location"] != self.me.links["self"]:
+            return False
+
+        return True
