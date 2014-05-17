@@ -84,14 +84,26 @@ class AbstractStore(dict):
     def __str__(self):
         return str(self.export())
 
+class DummyStore(AbstractStore):
+    """
+    This doesn't persistantly store any data it just acts like
+    a regular dictionary. This shouldn't be used for anything but
+    testing as nothing will be stored on disk.
+    """
 
+    def save(self):
+        pass
+
+    @classmethod
+    def load(cls, webfinger, pypump):
+        return self()
 
 class JSONStore(AbstractStore):
     """
-        Persistant dictionary-like storage
+    Persistant dictionary-like storage
 
-        Will write out all changes to disk as they're made
-        NB: Will overwrite any changes made to disk not on class.
+    Will write out all changes to disk as they're made
+    NB: Will overwrite any changes made to disk not on class.
     """
 
     def __init__(self, data=None, filename=None, *args, **kwargs):
