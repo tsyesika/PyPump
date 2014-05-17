@@ -61,7 +61,8 @@ class PyPump(object):
       after they authenticate this client... assuming this is
       happening over the web.  If not, the callback is "oob", or "out
       of band".
-    - verify_requests: Jessica should fill this in :)
+    - verify_requests: If this is set to False PyPump won't check SSL/TLS
+      certificates.
     - retries: number of times to retry if a request fails
     - timeout: how long to give on a timeout for an http request, in
       seconds
