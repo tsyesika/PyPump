@@ -99,6 +99,8 @@ class PyPump(object):
         # Setup store object
         if store is None:
             self.store = self.create_store()
+        else:
+            self.store = store
 
         # Setup variables for client
         self.client.set_pump(self)
@@ -122,9 +124,11 @@ class PyPump(object):
 
         self.populate_models()
 
-        if not ("oauth-access-token" in self.store and "oauth-access-secret" in self.store):
+        if "oauth-request-token" not in self.store and "oauth-access-token" not in self.store:
             # we Need to make a new oauth request
             self.oauth_request()
+
+        self.construct_oauth_url()
 
     @property
     def me(self):
@@ -354,6 +358,9 @@ class PyPump(object):
         self.store["oauth-request-token"] = self._server_tokens["token"]
         self.store["oauth-request-secret"] = self._server_tokens["token_secret"]
 
+
+    def construct_oauth_url(self):
+        """ Constructs verifier OAuth URL """
         url = self.build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.client.server,
@@ -367,8 +374,7 @@ class PyPump(object):
 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
-        self._server_tokens["verifier"] = verifier
-        self.request_access(**self._server_tokens)
+        self.request_access(verifier)
 
     def setup_oauth_client(self, url=None):
         """ Sets up client for requests to pump """
@@ -417,14 +423,14 @@ class PyPump(object):
 
         return data
 
-    def request_access(self, **auth_info):
+    def request_access(self, verifier):
         """ Get OAuth access token so we can make requests """
         client = OAuth1(
                 client_key=self._server_cache[self.client.server].key,
                 client_secret=self._server_cache[self.client.server].secret,
-                resource_owner_key=auth_info['token'],
-                resource_owner_secret=auth_info['token_secret'],
-                verifier=auth_info['verifier']
+                resource_owner_key=self.store["oauth-request-token"],
+                resource_owner_secret=self.store["oauth-request-secret"],
+                verifier=verifier
                 )
 
         request = {"auth": client}
