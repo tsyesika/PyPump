@@ -60,8 +60,12 @@ your first time, you need to authenticate this client::
     ...     print 'Go to: ' + url
     ...     return raw_input('Verifier: ') # they will get a code back
     >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
-    >>> client_credentials = pump.get_registration() # will return [<key>, <secret>, <expirey>]
-    >>> client_tokens = pump.get_token() # [<token>, <secret>]
+
+By default PyPump will use the JSONStore which comes with PyPump. This
+will store the client and OAuth credentials created when you connect
+to pump at ``~/$XDG_CONFIG_HOME/PyPump/credentials.json.`` If you wish
+to change the path or store the data somewhere else (postgres, mongo,
+redis, etc.) we suggest you read the :doc:`../store` documentation.
 
 The PyPump call will try to verify with OAuth. You may wish to change how it
 asks for authentication. PyPump's ``simple_verifier`` by default writes to

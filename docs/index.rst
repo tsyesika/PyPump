@@ -10,11 +10,11 @@ PyPump is a simple but powerful and pythonic way of interfacing with the `pump.i
 
 PyPump is under the `GPLv3 <https://www.gnu.org/licenses/gpl.html>`_. You should probably
 look to see if/how this may impact you and your programs if you wish to use PyPump. The community
-for PyPump lives on IRC in the #pypump channel on `MegNet <http://megworld.co.uk/irc>`_.
+for PyPump lives on IRC in the #pypump channel on `MegNet <https://megworld.co.uk/irc>`_.
 
 Getting started
 ---------------
-If you're new to PyPump and feeling a bit overwhelmed the :doc:`gettingstarted/tutorial` is the best 
+If you're new to PyPump and feeling a bit overwhelmed the :doc:`gettingstarted/tutorial` is the best
 place to go, however if you're familiar with python and understand pump, check out the
 :doc:`gettingstarted/qnd` guide!
 
@@ -27,12 +27,14 @@ Contents
    gettingstarted/qnd
    gettingstarted/tutorial
    gettingstarted/authentication
-   gettingstarted/verifier_callback 
+   gettingstarted/verifier_callback
    gettingstarted/webpump
+
+   store
 
 Models
 ------
-   
+
 .. toctree::
    :maxdepth: 1
 
