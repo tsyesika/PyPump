@@ -107,22 +107,6 @@ def verifier(url):
 if __name__ == "__main__":
     parser = optparse.OptionParser()
 
-    parser.add_option("-c", "--clean",
-                      dest="clean",
-                      action="store_true",
-                      default=False,
-                      help="Removes all stored OAuth credentials")
-
-    parser.add_option("-l", "--list",
-                      dest="list",
-                      action="store_true",
-                      default=False,
-                      help="Lists all stored OAuth credentials")
-
-    parser.add_option("-r", "--remove",
-                      dest="remove",
-                      help="Remove stored OAuth credentials for selected webfinger")
-
     parser.add_option("--log", "--loglevel",
                       dest="loglevel",
                       default="warning",
@@ -146,16 +130,6 @@ if __name__ == "__main__":
 
     logfile = "pypump-shell.log" if options.logfile else None
     logging.basicConfig(level=log_level, filename=logfile)
-
-    if options.clean:
-        if os.path.isfile(store_path):
-            os.remove(store_path)
-            six.print_("Successfully removed all OAuth credentials")
-        else:
-            six.print_("No OAuth crendetials found.")
-            sys.exit(1)
-
-        sys.exit()
 
     webfinger = "" if len(args) <= 0 else args[0]
 
