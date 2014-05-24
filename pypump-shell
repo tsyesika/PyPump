@@ -120,6 +120,8 @@ if __name__ == "__main__":
 
     parser.add_option("--no-check-certificate",
                       dest="verify",
+                      action="store_false",
+                      default=True,
                       help="Accepts invalid SSL certificates")
 
     (options, args) = parser.parse_args()
@@ -148,7 +150,7 @@ if __name__ == "__main__":
 
 
     try:
-        pump = PyPump(client=client, verifier_callback=verifier)
+        pump = PyPump(client=client, verifier_callback=verifier, verify_requests=options.verify)
     except requests.exceptions.SSLError:
         # This is caused when there has been an invalid certificate.
         # We should ask the user if they want to continue (common to use
@@ -166,7 +168,7 @@ if __name__ == "__main__":
             sys.exit(0)
 
         # Create the same PyPump object as above but without ssl verification
-        pump = PyPump(client=client, verifier_callback=verifier, verify=False)
+        pump = PyPump(client=client, verifier_callback=verifier, verify_requests=False)
 
     # bring curser back so banner walks over the setup message
     sys.stdout.write("\r")
