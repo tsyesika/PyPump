@@ -10,6 +10,10 @@ build
 eggs
 parts
 bin
+lib
+lib64
+include
+share
 var
 sdist
 develop-eggs
