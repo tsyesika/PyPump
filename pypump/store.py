@@ -17,10 +17,19 @@
 # along with PyPump.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
+import re
 import os
 
-class StoreException(Exception):
-    pass
+from exception import ValidationError, StoreException
+
+# Regex taken from WTForms
+EMAIL_REGEX = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", re.IGNORECASE)
+
+def webfinger_validator(webfinger):
+    """ Validates webfinger is correct - should look like user@host.tld """
+    error = "Invalid webfinger. Should be informat username@host.tld"
+    if not EMAIL_REGEX.match(webfinger):
+        raise ValidationError(error)
 
 class AbstractStore(dict):
     """
@@ -39,6 +48,10 @@ class AbstractStore(dict):
 
     prefix = None
 
+    def __init__(self, *args, **kwargs):
+        self.__validators = {}
+        return super(AbstractStore, self).__init__(*args, **kwargs)
+
     def __prefix_key(self, key):
         """ This will add the prefix to the key if one exists on the store """
         # If there isn't a prefix don't bother
@@ -52,6 +65,9 @@ class AbstractStore(dict):
         return "{0}-{1}".format(self.prefix, key)
 
     def __setitem__(self, key, *args, **kwargs):
+        if key in self.__validators.keys():
+            self.__validators[key](*args, **kwargs)
+
         key = self.__prefix_key(key)
         super(AbstractStore, self).__setitem__(key, *args, **kwargs)
         self.save()
@@ -63,6 +79,9 @@ class AbstractStore(dict):
     def __contains__(self, key, *args, **kwargs):
         key = self.__prefix_key(key)
         return super(AbstractStore, self).__contains__(key, *args, **kwargs)
+
+    def set_validator(self, key, validator):
+        self.__validators[key] = validator
 
     def save(self):
         """ Save all attributes in store """

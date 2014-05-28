@@ -15,7 +15,11 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from StoreException import StoreException, ValidationError
 
-class PyPumpException(Exception):
+class StoreException(Exception):
+    """ Raised when error occurs in store """
+    pass
+
+class ValidationError(StoreException):
+    """ Raised when validation on a field fails """
     pass
