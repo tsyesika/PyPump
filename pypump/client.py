@@ -131,6 +131,7 @@ class Client(object):
         """ Sends the request """
         request = {
                 "headers": {"Content-Type": "application/json"},
+                "timeout": self._pump.timeout,
                 "data": self.context,
                 }
         
