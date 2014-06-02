@@ -24,9 +24,10 @@ class StoreTest(PyPumpTest):
         store = TestStore()
 
         # Check that it raises a key error when nothing has been stored.
-        with self.assertRaises(KeyError):
+        def empty_store_key():
             store["coffee"]
-
+        self.assertRaises(KeyError, empty_store_key)
+            
         # Store something
         store["coffee"] = "awesome"
 
@@ -61,7 +62,8 @@ class StoreTest(PyPumpTest):
         store.prefix = None
 
         # Unprefixed shouldn't exist.
-        with self.assertRaises(KeyError):
+        def empty_store_key():
             store["key"]
+        self.assertRaises(KeyError, empty_store_key)
 
         self.assertEqual(store["hai-key"], "value")
