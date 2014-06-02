@@ -16,11 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with PyPump.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import json
 import re
 import os
 
-from exception import ValidationError, StoreException
+from pypump.exception import ValidationError, StoreException
 
 # Regex taken from WTForms
 EMAIL_REGEX = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", re.IGNORECASE)
