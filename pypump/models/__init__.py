@@ -323,7 +323,7 @@ class Postable(object):
 
     # bto
     def _get_bto(self):
-        return self.bto
+        return self._bto
 
     def _set_bto(self, *args, **kwargs):
         self._bto = self._set_people(*args, **kwargs)
@@ -332,7 +332,8 @@ class Postable(object):
 
     # bcc
     def _get_bcc(self):
-        return self.bcc
+        return self._bcc
+
     def _set_bcc(self, *args, **kwargs):
         self._bcc = self._set_people(*args, **kwargs)
 
