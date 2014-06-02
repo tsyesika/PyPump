@@ -35,7 +35,7 @@ class ImageContainer(object):
         self.height = height
 
     def __repr__(self):
-        return "<Image {width}x{height}".format(
+        return "<Image {width}x{height}>".format(
             width=self.width,
             height=self.height
         )
