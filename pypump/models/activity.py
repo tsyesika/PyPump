@@ -206,9 +206,15 @@ class Activity(AbstractModel):
     def unserialize(self, data):
         """ From JSON -> Activity object """
 
+        # copy activity attrs into object
         if "author" not in data["object"]:
             # add author if not set (true for posted objects in inbox/major)
             data["object"]["author"] = data["actor"]
+        for key in ["to", "cc", "bto", "bcc"]:
+            if key not in data["object"] and key in data:
+                # add author if not set (true for posted objects in inbox/major)
+                data["object"][key] = data[key]
+
 
         Mapper(pypump=self._pump).parse_map(self, data=data)
         self.add_links(data)
