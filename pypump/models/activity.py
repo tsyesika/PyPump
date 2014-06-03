@@ -33,8 +33,10 @@ class Mapper(object):
                 "object_type", "summary", "url", "preferred_username",
                 "verb", "username", "total_items", "liked",]
     dates = ["updated", "published", "deleted", "received"]
-    objects = ["generator", "actor", "obj", "author", "in_reply_to", "location"]
-    lists = ["to", "cc", "bcc", "bto","object_types"]
+    objects = ["generator", "actor", "obj", "author", "in_reply_to",
+               "location"]
+    lists = ["to", "cc", "bcc", "bto", "_to", "_cc", "_bto", "_bcc",
+             "object_types"]
     #feeds = ["likes", "shares", "replies"]
 
     def __init__(self, pypump=None, *args, **kwargs):

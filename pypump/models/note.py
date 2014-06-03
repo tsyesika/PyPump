@@ -34,7 +34,11 @@ class Note(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteable
         "updated": "updated",
         "deleted": "deleted",
         "liked": "liked",
-        "author": "author"
+        "author": "author",
+        "_to": "to",
+        "_cc": "cc",
+        "_bto": "bto",
+        "_bcc": "bcc",
     }
     
     @property
