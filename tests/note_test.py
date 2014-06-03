@@ -34,7 +34,15 @@ class NoteTest(PyPumpTest):
             "liked": False,
             "pump_io": {
                 "shared": False
-            }
+            },
+            "to": [{
+                "objectType" : "person",
+                "id" : "acct:notetestuser@example.com"
+            }],
+            "cc": [{
+                "objectType" : "collection",
+                "id" : "http://activityschema.org/collection/public"
+            }],
         }
 
         self.minidata = {
@@ -49,6 +57,11 @@ class NoteTest(PyPumpTest):
         self.response.data = self.maxidata
         note = self.pump.Note('test')
         self.assertTrue(isinstance(note, type(self.pump.Note())))
+    def test_note_set_to(self):
+        self.response.data = self.maxidata
+        note = self.pump.Note('test set to')
+        note.to = self.pump.Public
+        self.assertTrue(isinstance(note.to[0], type(self.pump.Collection())))
     def test_note_minimal_unserialize(self):
         note = self.pump.Note().unserialize(self.minidata)
         self.assertTrue(isinstance(note, type(self.pump.Note())))
@@ -79,4 +92,10 @@ class NoteTest(PyPumpTest):
     def test_note_attr_liked(self):
         self.assertTrue(hasattr(self.maxinote, 'liked'))
         self.assertEqual(self.maxinote.liked, self.maxidata["liked"])
+    def test_note_attr_to(self):
+        self.assertTrue(hasattr(self.maxinote, 'to'))
+        self.assertTrue(isinstance(self.maxinote.to[0], type(self.pump.Person())))
+    def test_note_attr_cc(self):
+        self.assertTrue(hasattr(self.maxinote, 'cc'))
+        self.assertTrue(isinstance(self.maxinote.cc[0], type(self.pump.Collection())))
 
