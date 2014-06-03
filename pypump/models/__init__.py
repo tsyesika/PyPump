@@ -286,6 +286,9 @@ class Postable(object):
         elif hasattr(people, "__iter__"):
             people = list(people)
 
+        return people
+
+    def _serialize_people(self, people):
         for i, person in enumerate(people):
             if isinstance(person, six.class_types):
                 people[i] = person()
@@ -342,10 +345,10 @@ class Postable(object):
     def serialize(self, *args, **kwargs):
         # now add the to, cc, bto, bcc
         data = {
-            "to": self._to,
-            "cc": self._cc,
-            "bto": self._bto,
-            "bcc": self._bcc,
+            "to": self._serialize_people(self._to),
+            "cc": self._serialize_people(self._cc),
+            "bto": self._serialize_people(self._bto),
+            "bcc": self._serialize_people(self._bcc),
         }
 
         return data
