@@ -53,6 +53,10 @@ class Image(AbstractModel, Postable, Likeable, Shareable, Commentable, Deleteabl
         "published": "published",
         "updated": "updated",
         "deleted": "deleted",
+        "_to": "to",
+        "_cc": "cc",
+        "_bto": "bto",
+        "_bcc": "bcc",
     }
 
     id = None
