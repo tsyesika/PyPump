@@ -117,7 +117,7 @@ class DummyStore(AbstractStore):
 
     @classmethod
     def load(cls, webfinger, pypump):
-        return self()
+        return cls()
 
 class JSONStore(AbstractStore):
     """
