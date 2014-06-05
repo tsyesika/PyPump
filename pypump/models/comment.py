@@ -15,7 +15,6 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from dateutil.parser import parse
 from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
                            Deleteable)
 from pypump.models.activity import Mapper

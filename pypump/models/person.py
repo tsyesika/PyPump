@@ -17,9 +17,6 @@
 
 import six
 
-from datetime import datetime
-from dateutil.parser import parse
-
 from pypump.models import AbstractModel
 from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
