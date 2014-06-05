@@ -19,8 +19,6 @@ import logging
 import mimetypes
 import os
 
-from dateutil.parser import parse
-
 from pypump.models import (AbstractModel, Postable, Likeable, Commentable,
                            Deleteable, Shareable)
 from pypump.models.activity import Mapper
