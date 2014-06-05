@@ -122,7 +122,7 @@ class PyPump(object):
             self.store["client-secret"] = self.client.secret
             self.store["client-expirey"] = self.client.expirey
 
-        self.populate_models()
+        self._populate_models()
 
         if "oauth-request-token" not in self.store and "oauth-access-token" not in self.store:
             # we Need to make a new oauth request
@@ -146,7 +146,7 @@ class PyPump(object):
 
         raise NotImplementedError("You need to specify PyPump.store_class or override PyPump.create_store method.")
 
-    def populate_models(self):
+    def _populate_models(self):
         def factory(pypump, model):
             return lambda *args, **kwargs: model(
                 pypump=kwargs.pop("pypump", pypump),
@@ -162,12 +162,12 @@ class PyPump(object):
         self.Public = Public()
         self.Activity = factory(self, Activity)
 
-    def build_url(self, endpoint):
+    def _build_url(self, endpoint):
         """ Returns a fully qualified URL """
         server = None
         if "://" in endpoint:
             #looks like an url, let's break it down
-            server, endpoint = self.deconstruct_url(endpoint)
+            server, endpoint = self._deconstruct_url(endpoint)
 
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
@@ -177,7 +177,7 @@ class PyPump(object):
                 )
         return url
 
-    def deconstruct_url(self, url):
+    def _deconstruct_url(self, url):
         """ Breaks down URL and returns server and endpoint """
         url = url.split("://", 1)[-1]
         server, endpoint = url.split("/", 1)
@@ -188,7 +188,7 @@ class PyPump(object):
         and adds it to _server_cache if it doesnt already exist """
 
         if "://" in url:
-            server, endpoint = self.deconstruct_url(url)
+            server, endpoint = self._deconstruct_url(url)
         else:
             server = url
 
@@ -234,7 +234,7 @@ class PyPump(object):
             data = json.dumps(data)
 
         if not raw:
-            url = self.build_url(endpoint)
+            url = self._build_url(endpoint)
         else:
             url = endpoint
 
@@ -323,7 +323,7 @@ class PyPump(object):
 
     def _requester(self, fnc, endpoint, raw=False, **kwargs):
         if not raw:
-            url = self.build_url(endpoint)
+            url = self._build_url(endpoint)
         else:
             url = endpoint
 
@@ -337,7 +337,7 @@ class PyPump(object):
                 raise # shoot this seems real.
             else:
                 self.set_http()
-                url = self.build_url(endpoint)
+                url = self._build_url(endpoint)
                 self.set_https()
                 raw = True
                 return self._requester(fnc, url, raw, **kwargs)
@@ -368,7 +368,7 @@ class PyPump(object):
 
     def construct_oauth_url(self):
         """ Constructs verifier OAuth URL """
-        return self.build_url("oauth/authorize?oauth_token={token}".format(
+        return self._build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.client.server,
                 token=self.store["oauth-request-token"].decode("utf-8")
@@ -381,7 +381,7 @@ class PyPump(object):
     def setup_oauth_client(self, url=None):
         """ Sets up client for requests to pump """
         if url and "://" in url:
-            server, endpoint = self.deconstruct_url(url)
+            server, endpoint = self._deconstruct_url(url)
         else:
             server = self.client.server
 
