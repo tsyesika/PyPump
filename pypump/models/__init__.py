@@ -79,7 +79,7 @@ class AbstractModel(object):
         return str(repr(self))
 
     def __bytes__(self):
-        return self.b(str(self))
+        return six.b(str(self))
 
     def add_link(self, name, link):
         """ Adds a link to the model """
