@@ -15,9 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pypump.models import AbstractModel
+from pypump.models import PumpObject
 
-class Place(AbstractModel):
+class Place(PumpObject):
 
     name = None
     longitude = None

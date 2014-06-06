@@ -16,25 +16,16 @@
 ##
 import logging
 
-from pypump.models import AbstractModel
+from pypump.models import PumpObject, Mapper
 from pypump.models.feed import Feed
-from pypump.models.activity import Mapper
 
 _log = logging.getLogger(__name__)
 
-class Collection(AbstractModel):
+class Collection(PumpObject):
 
     _members = None
     _ignore_attr = ["dummyattr", ]
-    _mapping = {
-        "id": "id",
-        "display_name": "displayName",
-        "content": "content",
-        "author": "author",
-        "published": "published",
-        "updated": "updated",
-        "url": "url"
-    }
+    _mapping = {}
 
     def __init__(self, id=None, *args, **kwargs):
         super(Collection, self).__init__(*args, **kwargs)

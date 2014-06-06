@@ -18,8 +18,7 @@
 import logging
 import six
 
-from pypump.models import AbstractModel
-from pypump.models.activity import Mapper
+from pypump.models import PumpObject, Mapper
 
 _log = logging.getLogger(__name__)
 
@@ -96,7 +95,7 @@ class ItemList(object):
         return self.__next__()
 
 
-class Feed(AbstractModel):
+class Feed(PumpObject):
     id = None
     display_name = None
     total_items = None

@@ -1,14 +1,14 @@
 from __future__ import absolute_import
 from tests import PyPumpTest
 
-from pypump.models import AbstractModel
+from pypump.models import PumpObject
 
-class AbstractModelTest(PyPumpTest):
+class PumpObjectTest(PyPumpTest):
     
     def setUp(self):
-        super(AbstractModelTest, self).setUp()
+        super(PumpObjectTest, self).setUp()
 
-        self.model = AbstractModel(pypump=self.pump)
+        self.model = PumpObject(pypump=self.pump)
 
         self.person_json = {
             "preferredUsername": "testuser",

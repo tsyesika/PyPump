@@ -15,35 +15,53 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import json
 import logging
 import six
+from dateutil.parser import parse
 
 from pypump.exception.PumpException import PumpException
 
 _log = logging.getLogger(__name__)
 
-class AbstractModel(object):
+class PumpObject(object):
 
-    links = None
-
-    @property
-    def TYPE(self):
-        return self.__class__.__name__
-
-    @property
-    def objectType(self):
-        return self.TYPE.lower()
+    _ignore_attr = list()
 
     _mapping = {
-        "objectType":"TYPE",
+        "attachments": "attachments",
+        "author": "author",
+        "content": "content",
+        "display_name": "displayName",
+        "downstream_duplicates": "downstreamDuplicates",
+        "id": "id",
+        "image": "image",
+        "in_reply_to": "inReplyTo",
+        "liked": "liked",
+        "likes": "likes",
+        "links": "links",
+        "published": "published",
+        "replies": "replies",
+        "shares": "shares",
+        "summary": "summary",
+        "updated": "updated",
+        "upstream_duplicates": "upstreamDuplicates",
+        "url": "url",
+        "deleted" : "deleted",
+        "object_type": "objectType",
+        "_to": "to",
+        "_cc": "cc",
+        "_bto": "bto",
+        "_bcc": "bcc",
     }
+
 
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
         self.links = {}
         if pypump:
             self._pump = pypump
+
+        self._mapping.update(PumpObject._mapping)
 
     def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
@@ -110,30 +128,108 @@ class AbstractModel(object):
 
         return self.links
 
-    def unserialize(self, data, *args, **kwargs):
-        """ Changes it from JSON -> obj """
-        data = json.loads(data)
-        klass = self(pypump=self._pump)
+    def unserialize(self, data):
+        Mapper(pypump=self._pump).parse_map(self, mapping=PumpObject._mapping,
+                                            ignore_attr=PumpObject._ignore_attr,
+                                            data=data)
+        self.add_links(data)
+        return self
 
-        for key, value in data.items():
-            key = self.remap(key)
-            if key is None:
-                continue
+class Mapper(object):
 
-            setattr(klass, key, value)
+    """ Handles mapping of json attributes to models """
 
-        return klass
+    # TODO probably better to move this into the models,
+    # {"json_attr":("model_attr", "datatype"), .. } or similar
+    literals = ["content", "display_name", "id", "object_type", "summary",
+                "url", "preferred_username", "verb", "username",
+                "total_items", "liked"]
+    dates = ["updated", "published", "deleted", "received"]
+    objects = ["generator", "actor", "obj", "author", "in_reply_to",
+               "location"]
+    lists = ["_to", "_cc", "_bto", "_bcc", "object_types"]
+    #feeds = ["likes", "shares", "replies"]
 
-    def remap(self, data):
-        """ Remaps """
-        if data in self._mapping.keys():
-            return self._mappping[data]
-        elif data in self.__mapping.values():
-            for k, v in self._mapping.items():
-                if data == v:
-                    return k
+    def __init__(self, pypump=None, *args, **kwargs):
+        self._pump = pypump
 
-        return data
+    def parse_map(self, obj, mapping=None, ignore_attr=None, *args, **kwargs):
+        """ Parses a dictionary of (model_attr, json_attr) items """
+        mapping = mapping or obj._mapping
+        ignore_attr = ignore_attr or obj._ignore_attr
+
+        if "data" in kwargs:
+            for k, v in mapping.items():
+                if v in kwargs["data"] and k not in ignore_attr:
+                    self.add_attr(obj, k, kwargs["data"][v], from_json=True)
+                #elif k not in ignore_attr:
+                    #_log.debug("Setting attribute %r to None" % k)
+                    #self.set_none(obj, k)
+        else:
+            for k, v in mapping.items():
+                if k in kwargs and k not in ignore_attr:
+                    self.add_attr(obj, k, kwargs[k])
+
+    def add_attr(self, obj, key, data, from_json=False):
+        if key in self.objects:
+            self.set_object(obj, key, data, from_json)
+        elif key in self.dates:
+            self.set_date(obj, key, data, from_json)
+        elif key in self.lists:
+            self.set_list(obj, key, data, from_json)
+        elif key in self.literals:
+            self.set_literal(obj, key, data, from_json)
+        else:
+            _log.debug("Ignoring unknown attribute %r", key)
+
+    def set_none(self, obj, key):
+        setattr(obj, key, None)
+
+    def set_literal(self, obj, key, data, from_json):
+        setattr(obj, key, data)
+
+    def get_object(self, data):
+        try:
+            # Look for suitable PyPump model based on objectType
+            obj_type = data.get("objectType").capitalize()
+            obj = getattr(self._pump, obj_type)
+            obj = obj().unserialize(data)
+            _log.debug("Created PyPump model %r" % obj.__class__)
+            return obj
+        except AttributeError as e:
+            _log.debug("Exception: %s" % e)
+            try:
+                import pypump.models.activity
+                # Look for suitable pumpobject model based on objectType
+                obj = getattr(pypump.models.activity, data.get("objectType").capitalize())
+                obj = obj(pypump=self._pump, data=data)
+                _log.debug("Created activity.* model: %r" % obj.__class__)
+                return obj
+            except AttributeError as e:
+                # Fall back to PumpObject
+                _log.debug("Exception: %s" % e)
+                obj = PumpObject(pypump=self._pump).unserialize(data)
+                _log.debug("Created PumpObject: %r" % obj)
+                return obj
+
+    def set_object(self, obj, key, data, from_json):
+        if from_json:
+            setattr(obj, key, self.get_object(data))
+
+    def set_date(self, obj, key, data, from_json):
+        if from_json:
+            setattr(obj, key, parse(data))
+
+    def set_list(self, obj, key, data, from_json):
+        if from_json:
+            tmplist = []
+            for i in data:
+                if isinstance(i, six.string_types):
+                    tmplist.append(i)
+                else:
+                    tmplist.append(self.get_object(i))
+            setattr(obj, key, tmplist)
+
 
 from pypump.models.feed import Feed
 
@@ -281,7 +377,7 @@ class Postable(object):
 
     def _set_people(self, people):
         """ Sets who the object is sent to """
-        if hasattr(people, "objectType"):
+        if hasattr(people, "object_type"):
             people = [people]
         elif hasattr(people, "__iter__"):
             people = list(people)
@@ -296,7 +392,7 @@ class Postable(object):
             if isinstance(people[i], type(self._pump.Person())):
                 people[i] = {
                     "id": people[i].id,
-                    "objectType": people[i].objectType,
+                    "objectType": people[i].object_type,
                 }
             else:
                 # must be a collection

@@ -15,24 +15,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pypump.models import (AbstractModel, Commentable, Likeable, Shareable, 
-                           Deleteable)
-from pypump.models.activity import Mapper
+from pypump.models import (PumpObject, Commentable, Likeable, Shareable, 
+                           Deleteable, Mapper)
 
-class Comment(AbstractModel, Likeable, Shareable, Deleteable, Commentable):
+class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
 
     _ignore_attr = []
-    _mapping = {
-        "id": "id",
-        "url": "url",
-        "content": "content",
-        "published": "published",
-        "updated": "updated",
-        "deleted": "deleted",
-        "liked" : "liked",
-        "author" : "author",
-        "in_reply_to" : "inReplyTo"
-    }
+    _mapping = {}
 
     @property
     def ENDPOINT(self):

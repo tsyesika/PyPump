@@ -72,7 +72,7 @@ class PersonTest(PyPumpTest):
         self.assertEquals(person.id, self.request["object"]["id"])
         
         # Ensure object type is correct
-        self.assertEquals(person.objectType, self.request["object"]["objectType"])
+        self.assertEquals(person.object_type, self.request["object"]["objectType"])
 
     def test_update(self):
         """ Test that a update works """
@@ -94,7 +94,7 @@ class PersonTest(PyPumpTest):
 
         self.assertEqual(self.request["verb"], "update")
         self.assertEqual(self.request["object"]["id"], person.id)
-        self.assertEqual(self.request["object"]["objectType"], person.objectType)
+        self.assertEqual(self.request["object"]["objectType"], person.object_type)
         self.assertEqual(self.request["object"]["summary"], person.summary)
         self.assertEqual(self.request["object"]["displayName"], person.display_name)
 
@@ -107,7 +107,7 @@ class PersonTest(PyPumpTest):
 
         self.assertEquals(self.request["verb"], "stop-following")
         self.assertEquals(self.request["object"]["id"], person.id)
-        self.assertEquals(self.request["object"]["objectType"], person.objectType) 
+        self.assertEquals(self.request["object"]["objectType"], person.object_type) 
 
     def test_minimal_unserialize(self):
         """ Test the smallest amount of data can be given to unserialize """
@@ -119,7 +119,7 @@ class PersonTest(PyPumpTest):
         person = self.pump.Person("TestUser")
 
         self.assertEquals(self.response["id"], person.id)
-        self.assertEquals(self.response["objectType"], person.objectType)
+        self.assertEquals(self.response["objectType"], person.object_type)
 
     def test_unserialize(self):
         """ Tests person unserialization is successful """

@@ -1,7 +1,8 @@
 from __future__ import absolute_import
 from tests import PyPumpTest
 from dateutil.parser import parse
-from pypump.models.activity import ActivityObject, Application
+from pypump.models.activity import Application
+from pypump.models import PumpObject
 
 
 class ActivityTest(PyPumpTest):
@@ -49,13 +50,6 @@ class ActivityTest(PyPumpTest):
 
     def test_create_activity(self):
         self.assertTrue(isinstance(self.activity, type(self.pump.Activity())))
-
-    def test_activity_attr_to(self):
-        self.assertTrue(hasattr(self.activity, 'to'))
-        self.assertTrue(isinstance(self.activity.to[0], type(self.pump.Person())))
-    def test_activity_attr_cc(self):
-        self.assertTrue(hasattr(self.activity, 'cc'))
-        self.assertTrue(isinstance(self.activity.cc[0], type(self.pump.Person())))
     def test_activity_attr_verb(self):
         self.assertTrue(hasattr(self.activity, 'verb'))
         self.assertEqual(self.activity.verb, self.response["verb"])
@@ -64,7 +58,7 @@ class ActivityTest(PyPumpTest):
         self.assertTrue(isinstance(self.activity.generator, Application))
     def test_activity_attr_obj(self):
         self.assertTrue(hasattr(self.activity, 'obj'))
-        self.assertTrue(isinstance(self.activity.obj, ActivityObject))
+        self.assertTrue(isinstance(self.activity.obj, PumpObject))
     def test_activity_attr_actor(self):
         self.assertTrue(hasattr(self.activity, 'actor'))
         self.assertTrue(isinstance(self.activity.actor, type(self.pump.Person())))
@@ -129,6 +123,6 @@ class ActivityTest(PyPumpTest):
 
         activity = self.pump.Activity().unserialize(data)
 
-        self.assertTrue(isinstance(activity.obj, ActivityObject))
+        self.assertTrue(isinstance(activity.obj, PumpObject))
         self.assertEqual(activity.obj.deleted, parse(data['object']['deleted']))
 

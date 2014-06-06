@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from tests import PyPumpTest
-from pypump.models.activity import Mapper, ActivityObject, Application
+from pypump.models import Mapper, PumpObject
+from pypump.models.activity import Application
 
 class MapperTest(PyPumpTest):
     
@@ -10,7 +11,7 @@ class MapperTest(PyPumpTest):
     def test_get_object_unknown(self):
         """ Test creation of unknown activity model """
         test_data = {
-            "objectType" : "food", # pypump.models.activity.ActivityObject
+            "objectType" : "food", # pypump.models.PumpObject
             "id" : "https://example.com/api/food/pancake-v0.1a",
             "url" : "https://example.com/food/pancake-v0.1a",
             "content" : "flour, sugar, eggs, milk, beans",
@@ -23,14 +24,14 @@ class MapperTest(PyPumpTest):
         test_obj = Mapper(pypump=self.pump).get_object(test_data)
 
         # Test unserialization is correct
-        self.assertEqual(test_obj.objectType, test_data["objectType"])
+        self.assertEqual(test_obj.object_type, test_data["objectType"])
         self.assertEqual(test_obj.id, test_data["id"])
         self.assertEqual(test_obj.url, test_data["url"])
         self.assertEqual(test_obj.content, test_data["content"])
         self.assertEqual(test_obj.display_name, test_data["displayName"])
 
-        # test_obj should be ActivityObject
-        self.assertTrue(isinstance(test_obj, ActivityObject))
+        # test_obj should be PumpObject
+        self.assertTrue(isinstance(test_obj, PumpObject))
 
         # test_obj.author should be PyPump.Person
         self.assertTrue(isinstance(test_obj.author, type(self.pump.Person())))

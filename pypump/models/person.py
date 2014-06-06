@@ -17,23 +17,16 @@
 
 import six
 
-from pypump.models import AbstractModel
+from pypump.models import PumpObject, Mapper
 from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
-from pypump.models.activity import Mapper
 
-class Person(AbstractModel):
+class Person(PumpObject):
 
     _ignore_attr = []
     _mapping = {
-        "id": "id",
-        "url": "url",
         "username": "preferredUsername",
-        "display_name": "displayName",
-        "summary": "summary",
-        "updated": "updated",
-        "published":"published",
         "location":"location",
     }
 
@@ -142,7 +135,7 @@ class Person(AbstractModel):
             "verb":"follow",
             "object":{
                 "id":self.id,
-                "objectType":self.objectType,
+                "objectType":self.object_type,
             }
         }
 
@@ -154,7 +147,7 @@ class Person(AbstractModel):
             "verb":"stop-following",
             "object":{
                 "id":self.id,
-                "objectType":self.objectType,
+                "objectType":self.object_type,
             }
         }
 
@@ -166,7 +159,7 @@ class Person(AbstractModel):
             "verb":"update",
             "object":{
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
                 "displayName": self.display_name,
                 "summary": self.summary,
             }
