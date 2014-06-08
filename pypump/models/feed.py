@@ -16,7 +16,6 @@
 ##
 
 import logging
-import six
 
 from pypump.models import PumpObject, Mapper
 
@@ -123,12 +122,10 @@ class Feed(PumpObject):
         tmp = self.total_items or list(self[:1]) # we do a request on init to get some info
 
     def __repr__(self):
-        return "<Feed: {type}>".format(
-            type = self.TYPE,
-        )
+            return '<Feed>'
 
-    def __str__(self):
-        return "{name}".format(name=self.display_name or self.TYPE)
+    def __unicode__(self):
+        return u'{name}'.format(name=self.display_name)
 
     def __iter__(self):
         return ItemList(self)

@@ -1,7 +1,8 @@
-from __future__ import absolute_import
+#-*- coding: utf-8 -*-
 from tests import PyPumpTest
-from pypump.models.feed import *
+from pypump.models.feed import Feed, ItemList
 import unittest, json
+import six
 
 class FeedTest(PyPumpTest):
     
@@ -28,8 +29,17 @@ class FeedTest(PyPumpTest):
 
         self.feed = Feed('https://example.com/api/user/testuser/followers', pypump=self.pump)
 
-    def test_create_feed(self):
+    def test_feed(self):
+        #is a Feed object
         self.assertTrue(isinstance(self.feed, Feed))
+        #object to string
+        self.assertEqual(self.feed.__str__(), self.feed.display_name)
+        self.feed.display_name = u'Followers for Testanvändare'
+        if six.PY3:
+            self.assertEqual(self.feed.__str__(), self.feed.display_name)
+        else:
+            self.assertEqual(self.feed.__str__(), self.feed.display_name.encode('utf-8'))
+
     def test_feed_attr_display_name(self):
         self.assertTrue(hasattr(self.feed, 'display_name'))
         self.assertEqual(self.feed.display_name, self.response["displayName"])
