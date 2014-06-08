@@ -32,10 +32,6 @@ class Place(PumpObject):
         self.longitude = longitude
         self.latitude = latitude
 
-    def __repr__(self):
-        return "<{type}: {name}>".format(type=self.object_type.capitalize(),
-                                        name=self.display_name)
-
     def __unicode__(self):
         return u"{name}".format(name=self.display_name or 'unknown')
 
