@@ -20,6 +20,7 @@ from pypump.models import (PumpObject, Commentable, Likeable, Shareable,
 
 class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
 
+    object_type = 'comment'
     _ignore_attr = []
     _mapping = {}
 
@@ -56,19 +57,25 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
-            type=self.TYPE,
+            type=self.object_type.capitalize(),
             webfinger=getattr(self.author,'webfinger', 'unknown')
-            )
+        )
+
+    def __unicode__(self):
+        return u"{type} by {webfinger}".format(
+            type=self.object_type,
+            webfinger=getattr(self.author,'webfinger', 'unknown')
+        )
 
     def send(self):
         activity = {
             "verb":"post",
             "object":{
-                "objectType":self.objectType,
+                "objectType":self.object_type,
                 "content":self.content,
                 "inReplyTo":{
                     "id":self.in_reply_to.id,
-                    "objectType":self.in_reply_to.objectType,
+                    "objectType":self.in_reply_to.object_type,
                 },
             },
         }

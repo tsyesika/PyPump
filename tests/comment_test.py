@@ -52,10 +52,11 @@ class CommentTest(PyPumpTest):
         #used in test_comment_attr_*
         self.maxicomment = self.pump.Comment().unserialize(self.maxidata)
 
-    def test_comment_create(self):
+    def test_comment(self):
         self.response.data = self.maxidata
         comment = self.pump.Comment('test')
         self.assertTrue(isinstance(comment, type(self.pump.Comment())))
+        self.assertEqual(comment.__str__(), 'comment by unknown')
     def test_comment_minimal_unserialize(self):
         comment = self.pump.Comment().unserialize(self.minidata)
         self.assertTrue(isinstance(comment, type(self.pump.Comment())))
