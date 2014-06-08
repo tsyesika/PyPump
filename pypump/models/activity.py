@@ -50,6 +50,9 @@ class Activity(PumpObject):
             model=self.obj.object_type
         )
 
+    def __unicode__(self):
+        return u'{0}'.format(self._striptags(self.content))
+
     def unserialize(self, data):
         """ From JSON -> Activity object """
 

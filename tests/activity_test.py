@@ -1,4 +1,6 @@
+#-*- coding: utf-8 -*-
 from __future__ import absolute_import
+import six
 from tests import PyPumpTest
 from dateutil.parser import parse
 from pypump.models.activity import Application
@@ -48,8 +50,17 @@ class ActivityTest(PyPumpTest):
 
         self.activity = self.pump.Activity().unserialize(self.response.data)
 
-    def test_create_activity(self):
+    def test_activity(self):
+        #instance is Activity
         self.assertTrue(isinstance(self.activity, type(self.pump.Activity())))
+
+        #object to string
+        self.assertEqual(self.activity.__str__(), self.activity._striptags(self.activity.content))
+        self.activity.content = u'Test användarson posted test'
+        if six.PY3:
+            self.assertEqual(self.activity.__str__(), self.activity.content)
+        else:
+            self.assertEqual(self.activity.__str__(), self.activity.content.encode('utf-8'))
     def test_activity_attr_verb(self):
         self.assertTrue(hasattr(self.activity, 'verb'))
         self.assertEqual(self.activity.verb, self.response["verb"])
