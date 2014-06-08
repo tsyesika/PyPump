@@ -56,7 +56,11 @@ class NoteTest(PyPumpTest):
     def test_note_create(self):
         self.response.data = self.maxidata
         note = self.pump.Note('test')
+        #object is Note instance
         self.assertTrue(isinstance(note, type(self.pump.Note())))
+        #object to string
+        self.assertEqual(note.__str__(), 'note by unknown')
+
     def test_note_minimal_unserialize(self):
         note = self.pump.Note().unserialize(self.minidata)
         self.assertTrue(isinstance(note, type(self.pump.Note())))

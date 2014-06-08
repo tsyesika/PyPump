@@ -20,6 +20,7 @@ from pypump.models import (PumpObject, Postable, Likeable, Shareable,
 
 class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
 
+    object_type = 'note'
     _ignore_attr = []
     _mapping = {}
     
@@ -56,12 +57,12 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
         self.author = author
 
     def serialize(self):
-        """ Convers the post to JSON """
+        """ Converts the post to JSON """
         data = super(Note, self).serialize()
         data.update({
             "verb":"post",
             "object":{
-                "objectType":self.objectType,
+                "objectType":self.object_type,
                 "content":self.content,
             }
         })
@@ -71,11 +72,17 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
         return data
 
     def __repr__(self):
-        return "<{type} by {name}>".format(
-            type=self.TYPE,
-            name=getattr(self.author, 'webfinger', 'unknown')
-            )
-   
+        return "<{type} by {webfinger}>".format(
+            type=self.object_type.capitalize(),
+            webfinger=getattr(self.author, 'webfinger', 'unknown')
+        )
+
+    def __unicode__(self):
+        return u"{type} by {webfinger}".format(
+            type=self.object_type,
+            webfinger=getattr(self.author, 'webfinger', 'unknown')
+        )
+
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
         Mapper(pypump=self._pump).parse_map(self, data=data)
