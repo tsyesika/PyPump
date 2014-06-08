@@ -77,11 +77,12 @@ class Collection(PumpObject):
         """ Deletes the collection """
         self._pump.request(self.id, method="DELETE")
 
-    def __str__(self):
-        return self.display_name or self.id
+    def __unicode__(self):
+        return u'{0}'.format(self.display_name or self.id)
 
     def __repr__(self):
-        return "<{type}: {id}>".format(type=self.TYPE, id=self.id)
+        return "<{type}: {id}>".format(type=self.object_type.capitalize(),
+                                       id=self.id)
 
     def unserialize(self, data):
         Mapper(pypump=self._pump).parse_map(self, data=data)
@@ -89,10 +90,10 @@ class Collection(PumpObject):
         return self
 
 
-class Public(object):
+class Public(PumpObject):
     ENDPOINT = "http://activityschema.org/collection/public"
 
     def __init__(self):
         self.id = self.ENDPOINT
-        self.objectType = 'collection'
+        self.object_type = 'collection'
 
