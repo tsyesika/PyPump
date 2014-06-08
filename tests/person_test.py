@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 from __future__ import absolute_import
 from tests import PyPumpTest
 from pypump.models.place import Place
@@ -10,7 +11,7 @@ class PersonTest(PyPumpTest):
             "id": "acct:TestUser@example.com",
             "preferredUsername": "TestUser",
             "url": "http://example.com/TestUser",
-            "displayName": "TestUser@example.com",
+            "displayName": "Test Userson",
             "links": {
                 "self": {
                     "href": "http://example.com/api/user/TestUser/profile",
@@ -56,6 +57,15 @@ class PersonTest(PyPumpTest):
                 "items": [],
             }
         }
+
+    def test_person(self):
+        person = self.pump.Person("TestUser")
+        #is a Person object
+        self.assertTrue(isinstance(person, type(self.pump.Person())))
+        #object to string
+        self.assertEqual(str(person), self.response['displayName'])
+        person.display_name = u'Test användarson'
+        self.assertEqual(str(person), person.display_name.encode('utf-8'))
     
     def test_follow(self):
         """ Tests that pypump sends correct data when attempting to follow a person """

@@ -24,13 +24,13 @@ from pypump.models.feed import (Followers, Following, Lists,
 
 class Person(PumpObject):
 
+    object_type = 'person'
     _ignore_attr = []
     _mapping = {
         "username": "preferredUsername",
         "location":"location",
     }
 
-    TYPE = "person"
     ENDPOINT = "/api/user/{username}/feed"
 
     id = None
@@ -168,10 +168,13 @@ class Person(PumpObject):
         self._post_activity(activity)
 
     def __repr__(self):
-        return "<Person: {person}>".format(person=self.id.replace("acct:", ""))
+        return "<{type}: {webfinger}>".format(
+            type=self.object_type.capitalize(),
+            webfinger=getattr(self.webfinger or 'unknown')
+        )
 
-    def __str__(self):
-        return self.display_name or self.username or self.webfinger
+    def __unicode__(self):
+        return u"{0}".format(self.display_name or self.username or self.webfinger)
 
     def unserialize(self, data):
         """ Goes from JSON -> Person object """
