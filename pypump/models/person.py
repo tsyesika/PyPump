@@ -170,7 +170,7 @@ class Person(PumpObject):
     def __repr__(self):
         return "<{type}: {webfinger}>".format(
             type=self.object_type.capitalize(),
-            webfinger=getattr(self.webfinger or 'unknown')
+            webfinger=getattr(self, 'webfinger', 'unknown')
         )
 
     def __unicode__(self):

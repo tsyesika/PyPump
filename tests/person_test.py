@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 from __future__ import absolute_import
+import six
 from tests import PyPumpTest
 from pypump.models.place import Place
 
@@ -62,10 +63,16 @@ class PersonTest(PyPumpTest):
         person = self.pump.Person("TestUser")
         #is a Person object
         self.assertTrue(isinstance(person, type(self.pump.Person())))
-        #object to string
-        self.assertEqual(str(person), self.response['displayName'])
+        #repr
+        self.assertEqual(person.__repr__(), '<Person: TestUser@example.com>')
+        #string
+        self.assertEqual(person.__str__(), self.response['displayName'])
+        #unicode
         person.display_name = u'Test användarson'
-        self.assertEqual(str(person), person.display_name.encode('utf-8'))
+        if six.PY3:
+            self.assertEqual(person.__str__(), person.display_name)
+        else:
+            self.assertEqual(person.__str__(), person.display_name.encode('utf-8'))
     
     def test_follow(self):
         """ Tests that pypump sends correct data when attempting to follow a person """
