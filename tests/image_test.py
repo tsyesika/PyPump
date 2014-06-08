@@ -68,11 +68,16 @@ class ImageTest(PyPumpTest):
     def test_mini_unserialize(self):
         image = self.pump.Image().unserialize(self.mini_data)
 
-
     def test_unserialize(self):
         """ Tests image unserialization is successful """
         # Make the image object
         image = self.pump.Image().unserialize(self.imgdata)
+
+        #object is Image instance
+        self.assertTrue(isinstance(image, type(self.pump.Image())))
+
+        #object to string
+        self.assertEqual(image.__str__(), 'image by testuser@example.com')
 
         # Test unserialization is correct
         self.assertEqual(image.id, self.imgdata["id"])

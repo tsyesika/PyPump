@@ -70,12 +70,16 @@ class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
         self.updated = updated
 
     def __repr__(self):
-        if self.author is None:
-            return "<{type}>".format(type=self.TYPE)
-
         return "<{type} by {webfinger}>".format(
-            type=self.TYPE,
-            webfinger=self.author.webfinger)
+            type=self.object_type.capitalize(),
+            webfinger=getattr(self.author, 'webfinger', 'unknown')
+        )
+
+    def __unicode__(self):
+        return u"{type} by {webfinger}".format(
+            type=self.object_type,
+            webfinger=getattr(self.author, 'webfinger', 'unknown')
+        )
 
     def from_file(self, filename):
         """ Uploads an image from a filename """
