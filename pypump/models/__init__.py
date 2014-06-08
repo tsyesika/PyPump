@@ -15,10 +15,9 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import logging
+import logging, re
 import six
 from dateutil.parser import parse
-
 from pypump.exception.PumpException import PumpException
 
 _log = logging.getLogger(__name__)
@@ -91,13 +90,17 @@ class PumpObject(object):
         return True
 
     def __unicode__(self):
-        return six.u(str(self))
+        return u'{type}'.format(type=self.object_type)
 
-    def __str__(self):
-        return str(repr(self))
+    if six.PY3:
+        def __str__(self):
+            return self.__unicode__()
+    else:
+        def __str__(self):
+            return self.__unicode__().encode('utf-8')
 
-    def __bytes__(self):
-        return six.b(str(self))
+    def _striptags(self, html):
+        return re.sub(r'<[^>]+>', '', html)
 
     def add_link(self, name, link):
         """ Adds a link to the model """
@@ -209,7 +212,7 @@ class Mapper(object):
                 # Fall back to PumpObject
                 _log.debug("Exception: %s" % e)
                 obj = PumpObject(pypump=self._pump).unserialize(data)
-                _log.debug("Created PumpObject: %r" % obj)
+                _log.debug("Created PumpObject: %r" % obj.object_type)
                 return obj
 
     def set_object(self, obj, key, data, from_json):
