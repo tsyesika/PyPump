@@ -15,25 +15,31 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pypump.models import PumpObject
+from pypump.models import PumpObject, Mapper
 
 class Place(PumpObject):
+    object_type = 'place'
+    _ignore_attr = list()
+    _mapping = {}
 
-    name = None
+    display_name = None
     longitude = None
     latitude = None
 
-    def __init__(self, name=None, longitude=None, latitude=None, *args, **kwargs):
+    def __init__(self, display_name=None, longitude=None, latitude=None, *args, **kwargs):
         super(Place, self).__init__(*args, **kwargs)
-        self.name = name
+        self.display_name = display_name
         self.longitude = longitude
         self.latitude = latitude
 
     def __repr__(self):
-        return "<{type} {name}>".format(type=self.TYPE, name=self.name)
+        return "<{type}: {name}>".format(type=self.object_type.capitalize(),
+                                        name=self.display_name)
+
+    def __unicode__(self):
+        return u"{name}".format(name=self.display_name or 'unknown')
 
     def unserialize(self, data):
-        self.name = data.get("displayName", None)        
         if ("lon" in data and "lat" in data):
             self.longitude = float(data["lon"])
             self.latitude = float(data["lat"])
@@ -54,5 +60,7 @@ class Place(PumpObject):
         else:
             self.longitude = None
             self.latitude = None
+        
+        Mapper(pypump=self._pump).parse_map(self, data=data)
 
         return self
