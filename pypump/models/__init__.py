@@ -61,6 +61,10 @@ class PumpObject(object):
             self._pump = pypump
 
         self._mapping.update(PumpObject._mapping)
+        for i in self._ignore_attr:
+            #remove to be ignored attributes from mapping
+            if self._mapping.get(i):
+                del self._mapping[i]
 
     def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
@@ -159,21 +163,17 @@ class Mapper(object):
     def __init__(self, pypump=None, *args, **kwargs):
         self._pump = pypump
 
-    def parse_map(self, obj, mapping=None, ignore_attr=None, *args, **kwargs):
+    def parse_map(self, obj, mapping=None, *args, **kwargs):
         """ Parses a dictionary of (model_attr, json_attr) items """
         mapping = mapping or obj._mapping
-        ignore_attr = ignore_attr or obj._ignore_attr
 
         if "data" in kwargs:
             for k, v in mapping.items():
-                if v in kwargs["data"] and k not in ignore_attr:
+                if v in kwargs["data"]:
                     self.add_attr(obj, k, kwargs["data"][v], from_json=True)
-                #elif k not in ignore_attr:
-                    #_log.debug("Setting attribute %r to None" % k)
-                    #self.set_none(obj, k)
         else:
             for k, v in mapping.items():
-                if k in kwargs and k not in ignore_attr:
+                if k in kwargs:
                     self.add_attr(obj, k, kwargs[k])
 
     def add_attr(self, obj, key, data, from_json=False):
