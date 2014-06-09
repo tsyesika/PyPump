@@ -169,8 +169,11 @@ class Mapper(object):
 
         if "data" in kwargs:
             for k, v in mapping.items():
-                if v in kwargs["data"]:
-                    self.add_attr(obj, k, kwargs["data"][v], from_json=True)
+                if kwargs["data"].get(v, None) is not None:
+                    val = kwargs["data"][v]
+                else:
+                    val = None
+                self.add_attr(obj, k, val, from_json=True)
         else:
             for k, v in mapping.items():
                 if k in kwargs:
@@ -188,11 +191,11 @@ class Mapper(object):
         else:
             _log.debug("Ignoring unknown attribute %r", key)
 
-    def set_none(self, obj, key):
-        setattr(obj, key, None)
-
     def set_literal(self, obj, key, data, from_json):
-        setattr(obj, key, data)
+        if data is not None:
+            setattr(obj, key, data)
+        else:
+            setattr(obj, key, None)
 
     def get_object(self, data):
         try:
@@ -220,20 +223,27 @@ class Mapper(object):
 
     def set_object(self, obj, key, data, from_json):
         if from_json:
-            setattr(obj, key, self.get_object(data))
+            if data is not None:
+                setattr(obj, key, self.get_object(data))
+            else:
+                setattr(obj, key, None)
 
     def set_date(self, obj, key, data, from_json):
         if from_json:
-            setattr(obj, key, parse(data))
+            if data is not None:
+                setattr(obj, key, parse(data))
+            else:
+                setattr(obj, key, None)
 
     def set_list(self, obj, key, data, from_json):
         if from_json:
             tmplist = []
-            for i in data:
-                if isinstance(i, six.string_types):
-                    tmplist.append(i)
-                else:
-                    tmplist.append(self.get_object(i))
+            if data is not None:
+                for i in data:
+                    if isinstance(i, six.string_types):
+                        tmplist.append(i)
+                    else:
+                        tmplist.append(self.get_object(i))
             setattr(obj, key, tmplist)
 
 
