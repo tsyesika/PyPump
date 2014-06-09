@@ -371,7 +371,7 @@ class PyPump(object):
         return self._build_url("oauth/authorize?oauth_token={token}".format(
                 protocol=self.protocol,
                 server=self.client.server,
-                token=self.store["oauth-request-token"].decode("utf-8")
+                token=self.store["oauth-request-token"]
                 ))
 
     def verifier(self, verifier):
