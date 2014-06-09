@@ -90,7 +90,10 @@ class PumpObject(object):
         return True
 
     def __unicode__(self):
-        return u'{type}'.format(type=self.object_type)
+        if hasattr(self, 'display_name'):
+            return u'{name}'.format(name=self.display_name)
+        else:
+            return u'{type}'.format(type=self.object_type)
 
     if six.PY3:
         def __str__(self):
