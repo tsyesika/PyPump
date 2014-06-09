@@ -25,7 +25,7 @@ from pypump.models.feed import (Followers, Following, Lists,
 class Person(PumpObject):
 
     object_type = 'person'
-    _ignore_attr = []
+    _ignore_attr = ['liked',]
     _mapping = {
         "username": "preferredUsername",
         "location":"location",
