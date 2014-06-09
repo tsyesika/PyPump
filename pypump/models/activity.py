@@ -22,7 +22,8 @@ import logging
 _log = logging.getLogger(__name__)
 
 class Application(PumpObject):
-    _ignore_attr = ["likes", "replies", "shares"]
+    _ignore_attr = ["likes", "replies", "shares", "author", "content",
+                    "in_reply_to", "liked", "summary"]
     _mapping = {}
 
     def __init__(self, *args, **kwargs):
@@ -31,7 +32,8 @@ class Application(PumpObject):
 
 
 class Activity(PumpObject):
-    _ignore_attr = []
+    _ignore_attr = [ "author","deleted", "display_name","in_reply_to",
+                    "liked", "summary",]
     _mapping = {
         "verb":"verb",
         "generator":"generator",

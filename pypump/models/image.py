@@ -39,7 +39,7 @@ class ImageContainer(object):
 
 class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
 
-    _ignore_attr = []
+    _ignore_attr = ["summary",]
     _mapping = {}
 
     id = None

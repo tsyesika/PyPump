@@ -21,7 +21,7 @@ from pypump.models import (PumpObject, Commentable, Likeable, Shareable,
 class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
 
     object_type = 'comment'
-    _ignore_attr = []
+    _ignore_attr = ["summary",]
     _mapping = {}
 
     @property
