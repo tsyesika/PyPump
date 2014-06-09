@@ -94,7 +94,7 @@ class PumpObject(object):
         return True
 
     def __unicode__(self):
-        if hasattr(self, 'display_name'):
+        if self.display_name is not None:
             return u'{name}'.format(name=self.display_name)
         else:
             return u'{type}'.format(type=self.object_type)
