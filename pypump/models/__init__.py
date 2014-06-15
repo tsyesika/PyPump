@@ -51,6 +51,11 @@ class PumpObject(object):
         "_cc": "cc",
         "_bto": "bto",
         "_bcc": "bcc",
+        "_comments": "replies",
+        "_followers": "followers",
+        "_following": "following",
+        "_likes": "likes",
+        "_shares": "shares",
     }
 
 
@@ -157,8 +162,8 @@ class Mapper(object):
     dates = ["updated", "published", "deleted", "received"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to",
                "location"]
-    lists = ["_to", "_cc", "_bto", "_bcc", "object_types"]
-    #feeds = ["likes", "shares", "replies"]
+    lists = ["_to", "_cc", "_bto", "_bcc", "object_types", "_items"]
+    feeds = ["_comments", "_followers", "_following", "_likes", "_shares"]
 
     def __init__(self, pypump=None, *args, **kwargs):
         self._pump = pypump
@@ -188,6 +193,8 @@ class Mapper(object):
             self.set_list(obj, key, data, from_json)
         elif key in self.literals:
             self.set_literal(obj, key, data, from_json)
+        elif key in self.feeds:
+            self.set_feed(obj, key, data, from_json)
         else:
             _log.debug("Ignoring unknown attribute %r", key)
 
@@ -245,6 +252,17 @@ class Mapper(object):
                     else:
                         tmplist.append(self.get_object(i))
             setattr(obj, key, tmplist)
+
+    def set_feed(self, obj, key, data, from_json):
+        from pypump.models.feed import Feed
+        if from_json:
+            if data is not None:
+                try:
+                    setattr(obj, key, Feed(pypump=self._pump).unserialize(data))
+                except Exception as e:
+                    _log.debug("Exception %s" % e)
+            else:
+                setattr(obj, key, [])
 
 
 from pypump.models.feed import Feed
