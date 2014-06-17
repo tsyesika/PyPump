@@ -31,18 +31,6 @@ class Person(PumpObject):
         "location":"location",
     }
 
-    ENDPOINT = "/api/user/{username}/feed"
-
-    id = None
-    username = None
-    display_name = None
-    url = None # url to profile
-    updated = None # Last time this was updated
-    published = None # when they joined (I think?)
-    location = None # place item
-    summary = None # lil bit about them =]    
-    image = None # Image items
-
     _inbox = None
     _outbox = None
     _followers = None
@@ -86,48 +74,53 @@ class Person(PumpObject):
     def webfinger(self):
         return self.id.replace("acct:", "")
 
-    def __init__(self, webfinger=None, id=None, username=None, url=None, summary=None, 
-                 display_name=None, image=None, 
-                 published=None, updated=None, location=None,
+    @property
+    def server(self):
+        return self.id.split("@")[-1]
+
+    @property
+    def isme(self):
+        return (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
+
+    def __init__(self, webfinger=None, summary=None, username=None,
+                 display_name=None, image=None, location=None,
                  *args, **kwargs):
         """
-        id - the ID of the person. e.g. acct:Username@server.example
-        username - persons username
-        url - url to profile
+        webfinger - user@host.tld
         summary - summary of the user
+        username - persons username
         display_name - what the user want's to show up (default: username)
         image - image of the user (default: No image/None)
-        published - when the user joined pump (default: None)
-        updated - when the user last updated their profile (default: published)
         location - where the user resides (default: No location/None)
         """
         super(Person, self).__init__(*args, **kwargs)
+        #do empty unserialize to add all attributes
+        self.unserialize({'objectType':self.object_type})
 
-        # okay we need to check if the webfinger is being used
         if isinstance(webfinger, six.string_types):
-            # first clean up
-            webfinger = webfinger.strip(" ")
-            # okay now we need to look if it's on our servers or not.
             if "@" in webfinger:
-                self.username, self.server = webfinger.split("@")
+                # webfinger is being used
+                self.id = "acct:{0}".format(webfinger)
+                self.username = username or webfinger.split("@")[0]
             else:
-                # they probably just gave a username, the assumption is it's on our server!
-                self.username, self.server = webfinger, self._pump.client.server
+                # webfinger looks like a username, we assume the user is on our server
+                self.username = webfinger
+                self.id = "acct:{0}@{1}".format(self.username, self._pump.client.server)
+
+            self.summary = summary
+            self.display_name = display_name
+            self.image = image #TODO set proper image object
+            self.location = location #TODO set proper Place object
 
             self.add_link('self', "{0}://{1}/api/user/{2}/profile".format(
                 self._pump.protocol, self.server, self.username)
             )
-            data = self._pump.request(self.links['self'])
-            self.unserialize(data)
+            try:
+                data = self._pump.request(self.links['self'])
+                self.unserialize(data)
+            except:
+                pass
 
-        self.username = username or self.username
-        self.url = url or self.url
-        self.summary = summary or self.summary
-        self.image = image or self.image
-        self.display_name = display_name or self.display_name
-        self.published = published or self.published
-        self.updated = updated or self.updated
-        self.isme = (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
 
     def follow(self): 
         """ Follow person """
@@ -154,6 +147,7 @@ class Person(PumpObject):
         self._post_activity(activity)
 
     def update(self):
+        #TODO update location
         """ Updates person object"""
         activity = {
             "verb":"update",
@@ -180,8 +174,6 @@ class Person(PumpObject):
         """ Goes from JSON -> Person object """
 
         Mapper(pypump=self._pump).parse_map(self, data=data)
-        self.server = self.id.replace("acct:", "").split("@")[-1]
-        self.isme = "acct:%s@%s" % (self._pump.client.nickname, self._pump.client.server) == self.id
         self.add_links(data)
 
         return self
