@@ -72,12 +72,12 @@ class FeedTest(PyPumpTest):
         self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])
     def test_feed_slice_id_to_inf(self):
-        sliceditems = list(self.feed['acct:testuser10@example.com':])
+        sliceditems = list(self.feed[slice('acct:testuser10@example.com', None)])
         self.assertEqual(len(sliceditems), 9)
         self.assertEqual(sliceditems[0].id, self.response['items'][11]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][19]['id'])
     def test_feed_slice_zero_to_id(self):
-        sliceditems = list(self.feed[:'acct:testuser5@example.com'])
+        sliceditems = list(self.feed[slice('acct:testuser5@example.com')])
         self.assertEqual(len(sliceditems), 5)
         self.assertEqual(sliceditems[-1].id, self.response['items'][0]['id'])
         self.assertEqual(sliceditems[0].id, self.response['items'][4]['id'])
