@@ -160,7 +160,7 @@ class Client(object):
         return server_data
 
     def register(self, server=None):
-        """ Reigsters the client with the Pump API retriving the id and secret """
+        """ Registers the client with the Pump API retrieving the id and secret """
         if (self.key or self.secret):
             return self.update()
  

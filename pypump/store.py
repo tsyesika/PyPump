@@ -29,7 +29,7 @@ EMAIL_REGEX = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", re.IGNORECASE)
 
 def webfinger_validator(webfinger):
     """ Validates webfinger is correct - should look like user@host.tld """
-    error = "Invalid webfinger. Should be informat username@host.tld"
+    error = "Invalid webfinger. Should be in format username@host.tld"
     if not EMAIL_REGEX.match(webfinger):
         raise ValidationError(error)
 

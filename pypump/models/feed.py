@@ -246,9 +246,10 @@ class Feed(PumpObject):
 
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
         """ Get a feed's items.
-        since:  return items added after this id (ordered old -> new)
-        before: return items added before this id (ordered new -> old)
-        limit: amount of items to return
+        offset: Amount of items to skip before returning data
+        since:  Return items added after this id (ordered old -> new)
+        before: Return items added before this id (ordered new -> old)
+        limit: Amount of items to return
         """
         if self._items is not None and self.total_items is not None:
             if len(self._items) >= self.total_items:
