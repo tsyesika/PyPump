@@ -109,15 +109,17 @@ class ItemList(object):
         how API handles offset/since/before parameters
         """
         def id_in_list(list, id):
-            if [i for i in list if i.id == id]:
-                return True
+            if id:
+                if [i for i in list if i.id == id]:
+                    return True
+                else:
+                    raise PyPumpException("id %r not in feed." % self._since)
 
+        tmp = []
         if self._before is not None:
             #return list based on before param
-            if self._before and not id_in_list(self.feed._items, self._before):
-                #raise PyPumpException("id %s not in feed." % self._before)
-                return []
-            tmp = []
+            if not id_in_list(self.feed._items, self._before):
+                return tmp
             if isinstance(self._before, six.string_types):
                 found = False
                 for i in self.feed._items:
@@ -127,17 +129,14 @@ class ItemList(object):
                         continue
                     else:
                         tmp.append(i)
-                self._before = False if self._before is not None else None
+                self._before = False
             return tmp
 
         if self._since is not None:
             #return list based on since param
-            if self._since and not id_in_list(self.feed._items, self._since):
-                #raise PyPumpException("id %s not in feed." % self._since)
-                return []
-            tmp = []
+            if not id_in_list(self.feed._items, self._since):
+                return tmp
             if isinstance(self._since, six.string_types):
-                tmp = []
                 found = False
                 for i in self.feed._items:
                     if i.id == self._since:
@@ -145,7 +144,7 @@ class ItemList(object):
                         break
                     else:
                         tmp.append(i)
-                self._since = False if self._since is not None else None
+                self._since = False
             return reversed(tmp)
 
         if not hasattr(self,'usedcache'):
@@ -157,8 +156,7 @@ class ItemList(object):
     
             return self.feed._items
         else:
-            return []
-
+            return tmp
 
     @property
     def done(self):
@@ -169,11 +167,9 @@ class ItemList(object):
         if self._limit is None:
             self._done = False
         elif self.itemcount >= self._limit:
-            _log.debug('Feed ItemList done: hit limit')
             self._done = True
 
         return self._done
-
 
     def _build_cache(self):
         """ Build a list of objects from feed's cached items or API page"""

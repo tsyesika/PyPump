@@ -87,6 +87,7 @@ class FeedTest(PyPumpTest):
         self.assertEqual(len(items), 3)
         self.assertEqual(items[0].id, self.response['items'][11]['id'])
         self.assertEqual(items[-1].id, self.response['items'][13]['id'])
+    def test_feed_items_since(self):
         #since and limit 12 (limit more than items returned)
         items = list(self.feed.items(since='acct:testuser10@example.com', limit=12))
         self.assertEqual(len(items), 10)
