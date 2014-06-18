@@ -228,6 +228,7 @@ class ItemList(object):
 class Feed(PumpObject):
     _ignore_attr = []
     _mapping = {"display_name": "displayName",
+                "id":"url",
                 "url": "url",
                 "object_types": "objectTypes",
                 "_items": "items",
