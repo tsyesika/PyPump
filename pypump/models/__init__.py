@@ -404,9 +404,9 @@ class Deleteable(object):
 
         self._post_activity(activity)
 
-class Postable(object):
-    """ Adds methods to set to, cc and soon bcc as well as .send() """
-    
+class Addressable(object):
+    """ Adds methods to set to, cc, bto, bcc"""
+
     _to = list()
     _cc = list()
     _bto = list()
@@ -487,6 +487,9 @@ class Postable(object):
 
         return data
 
+class Postable(Addressable):
+    """ Adds .send() """
+    
     def send(self):
         """ Sends the data to the server """
         data = self.serialize()
