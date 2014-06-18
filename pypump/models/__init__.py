@@ -422,23 +422,24 @@ class Postable(object):
         return people
 
     def _serialize_people(self, people):
-        for i, person in enumerate(people):
+        tmp = []
+        for person in people:
             if isinstance(person, six.class_types):
-                people[i] = person()
+                tmp.append(person())
             
-            if isinstance(people[i], type(self._pump.Person())):
-                people[i] = {
-                    "id": people[i].id,
-                    "objectType": people[i].object_type,
-                }
+            if isinstance(person, type(self._pump.Person())):
+                tmp.append({
+                    "id": person.id,
+                    "objectType": person.object_type,
+                })
             else:
-                # must be a collection
-                people[i] = {
-                    "id": people[i].id,
+                # probably a collection
+                tmp.append({
+                    "id": person.id,
                     "objectType": "collection",
-                }
+                })
 
-        return people
+        return tmp
     # to
     def _get_to(self):
         return self._to
