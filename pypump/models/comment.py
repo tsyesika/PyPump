@@ -16,9 +16,9 @@
 ##
 
 from pypump.models import (PumpObject, Commentable, Likeable, Shareable, 
-                           Deleteable, Mapper)
+                           Deleteable, Postable, Mapper)
 
-class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
+class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable):
 
     object_type = 'comment'
     _ignore_attr = ["summary",]
@@ -67,8 +67,9 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
             webfinger=getattr(self.author,'webfinger', 'unknown')
         )
 
-    def send(self):
-        activity = {
+    def serialize(self):
+        data = super(Comment, self).serialize()
+        data.update({
             "verb":"post",
             "object":{
                 "objectType":self.object_type,
@@ -78,9 +79,9 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable):
                     "objectType":self.in_reply_to.object_type,
                 },
             },
-        }
+        })
 
-        return self._post_activity(activity)
+        return data
 
     def unserialize(self, data):
         """ from JSON -> Comment """
