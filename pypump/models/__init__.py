@@ -65,7 +65,10 @@ class PumpObject(object):
         if pypump:
             self._pump = pypump
 
-        self._mapping.update(PumpObject._mapping)
+        mapping = PumpObject._mapping.copy()
+        mapping.update(self._mapping)
+        self._mapping = mapping
+
         for i in self._ignore_attr:
             #remove to be ignored attributes from mapping
             if self._mapping.get(i):
