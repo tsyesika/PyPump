@@ -17,12 +17,12 @@
 
 import six
 
-from pypump.models import PumpObject, Mapper
+from pypump.models import PumpObject, Mapper, Addressable
 from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
-class Person(PumpObject):
+class Person(PumpObject, Addressable):
 
     object_type = 'person'
     _ignore_attr = ['liked','in_reply_to']
@@ -121,45 +121,35 @@ class Person(PumpObject):
             except:
                 pass
 
+    def serialize(self, verb):
+        data = super(Person, self).serialize()
+        data.update({
+            "verb":verb,
+            "object":{
+                "id":self.id,
+                "objectType":self.object_type,
+                "displayName": self.display_name,
+                "summary": self.summary,
+            }
+        })
+
+        return data
 
     def follow(self): 
         """ Follow person """
-        activity = {
-            "verb":"follow",
-            "object":{
-                "id":self.id,
-                "objectType":self.object_type,
-            }
-        }
-
-        self._post_activity(activity)
+        data = self.serialize(verb="follow")
+        self._post_activity(data)
 
     def unfollow(self):
         """ Unfollow person """
-        activity = {
-            "verb":"stop-following",
-            "object":{
-                "id":self.id,
-                "objectType":self.object_type,
-            }
-        }
-
-        self._post_activity(activity)
+        data = self.serialize(verb="stop-following")
+        self._post_activity(data)
 
     def update(self):
         #TODO update location
         """ Updates person object"""
-        activity = {
-            "verb":"update",
-            "object":{
-                "id": self.id,
-                "objectType": self.object_type,
-                "displayName": self.display_name,
-                "summary": self.summary,
-            }
-        }
-
-        self._post_activity(activity)
+        data = self.serialize(verb="update")
+        self._post_activity(data)
 
     def __repr__(self):
         return "<{type}: {webfinger}>".format(
