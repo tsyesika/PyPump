@@ -7,4 +7,9 @@ python:
   - "pypy"
 install: python setup.py develop
 script: python setup.py test
+
+notifications:
+  irc:
+    channels:
+      - "ircs://irc.megworld.co.uk:9000#pypump"
   
