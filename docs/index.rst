@@ -32,6 +32,14 @@ Contents
 
    store
 
+Common Tasks
+------------
+
+.. toctree::
+   :maxdepth: 1
+   common/upload_image.rst
+
+
 Models
 ------
 
