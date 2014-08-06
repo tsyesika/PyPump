@@ -6,8 +6,6 @@ python:
   - "3.3"
   - "3.4"
   - "pypy"
-  - TOX_ENV=docs
-
 install: python setup.py develop
 script: python setup.py test
 
