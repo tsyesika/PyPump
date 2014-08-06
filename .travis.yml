@@ -6,8 +6,18 @@ python:
   - "3.3"
   - "3.4"
   - "pypy"
-install: python setup.py develop
-script: python setup.py test
+
+matrix:
+  include:
+    - python: "2.7"
+      env: TOX_ENV=docs
+      install: pip install tox
+      script: tox -e $TOX_ENV
+
+install:
+  - python setup.py develop
+script:
+  - python setup.py test
 
 notifications:
   irc:
