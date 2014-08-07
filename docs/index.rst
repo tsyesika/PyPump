@@ -32,13 +32,13 @@ Contents
 
    store
 
-Common Tasks
-------------
+Common
+------
 
 .. toctree::
    :maxdepth: 1
 
-   common/upload_image
+   common/media
 
 
 Models
