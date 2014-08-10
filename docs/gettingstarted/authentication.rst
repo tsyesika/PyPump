@@ -24,7 +24,7 @@ The following will create (for the first time) a connection to a pump.io server 
     >>> client_credentials = pump.get_registration() # will return [<client key>, <client secret>, <expirey>]
     >>> client_tokens = pump.get_token() # will return [<token>, <secret>]
 
-.. note:: If you're not using CLI you will need to override the *get_access* method on PyPump to ask for their varification token
+.. note:: If you're not using CLI you will need to override the *get_access* method on PyPump to ask for their verification token
 
 An example of then connecting again (using the same variable names as above). This will produce a PyPump object which will use the same credentials as established above::
 
