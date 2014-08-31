@@ -98,3 +98,20 @@ class NoteTest(PyPumpTest):
         self.assertTrue(hasattr(self.maxinote, 'cc'))
         self.assertTrue(isinstance(self.maxinote.cc[0], type(self.pump.Collection())))
 
+
+    # test that mixin methods from models/__init__.py isnt completely broken
+    def test_note_like(self):
+        note = self.pump.Note('test')
+        note.like()
+    def test_note_unlike(self):
+        note = self.pump.Note('test')
+        note.unlike()
+    def test_note_share(self):
+        note = self.pump.Note('test')
+        note.share()
+    def test_note_unshare(self):
+        note = self.pump.Note('test')
+        note.unshare()
+    def test_note_delete(self):
+        note = self.pump.Note('test')
+        note.delete()
