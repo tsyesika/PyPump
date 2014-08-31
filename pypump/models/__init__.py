@@ -296,7 +296,7 @@ class Likeable(object):
             "verb": verb,
             "object": {
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
             }
         }
 
@@ -308,7 +308,7 @@ class Likeable(object):
             "verb": verb,
             "object": {
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
             }
         }
 
@@ -371,7 +371,7 @@ class Shareable(object):
             "verb": "share",
             "object": {
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
             },
         }
 
@@ -383,7 +383,7 @@ class Shareable(object):
             "verb": "unshare",
             "object": {
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
             },
         }
 
@@ -398,7 +398,7 @@ class Deleteable(object):
             "verb": "delete",
             "object": {
                 "id": self.id,
-                "objectType": self.objectType,
+                "objectType": self.object_type,
             }
         }
 
