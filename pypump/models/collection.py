@@ -46,7 +46,7 @@ class Collection(PumpObject):
         activity = {
             "verb": "add",
             "object": {
-                "objectType": obj.objectType,
+                "objectType": obj.object_type,
                 "id": obj.id
             },
             "target":{
@@ -62,7 +62,7 @@ class Collection(PumpObject):
         activity = {
             "verb": "remove",
             "object": {
-                "objectType": obj.objectType,
+                "objectType": obj.object_type,
                 "id": obj.id
             },
             "target":{
