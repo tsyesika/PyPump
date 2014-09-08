@@ -19,8 +19,9 @@
 from __future__ import absolute_import
 
 import json
-import re
 import os
+import re
+import stat
 
 from pypump.exception import ValidationError, StoreException
 
@@ -147,7 +148,10 @@ class JSONStore(AbstractStore):
         if self.filename is None:
             raise StoreException("Filename must be set to write store to disk")
 
-        fout = open(self.filename, "w")
+        # The `open` built-in doesn't allow us to set the mode
+        mode = stat.S_IRUSR | stat.S_IWUSR #0600
+        fd = os.open(self.filename, os.O_WRONLY | os.O_CREAT, mode)
+        fout = os.fdopen(fd, "w")
         fout.write(json.dumps(self.export()))
         fout.close()
 

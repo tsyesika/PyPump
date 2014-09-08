@@ -1,7 +1,10 @@
 from __future__ import absolute_import
 
+import os
+import stat
+
 from tests import PyPumpTest
-from pypump import AbstractStore
+from pypump import AbstractStore, JSONStore
 
 class TestStore(AbstractStore):
     """ Provide a more testable store """
@@ -67,3 +70,32 @@ class StoreTest(PyPumpTest):
         self.assertRaises(KeyError, empty_store_key)
 
         self.assertEqual(store["hai-key"], "value")
+
+class JSONStoreTest(PyPumpTest):
+    """
+    Test the JSON implementation of the store class
+    """
+
+    def setUp(self):
+        filename = os.path.abspath(".")
+        filename = os.path.join(filename, "pypumpstoretest.json")
+
+        if os.path.exists(filename):
+            raise OSError("{0} already exists".format(filename))
+
+        self.filename = filename
+
+    def tearDown(self):
+        try:
+            os.remove(self.filename)
+        except OSError:
+            pass
+
+    def test_permissions(self):
+        store = JSONStore(filename=self.filename)
+        store["unittest"] = "framework"
+
+        mode = os.stat(self.filename).st_mode
+
+        #we're only going to test to make sure "others" can't read the file
+        self.assertEqual(mode & stat.S_IRWXO, 0, "File mode is insecure")
