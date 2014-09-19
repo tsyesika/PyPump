@@ -1,6 +1,6 @@
 
 Activity
-====
+========
 
 This object represents pump.io's activities, these are used in feeds like `inbox`. 
 
@@ -63,7 +63,7 @@ This object represents pump.io's activities, these are used in feeds like `inbox
             >>> my_activity.generator
             <Generator: E14N Web>
 
-    .. py:obj:: obj
+    .. py:attribute:: obj
 
         This is the object that was affected by the activity::
 
