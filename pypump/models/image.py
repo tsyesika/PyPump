@@ -124,10 +124,16 @@ class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
 
     def unserialize(self, data):
 
+        def get_fileurl(data):
+            if data.get("pump_io", {}).get("proxyURL"):
+                return data["pump_io"]["proxyURL"]
+            else:
+                return data["url"]
+
         if "fullImage" in data:
             full_image = data["fullImage"]
             self.original = ImageContainer(
-                url=full_image["url"],
+                url=get_fileurl(full_image),
                 height=full_image.get("height"),
                 width=full_image.get("width")
             )
@@ -135,8 +141,9 @@ class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
         if "image" in data:
             save_point = "original" if not hasattr(self, "original") else "thumbnail"
             thumbnail = data["image"]
+
             setattr(self, save_point, ImageContainer(
-                url=thumbnail["url"],
+                url=get_fileurl(thumbnail),
                 height=thumbnail.get("height"),
                 width=thumbnail.get("width")
             ))
