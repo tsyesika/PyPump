@@ -130,6 +130,8 @@ class PyPump(object):
 
     @property
     def me(self):
+        """ Returns Person object of the logged in user """
+
         if self._me is not None:
             return self._me
 
