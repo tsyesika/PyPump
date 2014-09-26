@@ -77,7 +77,7 @@ class PyPump(object):
     store_class = JSONStore
 
     def __init__(self, client, verifier_callback, store=None, callback="oob",
-                 verify_requests=True, retries=1, timeout=30):
+                 verify_requests=True, retries=0, timeout=30):
         """
         This is the main pump instance, this handles the oauth,
         this also holds the models.
@@ -240,7 +240,7 @@ class PyPump(object):
 
         headers = headers or {"Content-Type": "application/json"}
 
-        for attempt in range(retries):
+        for attempt in range(1 + retries):
             if method == "POST":
                 request = {
                         "auth": client,
