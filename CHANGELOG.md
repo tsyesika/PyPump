@@ -1,6 +1,12 @@
 0.6
 ===
-
+- Recipients can now be set for Comment, Person objects
+- Recipient properties (.to, .cc, .bto, .bcc) has been moved from Activity to Activity.obj
+- Feeds (inbox, followers, etc) can now be sliced by object or object_id.
+- Feed.items(offset=int|since=id|before=id, limit=20) method.
+- Unicode improvements when printing Pump objects.
+- Instead of skipping an Object attribute which has no response data (f.ex Note.deleted when note has not been deleted) we now set the attribute to None.
+- Fixed WebPump OAuth token issue (#89)
 - Allow you to use \<commentable object\>.comment() by passing in just a string apposed to a Comment object. ([44f3426](https://github.com/xray7224/PyPump/commit/44f34268a4d0f97107438baf05510b75f9fdebee))
 - Introduce "Store" object for saving persistant data.
 
