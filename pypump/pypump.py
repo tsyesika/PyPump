@@ -217,8 +217,16 @@ class PyPump(object):
                 raw=False, params=None, retries=None, client=None,
                 headers=None, timeout=None, **kwargs):
         """ Make request to endpoint with OAuth
-        method = GET (default), POST or PUT
-        attempts = this is how many times it'll try re-attempting
+        
+        - endpoint: endpoint path (or a fully qualified URL if raw=True)
+        - method: GET (default), POST or DELETE
+        - data: data to send in the request body
+        - raw: use endpoint as entered without trying to modify it
+        - params: dictionary of parameters to send in the query string
+        - retries: number of times to retry if a request fails
+        - client: OAuth client data
+        - headers: dictionary of HTTP headers
+        - timeout: the timeout for a request, in seconds
         """
 
         retries = self.retries if retries is None else retries
