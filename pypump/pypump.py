@@ -227,7 +227,7 @@ class PyPump(object):
         - raw: use endpoint as entered without trying to modify it.
         - params: dictionary of parameters to send in the query string.
         - retries: number of times to retry if a request fails.
-        - client: OAuth client data.
+        - client: OAuth client data, if False do request without OAuth.
         - headers: dictionary of HTTP headers.
         - timeout: the timeout for a request, in seconds.
         """
@@ -238,6 +238,8 @@ class PyPump(object):
         # check client has been setup
         if client is None:
             client = self.setup_oauth_client(endpoint)
+        elif client is False:
+            client = None
 
         params = {} if params is None else params
 
