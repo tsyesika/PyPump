@@ -416,6 +416,7 @@ class PyPump(object):
             client_key=self._server_cache[self.client.server].key,
             client_secret=self._server_cache[self.client.server].secret,
             callback_uri=self.callback)
+        oauth.verify = self.verify_requests
         data = oauth.fetch_request_token(request_token_url)
         return data
 
@@ -430,6 +431,7 @@ class PyPump(object):
             resource_owner_secret=self.store["oauth-request-secret"],
             verifier=verifier
         )
+        oauth.verify = self.verify_requests
         data = oauth.fetch_access_token(access_token_url)
 
         self.store["oauth-access-token"] = data.get("oauth_token")
