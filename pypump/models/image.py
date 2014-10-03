@@ -145,6 +145,6 @@ class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
                 width=thumbnail.get("width")
             ))
         Mapper(pypump=self._pump).parse_map(self, data=data)
-        self.add_links(data)
+        self._add_links(data)
 
         return self

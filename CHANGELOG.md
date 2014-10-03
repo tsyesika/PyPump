@@ -1,5 +1,6 @@
 0.6
 ===
+- PumpObject.add_link and .add_links renamed to ._add_link and ._add_links
 - Recipients can now be set for Comment, Person objects
 - Recipient properties (.to, .cc, .bto, .bcc) has been moved from Activity to Activity.obj
 - Feeds (inbox, followers, etc) can now be sliced by object or object_id.

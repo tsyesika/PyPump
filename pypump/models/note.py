@@ -80,5 +80,5 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
     def unserialize(self, data):
         """ Goes from JSON -> Note object """
         Mapper(pypump=self._pump).parse_map(self, data=data)
-        self.add_links(data)
+        self._add_links(data)
         return self

@@ -117,13 +117,13 @@ class PumpObject(object):
     def _striptags(self, html):
         return re.sub(r'<[^>]+>', '', html)
 
-    def add_link(self, name, link):
+    def _add_link(self, name, link):
         """ Adds a link to the model """
 
         self.links[name] = link
         return True
 
-    def add_links(self, links, key="href", proxy_key="proxyURL", endpoints=None):
+    def _add_links(self, links, key="href", proxy_key="proxyURL", endpoints=None):
         """ Parses and adds block of links """
         if endpoints is None:
             endpoints = ["likes", "replies", "shares", "self", "followers",
@@ -131,18 +131,18 @@ class PumpObject(object):
 
         if links.get("links"):
             for endpoint in links['links']:
-                self.add_link(endpoint, links['links'][endpoint]["href"])
+                self._add_link(endpoint, links['links'][endpoint]["href"])
 
         for endpoint in endpoints:
             if links.get(endpoint, None) is None:
                 continue
 
             if "pump_io" in links[endpoint]:
-                self.add_link(endpoint, links[endpoint]["pump_io"][proxy_key])
+                self._add_link(endpoint, links[endpoint]["pump_io"][proxy_key])
             elif "url" in links[endpoint]:
-                self.add_link(endpoint, links[endpoint]["url"])
+                self._add_link(endpoint, links[endpoint]["url"])
             else:
-                self.add_link(endpoint, links[endpoint][key])
+                self._add_link(endpoint, links[endpoint][key])
 
         return self.links
 
@@ -150,7 +150,7 @@ class PumpObject(object):
         Mapper(pypump=self._pump).parse_map(self, mapping=PumpObject._mapping,
                                             ignore_attr=PumpObject._ignore_attr,
                                             data=data)
-        self.add_links(data)
+        self._add_links(data)
         return self
 
 class Mapper(object):

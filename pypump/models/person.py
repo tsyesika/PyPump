@@ -112,7 +112,7 @@ class Person(PumpObject, Addressable):
             self.image = image #TODO set proper image object
             self.location = location #TODO set proper Place object
 
-            self.add_link('self', "{0}://{1}/api/user/{2}/profile".format(
+            self._add_link('self', "{0}://{1}/api/user/{2}/profile".format(
                 self._pump.protocol, self.server, self.username)
             )
             try:
@@ -164,6 +164,6 @@ class Person(PumpObject, Addressable):
         """ Goes from JSON -> Person object """
 
         Mapper(pypump=self._pump).parse_map(self, data=data)
-        self.add_links(data)
+        self._add_links(data)
 
         return self

@@ -83,7 +83,7 @@ class Collection(PumpObject):
 
     def unserialize(self, data):
         Mapper(pypump=self._pump).parse_map(self, data=data)
-        self.add_links(data)
+        self._add_links(data)
         return self
 
 
