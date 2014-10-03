@@ -23,6 +23,7 @@ _log = logging.getLogger(__name__)
 
 class Collection(PumpObject):
 
+    object_type = 'collection'
     _members = None
     _ignore_attr = ["dummyattr", ]
     _mapping = {}
@@ -37,10 +38,6 @@ class Collection(PumpObject):
         self._members = self._members or Feed(self.links["members"], pypump=self._pump)
         return self._members
 
-    @property
-    def ENDPOINT(self):
-        return self.id
-
     def add(self, obj):
         """ Adds a member to the collection """
         activity = {
@@ -50,7 +47,7 @@ class Collection(PumpObject):
                 "id": obj.id
             },
             "target":{
-                "objectType": "collection",
+                "objectType": self.object_type,
                 "id": self.id
             }
         }
@@ -66,7 +63,7 @@ class Collection(PumpObject):
                 "id": obj.id
             },
             "target":{
-                "objectType": "collection",
+                "objectType": self.object_type,
                 "id": self.id
             }
         }
@@ -91,9 +88,8 @@ class Collection(PumpObject):
 
 
 class Public(PumpObject):
-    ENDPOINT = "http://activityschema.org/collection/public"
 
     def __init__(self):
-        self.id = self.ENDPOINT
+        self.id = "http://activityschema.org/collection/public"
         self.object_type = 'collection'
 
