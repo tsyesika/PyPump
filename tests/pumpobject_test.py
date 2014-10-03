@@ -93,9 +93,9 @@ class PumpObjectTest(PyPumpTest):
         }
 
     def test_add_links_person(self):
-        "add person object : add_links(person)"
+        "add person object : _add_links(person)"
         test_obj = self.person_json
-        self.model.add_links(test_obj)
+        self.model._add_links(test_obj)
 
         self.assertTrue(self.model.links.get('self'))
         self.assertEqual(self.model.links['self'], test_obj['links']['self']['href'])
@@ -103,17 +103,17 @@ class PumpObjectTest(PyPumpTest):
         self.assertEqual(self.model.links['activity-inbox'], test_obj['links']['activity-inbox']['href'])
 
     def test_add_links_note(self):
-        "add notes object : add_links(note)"
+        "add notes object : _add_links(note)"
         test_obj = self.note_json
-        self.model.add_links(test_obj)
+        self.model._add_links(test_obj)
 
         self.assertTrue(self.model.links.get('self'))
         self.assertEqual(self.model.links['self'], test_obj['links']['self']['href'])
 
     def test_add_links_note_links(self):
-        "add note's links object : add_links(note['links'])"
+        "add note's links object : _add_links(note['links'])"
         test_obj = self.note_json
-        self.model.add_links(test_obj['links'])
+        self.model._add_links(test_obj['links'])
 
         self.assertTrue(self.model.links.get('self'))
         self.assertEqual(self.model.links['self'], test_obj['links']['self']['href'])
@@ -121,7 +121,7 @@ class PumpObjectTest(PyPumpTest):
     def test_add_links_note_shares_no_proxy(self):
         "note's shares link without a proxyurl"
         test_obj = self.note_json
-        self.model.add_links(test_obj)
+        self.model._add_links(test_obj)
 
         self.assertTrue(self.model.links.get('shares'))
         self.assertEqual(self.model.links['shares'], test_obj['shares']['url'])
@@ -129,7 +129,7 @@ class PumpObjectTest(PyPumpTest):
     def test_add_links_note_likes_proxy(self):
         "note's likes link with a proxyurl"
         test_obj = self.note_json
-        self.model.add_links(test_obj)
+        self.model._add_links(test_obj)
 
         self.assertTrue(self.model.links.get('likes'))
         self.assertEqual(self.model.links['likes'], test_obj['likes']['pump_io']['proxyURL'])
