@@ -64,6 +64,10 @@ class ImageTest(PyPumpTest):
             "verb": "post",
             "object": self.imgdata,
         }
+    def test_create_empty(self):
+        image = self.pump.Image()
+        #object to string
+        self.assertEqual(image.__str__(), 'image by unknown')
 
     def test_mini_unserialize(self):
         image = self.pump.Image().unserialize(self.mini_data)
