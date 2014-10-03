@@ -24,12 +24,6 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
     _ignore_attr = ["summary",]
     _mapping = {}
     
-    @property
-    def ENDPOINT(self):
-        return "/api/user/{username}/feed".format(
-            username=self._pump.client.nickname
-            )
-
     id = None
     url = None
     display_name = None

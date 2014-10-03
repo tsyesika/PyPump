@@ -24,12 +24,6 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable
     _ignore_attr = ["summary",]
     _mapping = {}
 
-    @property
-    def ENDPOINT(self):
-        return "/api/user/{username}/feed".format(
-            username=self._pump.client.nickname
-            )
-
     id = None
     url = None
     content = None

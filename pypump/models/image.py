@@ -53,10 +53,6 @@ class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
     updated = None
     deleted = None
 
-    @property
-    def ENDPOINT(self):
-        return "/api/user/{username}/feed".format(self._pump.client.nickname)
-
     def __init__(self, id=None, url=None, display_name=None, content=None, 
                  author=None, published=None, updated=None, *args, **kwargs):
 
