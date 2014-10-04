@@ -220,8 +220,9 @@ class Mapper(object):
             try:
                 import pypump.models.activity
                 # Look for suitable pumpobject model based on objectType
-                obj = getattr(pypump.models.activity, data.get("objectType").capitalize())
-                obj = obj(pypump=self._pump, data=data)
+                obj_type = data.get("objectType").capitalize()
+                obj = getattr(pypump.models.activity, obj_type)
+                obj = obj(pypump=self._pump).unserialize(data)
                 _log.debug("Created activity.* model: %r" % obj.__class__)
                 return obj
             except AttributeError as e:
