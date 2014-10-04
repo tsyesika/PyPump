@@ -76,9 +76,3 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
             type=self.object_type,
             webfinger=getattr(self.author, 'webfinger', 'unknown')
         )
-
-    def unserialize(self, data):
-        """ Goes from JSON -> Note object """
-        Mapper(pypump=self._pump).parse_map(self, data=data)
-        self._add_links(data)
-        return self

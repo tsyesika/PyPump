@@ -238,7 +238,7 @@ class Feed(PumpObject):
 
     def __init__(self, url=None, *args, **kwargs):
         super(Feed, self).__init__(*args, **kwargs)
-        self.unserialize() #do empty unserialize to set all attributes
+        self.unserialize({}) #do empty unserialize to set all attributes
         self.url = url or None
 
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
@@ -265,7 +265,7 @@ class Feed(PumpObject):
         self.unserialize(data)
         return data
 
-    def unserialize(self, data={}):
+    def unserialize(self, data):
         Mapper(pypump=self._pump).parse_map(self, data=data)
         self._add_links(data)
         self.url = data.get('pump_io', {}).get('proxyURL') or self.url

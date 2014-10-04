@@ -159,11 +159,3 @@ class Person(PumpObject, Addressable):
 
     def __unicode__(self):
         return u"{0}".format(self.display_name or self.username or self.webfinger)
-
-    def unserialize(self, data):
-        """ Goes from JSON -> Person object """
-
-        Mapper(pypump=self._pump).parse_map(self, data=data)
-        self._add_links(data)
-
-        return self

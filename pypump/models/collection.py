@@ -81,11 +81,6 @@ class Collection(PumpObject):
         return "<{type}: {id}>".format(type=self.object_type.capitalize(),
                                        id=self.id)
 
-    def unserialize(self, data):
-        Mapper(pypump=self._pump).parse_map(self, data=data)
-        self._add_links(data)
-        return self
-
 
 class Public(PumpObject):
 

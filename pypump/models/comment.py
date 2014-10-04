@@ -76,10 +76,3 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable
         })
 
         return data
-
-    def unserialize(self, data):
-        """ from JSON -> Comment """
-        Mapper(pypump=self._pump).parse_map(self, data=data)
-        self._add_links(data)
-        return self
-        
