@@ -147,8 +147,8 @@ class PumpObject(object):
         return self.links
 
     def unserialize(self, data):
-        Mapper(pypump=self._pump).parse_map(self, mapping=PumpObject._mapping,
-                                            ignore_attr=PumpObject._ignore_attr,
+        Mapper(pypump=self._pump).parse_map(self,
+                                            mapping=self._mapping,
                                             data=data)
         self._add_links(data)
         return self
