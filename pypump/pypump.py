@@ -155,7 +155,6 @@ class PyPump(object):
         self.Person = factory(self, Person)
         self.Place = factory(self, Place)
         self.Public = Public()
-        self.Activity = factory(self, Activity)
 
     def _build_url(self, endpoint):
         """ Returns a fully qualified URL """

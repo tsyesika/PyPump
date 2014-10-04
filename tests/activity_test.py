@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import six
 from tests import PyPumpTest
 from dateutil.parser import parse
-from pypump.models.activity import Application
+from pypump.models.activity import Activity, Application
 from pypump.models import PumpObject
 
 
@@ -48,11 +48,11 @@ class ActivityTest(PyPumpTest):
             "id": "https://example.com/api/activity/abc"
         }
 
-        self.activity = self.pump.Activity().unserialize(self.response.data)
+        self.activity = Activity(pypump=self.pump).unserialize(self.response.data)
 
     def test_activity(self):
         #instance is Activity
-        self.assertTrue(isinstance(self.activity, type(self.pump.Activity())))
+        self.assertTrue(isinstance(self.activity, Activity))
 
         #object to string
         self.assertEqual(self.activity.__str__(), self.activity._striptags(self.activity.content))
@@ -111,7 +111,7 @@ class ActivityTest(PyPumpTest):
             }
         }
 
-        activity = self.pump.Activity().unserialize(data)
+        activity = Activity(pypump=self.pump).unserialize(data)
 
         self.assertTrue(isinstance(activity.obj, type(self.pump.Image())))
         self.assertEqual(activity.obj.deleted, parse(data['object']['deleted']))
@@ -132,7 +132,7 @@ class ActivityTest(PyPumpTest):
             }
         }
 
-        activity = self.pump.Activity().unserialize(data)
+        activity = Activity(pypump=self.pump).unserialize(data)
 
         self.assertTrue(isinstance(activity.obj, PumpObject))
         self.assertEqual(activity.obj.deleted, parse(data['object']['deleted']))
