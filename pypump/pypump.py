@@ -380,8 +380,6 @@ class PyPump(object):
     def construct_oauth_url(self):
         """ Constructs verifier OAuth URL """
         return self._build_url("oauth/authorize?oauth_token={token}".format(
-                protocol=self.protocol,
-                server=self.client.server,
                 token=self.store["oauth-request-token"]
                 ))
 
