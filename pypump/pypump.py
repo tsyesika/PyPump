@@ -26,7 +26,7 @@ import requests
 import six
 
 from six.moves.urllib import parse
-from requests_oauthlib import OAuth1, OAuth1Session
+from requests_oauthlib import OAuth1
 
 from pypump.store import JSONStore
 from pypump.client import Client
@@ -370,8 +370,8 @@ class PyPump(object):
         # get tokens from server and make a dict of them.
         self._server_tokens = self.request_token()
 
-        self.store["oauth-request-token"] = self._server_tokens["oauth_token"]
-        self.store["oauth-request-secret"] = self._server_tokens["oauth_token_secret"]
+        self.store["oauth-request-token"] = self._server_tokens["token"]
+        self.store["oauth-request-secret"] = self._server_tokens["token_secret"]
 
         # now we need the user to authorize me to use their pump.io account
         result = self.verifier_callback(self.construct_oauth_url())
@@ -416,13 +416,25 @@ class PyPump(object):
 
     def request_token(self):
         """ Gets OAuth request token """
-        request_token_url = self._build_url('oauth/request_token')
-        
-        oauth = OAuth1Session(
-            client_key=self._server_cache[self.client.server].key,
-            client_secret=self._server_cache[self.client.server].secret,
-            callback_uri=self.callback)
-        data = oauth.fetch_request_token(request_token_url)
+        client = OAuth1(
+                client_key=self._server_cache[self.client.server].key,
+                client_secret=self._server_cache[self.client.server].secret,
+                callback_uri=self.callback
+                )
+
+        request = {"auth": client}
+        response = self._requester(
+            requests.post,
+            "oauth/request_token",
+            **request
+        )
+
+        data = parse.parse_qs(response.content)
+        data = {
+            'token': data[self.PARAM_TOKEN][0],
+            'token_secret': data[self.PARAM_TOKEN_SECRET][0]
+            }
+
         return data
 
     def request_access(self, verifier):
