@@ -38,7 +38,6 @@ from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.place import Place
-from pypump.models.activity import Activity
 
 from pypump.models.collection import Collection, Public
 
