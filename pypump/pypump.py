@@ -23,6 +23,9 @@ import json
 import logging
 
 import requests
+import six
+
+from six.moves.urllib import parse
 from requests_oauthlib import OAuth1, OAuth1Session
 
 from pypump.store import JSONStore
@@ -64,6 +67,10 @@ class PyPump(object):
     - timeout: how long to give on a timeout for an http request, in
       seconds
     """
+
+    PARAM_VERIFER = six.b("oauth_verifier")
+    PARAM_TOKEN = six.b("oauth_token")
+    PARAM_TOKEN_SECRET = six.b("oauth_token_secret")
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
@@ -420,19 +427,25 @@ class PyPump(object):
 
     def request_access(self, verifier):
         """ Get OAuth access token so we can make requests """
-        access_token_url = self._build_url("oauth/access_token")
+        client = OAuth1(
+                client_key=self._server_cache[self.client.server].key,
+                client_secret=self._server_cache[self.client.server].secret,
+                resource_owner_key=self.store["oauth-request-token"],
+                resource_owner_secret=self.store["oauth-request-secret"],
+                verifier=verifier
+                )
 
-        oauth = OAuth1Session(
-            client_key=self._server_cache[self.client.server].key,
-            client_secret=self._server_cache[self.client.server].secret,
-            resource_owner_key=self.store["oauth-request-token"],
-            resource_owner_secret=self.store["oauth-request-secret"],
-            verifier=verifier
+        request = {"auth": client}
+        response = self._requester(
+            requests.post,
+            "oauth/access_token",
+            **request
         )
-        data = oauth.fetch_access_token(access_token_url)
 
-        self.store["oauth-access-token"] = data.get("oauth_token")
-        self.store["oauth-access-secret"] = data.get("oauth_token_secret")
+        data = parse.parse_qs(response.content)
+
+        self.store["oauth-access-token"] = data[self.PARAM_TOKEN][0]
+        self.store["oauth-access-secret"] = data[self.PARAM_TOKEN_SECRET][0]
         self._server_tokens = {} # clean up code.
 
 class WebPump(PyPump):
