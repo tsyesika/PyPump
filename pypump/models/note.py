@@ -19,36 +19,32 @@ from pypump.models import (PumpObject, Postable, Likeable, Shareable,
                            Commentable, Deleteable, Mapper)
 
 class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
+    """ This object represents a pump.io **note**,
+    notes are used to post text (or html) messages to the pump.io network.
+
+    :param content: (optional) Note content.
+    :param display_name: (optional) Note title.
+
+    Usage::
+
+        >>> mynote = pump.Note(content='<b>Hello</b> world!')
+        >>> mynote.send()
+
+    """
 
     object_type = 'note'
     _ignore_attr = ["summary",]
     _mapping = {}
     
-    id = None
-    url = None
-    display_name = None
-    content = None
-    published = None # When this was published
-    updated = None # last time this was updated
-    deleted = None # has the note been deleted
-    liked = None
-    author = None
+    def __init__(self,
+                 content=None,
+                 display_name=None,
+                 **kwargs):
 
-    def __init__(self, content=None, id=None, published=None, updated=None, 
-                 deleted=False, liked=None, author=None, display_name=None, url=None,
-                 *args, **kwargs):
+        super(Note, self).__init__(**kwargs)
 
-        super(Note, self).__init__(*args, **kwargs)
-
-        self.id = id
-        self.url = url
-        self.display_name = display_name
         self.content = content
-        self.published = published
-        self.updated = updated
-        self.deleted = deleted
-        self.liked = liked
-        self.author = author
+        self.display_name = display_name
 
     def serialize(self):
         """ Converts the post to JSON """
