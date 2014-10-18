@@ -79,7 +79,11 @@ class PersonTest(PyPumpTest):
         person = self.pump.Person("TestUser")
         
         # PyPump now expects the object returned back to it
-        self.response.data = {"verb": "follow", "object": self.response.data}
+        self.response.data = {
+            "actor": {"objectType": "person", "id":"acct:foo@bar"},
+            "verb": "follow",
+            "object": self.response.data
+        }
         person.follow()
 
         # Test verb is 'follow'
@@ -99,6 +103,7 @@ class PersonTest(PyPumpTest):
         
         self.response.data = {
             "verb": "update",
+            "actor": {"objectType": "person", "id":person.id},
             "object": {
                 "id": person.id,
                 "summary": person.summary,
@@ -119,7 +124,11 @@ class PersonTest(PyPumpTest):
         """ Test that you can unfollow a person """
         person = self.pump.Person("TestUser")
 
-        self.response.data = {"verb": "stop-following", "object": self.response.data}
+        self.response.data = {
+            "actor": {"objectType": "person", "id":"acct:foo@bar"},
+            "verb": "stop-following",
+            "object": self.response.data
+        }
         person.unfollow()
 
         self.assertEquals(self.request["verb"], "stop-following")

@@ -97,6 +97,13 @@ class PumpObject(object):
                 # true for collection.{add,remove}
                 self.unserialize(data["target"])
             else:
+                # copy activity attributes into object
+                if "author" not in data["object"]:
+                    data["object"]["author"] = data["actor"]
+                for key in ["to", "cc", "bto", "bcc"]:
+                    if key not in data["object"] and key in data:
+                        data["object"][key] = data[key]
+
                 self.unserialize(data["object"])
 
         return True
