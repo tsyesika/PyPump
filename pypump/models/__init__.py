@@ -36,11 +36,8 @@ class PumpObject(object):
         "image": "image",
         "in_reply_to": "inReplyTo",
         "liked": "liked",
-        "likes": "likes",
         "links": "links",
         "published": "published",
-        "replies": "replies",
-        "shares": "shares",
         "summary": "summary",
         "updated": "updated",
         "upstream_duplicates": "upstreamDuplicates",
@@ -65,14 +62,20 @@ class PumpObject(object):
         if pypump:
             self._pump = pypump
 
+        # combine mapping of self and PumpObject
         mapping = PumpObject._mapping.copy()
         mapping.update(self._mapping)
         self._mapping = mapping
 
+        # remove unwanted attributes from mapping
         for i in self._ignore_attr:
-            #remove to be ignored attributes from mapping
             if self._mapping.get(i):
                 del self._mapping[i]
+
+        # add any missing attributes
+        for key in self._mapping.keys():
+            if not hasattr(self, key):
+                setattr(self, key, None)
 
     def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
@@ -206,7 +209,8 @@ class Mapper(object):
         elif key in self.feeds:
             self.set_feed(obj, key, data, from_json)
         else:
-            _log.debug("Ignoring unknown attribute %r", key)
+            #_log.debug("Ignoring unknown attribute %r", key)
+            pass
 
     def set_literal(self, obj, key, data, from_json):
         if data is not None:
