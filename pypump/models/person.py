@@ -23,6 +23,17 @@ from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
 class Person(PumpObject, Addressable):
+    """ This object represents a pump.io **person**,
+    a person is a user on the pump.io network.
+
+    Example:
+        >>> alice = pump.Person('alice@example.org')
+        >>> print(alice.summary)
+        Hi, I'm Alice
+        >>> mynote = pump.Note('Hey Alice, it's Bob!')
+        >>> mynote.to = alice
+        >>> mynote.send()
+    """
 
     object_type = 'person'
     _ignore_attr = ['liked','in_reply_to']
@@ -40,6 +51,16 @@ class Person(PumpObject, Addressable):
 
     @property
     def outbox(self):
+        """ :class:`Outbox feed <pypump.models.feed.Outbox>` with all activities
+        sent by the person.
+        
+        Example:
+            >>> for activity in pump.me.outbox[:2]:
+            ...     print(activity)
+            ...
+            pypumptest2 unliked a comment in reply to a note
+            pypumptest2 deleted a note
+        """
         self._outbox = self._outbox or Outbox(self.links['activity-outbox'],pypump=self._pump)
         return self._outbox
 
