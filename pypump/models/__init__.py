@@ -395,7 +395,7 @@ class Commentable(object):
             instance, text content is also accepted.
         
         Example:
-            >>> anote.comment(pump.Comment('I agree!')
+            >>> anote.comment(pump.Comment('I agree!'))
             
             """
         if isinstance(comment, six.string_types):
