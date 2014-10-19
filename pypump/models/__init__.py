@@ -77,6 +77,21 @@ class PumpObject(object):
             if not hasattr(self, key):
                 setattr(self, key, None)
 
+    def _verb(self, verb):
+        """ Posts minimal activity with verb and bare self object.
+        :param verb: verb to be used.
+        """
+
+        activity = {
+            "verb": verb,
+            "object": {
+                "id": self.id,
+                "objectType": self.object_type,
+            }
+        }
+
+        self._post_activity(activity)
+
     def _post_activity(self, activity, unserialize=True):
         """ Posts a activity to feed """
         # I think we always want to post to feed
@@ -312,7 +327,7 @@ class Likeable(object):
 
     favorites = likes
 
-    def like(self, verb="like"):
+    def like(self):
         """ Like the object.
         
         Example:
@@ -322,17 +337,9 @@ class Likeable(object):
             >>> anote.liked
             True
         """
-        activity = {
-            "verb": verb,
-            "object": {
-                "id": self.id,
-                "objectType": self.object_type,
-            }
-        }
+        self._verb('like')
 
-        self._post_activity(activity)
-
-    def unlike(self, verb="unlike"):
+    def unlike(self):
         """ Unlike a previously liked object.
         
         Example:
@@ -343,23 +350,15 @@ class Likeable(object):
             False
         """
 
-        activity = {
-            "verb": verb,
-            "object": {
-                "id": self.id,
-                "objectType": self.object_type,
-            }
-        }
-
-        self._post_activity(activity)
+        self._verb('unlike')
 
     def favorite(self):
         """ Favorite the object. """
-        return self.like(verb="favorite")
+        self._verb('favorite')
 
     def unfavorite(self):
         """ Unfavorite a previously favorited object. """
-        return self.unlike(verb="unfavorite")
+        self._verb('unfavorite')
 
 
 class Commentable(object):
@@ -438,15 +437,8 @@ class Shareable(object):
         Example:
             >>> anote.share()
         """
-        activity = {
-            "verb": "share",
-            "object": {
-                "id": self.id,
-                "objectType": self.object_type,
-            },
-        }
 
-        self._post_activity(activity)
+        self._verb('share')
 
     def unshare(self):
         """ Unshare a previously shared object.
@@ -454,15 +446,8 @@ class Shareable(object):
         Example:
             >>> anote.unshare()
         """
-        activity = {
-            "verb": "unshare",
-            "object": {
-                "id": self.id,
-                "objectType": self.object_type,
-            },
-        }
 
-        self._post_activity(activity)
+        self._verb('unshare')
 
 class Deleteable(object):
     """ Provides the model with the ability to be deleted """
@@ -476,15 +461,8 @@ class Deleteable(object):
             >>> mynote.deleted
             datetime.datetime(2014, 10, 19, 9, 26, 39, tzinfo=tzutc())
         """
-        activity = {
-            "verb": "delete",
-            "object": {
-                "id": self.id,
-                "objectType": self.object_type,
-            }
-        }
 
-        self._post_activity(activity)
+        self._verb('delete')
 
 class Addressable(object):
     """ Adds methods to set to, cc, bto, bcc"""
