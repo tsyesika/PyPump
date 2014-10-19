@@ -295,7 +295,17 @@ class Likeable(object):
 
     @property
     def likes(self):
-        """ Gets who's liked this object """
+        """ A :class:`Feed <pypump.models.feed.Feed>`
+        of the people who've liked the object.
+
+        Example:
+            >>> for person in mynote.likes:
+            ...     print(person.webfinger)
+            ...
+            pypumptest1@pumpity.net
+            pypumptest2@pumpyourself.com
+        """
+
         endpoint = self.links["likes"]
         self._likes = self._likes or Feed(endpoint, pypump=self._pump)
         return self._likes
@@ -303,7 +313,15 @@ class Likeable(object):
     favorites = likes
 
     def like(self, verb="like"):
-        """ Likes the model """
+        """ Like the object.
+        
+        Example:
+            >>> anote.liked
+            False
+            >>> anote.like()
+            >>> anote.liked
+            True
+        """
         activity = {
             "verb": verb,
             "object": {
@@ -315,7 +333,16 @@ class Likeable(object):
         self._post_activity(activity)
 
     def unlike(self, verb="unlike"):
-        """ Unlikes the model """
+        """ Unlike a previously liked object.
+        
+        Example:
+            >>> anote.liked
+            True
+            >>> anote.unlike()
+            >>> anote.liked
+            False
+        """
+
         activity = {
             "verb": verb,
             "object": {
@@ -327,11 +354,11 @@ class Likeable(object):
         self._post_activity(activity)
 
     def favorite(self):
-        """ Favourite model """
+        """ Favorite the object. """
         return self.like(verb="favorite")
 
     def unfavorite(self):
-        """ Unfavourite model """
+        """ Unfavorite a previously favorited object. """
         return self.unlike(verb="unfavorite")
 
 
@@ -341,19 +368,37 @@ class Commentable(object):
         a comment to on the model. It also provides an ability to read
         comments.
 
-        must have _likes["replies"]
+        must have _links["replies"]
     """
     _comments = None
 
     @property
     def comments(self):
-        """ Fetches the comment objects for the models """
+        """ A :class:`Feed <pypump.models.feed.Feed>`
+        of the comments for the object.
+
+        Example:
+            >>> for comment in mynote.comments:
+            ...     print(comment)
+            ...
+            comment by pypumptest2@pumpyourself.com
+        """
+
         endpoint = self.links["replies"]
         self._comments = self._comments or Feed(endpoint, pypump=self._pump)
         return self._comments
 
     def comment(self, comment):
-        """ Posts a comment object on model """
+        """ Add a :class:`Comment <pypump.models.comment.Comment>`
+        to the object.
+
+        :param comment: A :class:`Comment <pypump.models.comment.Comment>`
+            instance, text content is also accepted.
+        
+        Example:
+            >>> anote.comment(pump.Comment('I agree!')
+            
+            """
         if isinstance(comment, six.string_types):
             comment = self._pump.Comment(comment)
 
@@ -366,19 +411,33 @@ class Shareable(object):
         Provides the model with the share and unshare methods and shares
         property allowing you to see who's shared the model.
 
-        must have _likes["shares"]
+        must have _links["shares"]
     """
     _shares = None
 
     @property
     def shares(self):
-        """ Fetches the people who've shared the model """
+        """ A :class:`Feed <pypump.models.feed.Feed>`
+        of the people who've shared the object.
+
+        Example:
+            >>> for person in mynote.shares:
+            ...     print(person.webfinger)
+            ...
+            pypumptest1@pumpity.net
+            pypumptest2@pumpyourself.com
+        """
+
         endpoint = self.links["shares"]
         self._shares = self._shares or Feed(endpoint, pypump=self._pump)
         return self._shares
 
     def share(self):
-        """ Shares the model """
+        """ Share the object.
+        
+        Example:
+            >>> anote.share()
+        """
         activity = {
             "verb": "share",
             "object": {
@@ -390,7 +449,11 @@ class Shareable(object):
         self._post_activity(activity)
 
     def unshare(self):
-        """ Unshares a previously shared model """
+        """ Unshare a previously shared object.
+        
+        Example:
+            >>> anote.unshare()
+        """
         activity = {
             "verb": "unshare",
             "object": {
@@ -405,7 +468,14 @@ class Deleteable(object):
     """ Provides the model with the ability to be deleted """
 
     def delete(self):
-        """ Delete's a model """
+        """ Delete the object content on the server.
+
+        Example:
+            >>> mynote.deleted
+            >>> mynote.delete()
+            >>> mynote.deleted
+            datetime.datetime(2014, 10, 19, 9, 26, 39, tzinfo=tzutc())
+        """
         activity = {
             "verb": "delete",
             "object": {
@@ -455,6 +525,16 @@ class Addressable(object):
 
     # to
     def _get_to(self):
+        """List of primary recipients.
+        If entry is a :class:`Person` the object will show up
+        in their direct inbox when sent.
+        
+        Example:
+            >>> mynote = pump.Note('hello pypumptest1')
+            >>> mynote.to = pump.Person('pypumptest1@pumpity.net')
+            >>> mynote.to
+            [<Person: pypumptest1@pumpity.net>]
+        """
         return self._to
 
     def _set_to(self, *args, **kwargs):
@@ -464,6 +544,13 @@ class Addressable(object):
 
     # cc
     def _get_cc(self):
+        """List of secondary recipients.
+        The object will show up in the recipients inbox when sent.
+        
+        Example:
+            >>> mynote = pump.Note('hello world')
+            >>> mynote.cc = pump.Public
+        """
         return self._cc
 
     def _set_cc(self, *args, **kwargs):
@@ -504,6 +591,11 @@ class Postable(Addressable):
     """ Adds .send() """
     
     def send(self):
-        """ Sends the data to the server """
+        """ Send the object to the server.
+        
+        Example:
+            >>> mynote = pump.Note('Hello world!)
+            >>> mynote.send()
+        """
         data = self.serialize()
         self._post_activity(data)
