@@ -33,32 +33,32 @@ class ClientException(Exception):
         super(ClientException, self).__init__(message, *args, **kwargs)
 
 class Client(object):
-    """This represents a client/application which is using the Pump API
+    """This represents a client/application which is using the Pump API.
 
-    Attributes / init args::
-    - webfinger: webfinger id of this user, ie "mary@example.org"
+    :param webfinger: webfinger id of this user, ie "mary@example.org"
       This is probably your username @ the domain of the pump instance
       you're using.
-    - type: whether this is a "web" or "native" client.  Unless you're
+    :param type: whether this is a "web" or "native" client.  Unless you're
       using pypump as part of a web service, you should choose "native".
-    - name: The name of this client, ie your application's name.  For
+    :param name: The name of this client, ie your application's name.  For
       example, if you were using PyPump to write CoolCommunicator, you
       would put "CoolCommunicator" here.
-    - contacts: Who wrote this application?  List of email addresses
+    :param contacts: Who wrote this application?  List of email addresses
       of those who authored this client.
-    - redirect: a list of URIs as callbacks for the authorization
+    :param redirect: a list of URIs as callbacks for the authorization
       server
-    - logo: URI of your application's logo.
+    :param logo: URI of your application's logo.
 
     Additionally, the following init args should only be supplied if
     you've already registered this client with the server.  If not,
-    these will be filled in during the `self.register()` step::
-    - key: If This is the token (the `client_id`) we got back that
+    these will be filled in during the `self.register()` step.
+
+    :param key: If This is the token (the `client_id`) we got back that
       identifies our client, assuming we've already registered our
       client.
-    - secret: This is your secret token that authorizes you to connect
+    :param secret: This is your secret token that authorizes you to connect
       to the pump instance (the `client_secret`).
-    - expirey: When our token expires (`espires_at`)
+    :param expirey: When our token expires (`espires_at`)
 
     Note that the above three are not the same as the oauth
     permissions verifying the user has access to post, this is related

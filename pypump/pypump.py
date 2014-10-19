@@ -50,21 +50,20 @@ class PyPump(object):
     requests to the server on it's own behalf and on the bahalf of the
     other clients as well as handling the OAuth requests.
 
-    Attributes / init args::
-    - client: an instance of `pypump.Client()`
-    - verifier_callback: If this is our first time registering the
+    :param client: an instance of :class:`Client <pypump.Client>`.
+    :param verifier_callback: If this is our first time registering the
       client, this function will be called with a single argument, the
       url one can post to for completing verification.
-    - store: this is the store instance to save any data persistantly.
-    - verifier_callback: the URI that is used for redirecting a user
+    :param store: this is the :class:`pypump.Store` instance to save any data persistantly.
+    :param verifier_callback: the URI that is used for redirecting a user
       after they authenticate this client... assuming this is
       happening over the web.  If not, the callback is "oob", or "out
       of band".
-    - verify_requests: If this is set to False PyPump won't check SSL/TLS
+    :param verify_requests: If this is set to False PyPump won't check SSL/TLS
       certificates.
-    - retries: number of times to retry if a request fails
-    - timeout: how long to give on a timeout for an http request, in
-      seconds
+    :param retries: number of times to retry if a request fails.
+    :param timeout: how long to give on a timeout for an http request, in
+      seconds.
     """
 
     PARAM_VERIFER = six.b("oauth_verifier")
@@ -75,8 +74,14 @@ class PyPump(object):
 
     store_class = JSONStore
 
-    def __init__(self, client, verifier_callback, store=None, callback="oob",
-                 verify_requests=True, retries=0, timeout=30):
+    def __init__(self,
+                 client,
+                 verifier_callback,
+                 store=None,
+                 callback="oob",
+                 verify_requests=True,
+                 retries=0,
+                 timeout=30):
         """
         This is the main pump instance, this handles the oauth,
         this also holds the models.
@@ -219,15 +224,15 @@ class PyPump(object):
         """ Make request to endpoint with OAuth.
         Returns dictionary with response data.
         
-        - endpoint: endpoint path, or a fully qualified URL if raw=True.
-        - method: GET (default), POST or DELETE.
-        - data: data to send in the request body.
-        - raw: use endpoint as entered without trying to modify it.
-        - params: dictionary of parameters to send in the query string.
-        - retries: number of times to retry if a request fails.
-        - client: OAuth client data, if False do request without OAuth.
-        - headers: dictionary of HTTP headers.
-        - timeout: the timeout for a request, in seconds.
+        :param endpoint: endpoint path, or a fully qualified URL if raw=True.
+        :param method: GET (default), POST or DELETE.
+        :param data: data to send in the request body.
+        :param raw: use endpoint as entered without trying to modify it.
+        :param params: dictionary of parameters to send in the query string.
+        :param retries: number of times to retry if a request fails.
+        :param client: OAuth client data, if False do request without OAuth.
+        :param headers: dictionary of HTTP headers.
+        :param timeout: the timeout for a request, in seconds.
         """
 
         retries = self.retries if retries is None else retries
