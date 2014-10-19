@@ -54,4 +54,13 @@ Models
    models/person
    models/activity
 
+
+API
+---
+
+.. toctree::
+   :maxdepth: 2
+
+   classref
+
 This was build on |today|
