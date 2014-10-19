@@ -115,8 +115,6 @@ class Person(PumpObject, Addressable):
         location - where the user resides (default: No location/None)
         """
         super(Person, self).__init__(*args, **kwargs)
-        #do empty unserialize to add all attributes
-        self.unserialize({'objectType':self.object_type})
 
         if isinstance(webfinger, six.string_types):
             if "@" in webfinger:
