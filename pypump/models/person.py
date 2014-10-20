@@ -53,8 +53,8 @@ class Person(PumpObject, Addressable):
 
     @property
     def outbox(self):
-        """ :class:`Outbox feed <pypump.models.feed.Outbox>` with all activities
-        sent by the person.
+        """ :class:`Outbox feed <pypump.models.feed.Outbox>` with all
+        :class:`activities <pypump.models.activity.Activity>` sent by the person.
         
         Example:
             >>> for activity in pump.me.outbox[:2]:
@@ -68,26 +68,82 @@ class Person(PumpObject, Addressable):
 
     @property
     def followers(self):
+        """ :class:`Feed <pypump.models.feed.Feed>` with all
+        :class:`Person <pypump.models.person.Person>` objects following the person.
+        
+        Example:
+            >>> alice = pump.Person('alice@example.org')
+            >>> for follower in alice.followers[:2]:
+            ...     print(follower.id)
+            ...
+            acct:bob@example.org
+            acct:carol@example.org
+        """
         self._followers = self._followers or Followers(self.links['followers'],pypump=self._pump)
         return self._followers
 
     @property
     def following(self):
+        """ :class:`Feed <pypump.models.feed.Feed>` with all
+        :class:`Person <pypump.models.person.Person>` objects followed by the person.
+        
+        Example:
+            >>> bob = pump.Person('bob@example.org')
+            >>> for followee in bob.following[:3]:
+            ...     print(followee.id)
+            ...
+            acct:alice@example.org
+            acct:duncan@example.org
+        """
         self._following = self._following or Following(self.links['following'],pypump=self._pump)
         return self._following
 
     @property
     def favorites(self):
+        """ :class:`Feed <pypump.models.feed.Feed>` with all objects
+        liked/favorited by the person.
+        
+        Example:
+            >>> for like in pump.me.favorites[:3]:
+            ...     print(like)
+            ...
+            note by alice@example.org
+            image by bob@example.org
+            comment by evan@e14n.com
+        """
         self._favorites = self._favorites or Favorites(self.links['favorites'],pypump=self._pump)
         return self._favorites
 
     @property
     def lists(self):
+        """ :class:`Lists feed <pypump.models.feed.Lists>` with all lists
+        owned by the person.
+        
+        Example:
+            >>> for list in pump.me.lists:
+            ...     print(list)
+            ...
+            Acquaintances
+            Family
+            Coworkers
+            Friends
+        """
         self._lists = self._lists or Lists(self.links['lists'],pypump=self._pump)
         return self._lists
 
     @property
     def inbox(self):
+        """ :class:`Inbox feed <pypump.models.feed.Inbox>` with all
+        :class:`activities <pypump.models.activity.Activity>`
+        received by the person, can only be read if logged in as the owner.
+        
+        Example:
+            >>> for activity in pump.me.inbox[:2]:
+            ...     print(activity.id)
+            ...
+            https://microca.st/api/activity/BvqXQOwXShSey1HxYuJQBQ
+            https://pumpyourself.com/api/activity/iQGdnz5-T-auXnbUUdXh-A
+        """
         if not self.isme:
             raise PyPumpException("You can't read other people's inboxes")
         self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)

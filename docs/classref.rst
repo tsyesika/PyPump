@@ -20,6 +20,13 @@ Classes representing pump.io objects.
         :exclude-members: serialize
         :inherited-members:
 
+.. module:: pypump.models.person
+.. autoclass:: Person
+        :inherited-members:
+
 .. module:: pypump.models.feed
 
 .. .. autoclass:: Feed
+.. .. autoclass:: Inbox
+.. .. autoclass:: Outbox
+.. .. autoclass:: Lists
