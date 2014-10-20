@@ -60,7 +60,7 @@ class PersonTest(PyPumpTest):
         }
 
     def test_person(self):
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
         #is a Person object
         self.assertTrue(isinstance(person, type(self.pump.Person())))
         #repr
@@ -76,7 +76,7 @@ class PersonTest(PyPumpTest):
     
     def test_follow(self):
         """ Tests that pypump sends correct data when attempting to follow a person """
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
         
         # PyPump now expects the object returned back to it
         self.response.data = {
@@ -97,7 +97,7 @@ class PersonTest(PyPumpTest):
 
     def test_update(self):
         """ Test that a update works """
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
         person.summary = "New summary!"
         person.display_name = "New user"
         
@@ -122,7 +122,7 @@ class PersonTest(PyPumpTest):
 
     def test_unfollow(self):
         """ Test that you can unfollow a person """
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
 
         self.response.data = {
             "actor": {"objectType": "person", "id":"acct:foo@bar"},
@@ -142,7 +142,7 @@ class PersonTest(PyPumpTest):
             "objectType": "person",
         }
 
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
 
         self.assertEquals(self.response["id"], person.id)
         self.assertEquals(self.response["objectType"], person.object_type)
@@ -150,7 +150,7 @@ class PersonTest(PyPumpTest):
     def test_unserialize(self):
         """ Tests person unserialization is successful """
         # Make the person object
-        person = self.pump.Person("TestUser")
+        person = self.pump.Person("TestUser@example.com")
 
         # Test unserialization is correct
         self.assertEqual(person.id, self.response["id"])

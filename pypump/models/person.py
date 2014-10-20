@@ -26,6 +26,8 @@ class Person(PumpObject, Addressable):
     """ This object represents a pump.io **person**,
     a person is a user on the pump.io network.
 
+    :param webfinger: User ID in ``nickname@hostname`` format.
+
     Example:
         >>> alice = pump.Person('alice@example.org')
         >>> print(alice.summary)
@@ -103,33 +105,15 @@ class Person(PumpObject, Addressable):
     def isme(self):
         return (self.username == self._pump.client.nickname and self.server == self._pump.client.server)
 
-    def __init__(self, webfinger=None, summary=None, username=None,
-                 display_name=None, image=None, location=None,
-                 *args, **kwargs):
-        """
-        webfinger - user@host.tld
-        summary - summary of the user
-        username - persons username
-        display_name - what the user want's to show up (default: username)
-        image - image of the user (default: No image/None)
-        location - where the user resides (default: No location/None)
-        """
-        super(Person, self).__init__(*args, **kwargs)
+    def __init__(self, webfinger=None, **kwargs):
+        super(Person, self).__init__(**kwargs)
 
         if isinstance(webfinger, six.string_types):
-            if "@" in webfinger:
-                # webfinger is being used
-                self.id = "acct:{0}".format(webfinger)
-                self.username = username or webfinger.split("@")[0]
-            else:
-                # webfinger looks like a username, we assume the user is on our server
-                self.username = webfinger
-                self.id = "acct:{0}@{1}".format(self.username, self._pump.client.server)
+            if not "@" in webfinger: # TODO do better validation
+                raise PyPumpException("Not a valid webfinger: %s" % webfinger)
 
-            self.summary = summary
-            self.display_name = display_name
-            self.image = image #TODO set proper image object
-            self.location = location #TODO set proper Place object
+            self.id = "acct:{0}".format(webfinger)
+            self.username = webfinger.split("@")[0]
 
             self._add_link('self', "{0}://{1}/api/user/{2}/profile".format(
                 self._pump.protocol, self.server, self.username)
