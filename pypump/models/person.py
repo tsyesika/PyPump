@@ -156,13 +156,11 @@ class Person(PumpObject, Addressable):
 
     def follow(self): 
         """ Follow person """
-        data = self.serialize(verb="follow")
-        self._post_activity(data)
+        self._verb('follow')
 
     def unfollow(self):
         """ Unfollow person """
-        data = self.serialize(verb="stop-following")
-        self._post_activity(data)
+        self._verb('stop-following')
 
     def update(self):
         #TODO update location
