@@ -22,6 +22,7 @@ import json
 import os
 import re
 import stat
+import datetime
 
 from pypump.exception import ValidationError, StoreException
 
@@ -148,12 +149,27 @@ class JSONStore(AbstractStore):
         if self.filename is None:
             raise StoreException("Filename must be set to write store to disk")
 
+        # We need an atomic way of re-writing the settings, we also need to
+        # prevent only overwriting part of the settings file (see bug #116).
+        # Create a temp file and only then re-name it to the config
+        filename = "{filename}.{date}.tmp".format(
+            filename=self.filename,
+            date=datetime.datetime.utcnow().isoformat()
+        )
+
         # The `open` built-in doesn't allow us to set the mode
         mode = stat.S_IRUSR | stat.S_IWUSR #0600
-        fd = os.open(self.filename, os.O_WRONLY | os.O_CREAT, mode)
+        fd = os.open(filename, os.O_WRONLY | os.O_CREAT, mode)
         fout = os.fdopen(fd, "w")
         fout.write(json.dumps(self.export()))
         fout.close()
+
+        # Now we should remove the old config
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
+
+        # Now rename the temp file to the real config file
+        os.rename(filename, self.filename)
 
     @classmethod
     def get_filename(cls):
