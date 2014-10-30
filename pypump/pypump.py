@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 ##
 #   Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
 #
@@ -222,7 +223,7 @@ class PyPump(object):
                 headers=None, timeout=None, **kwargs):
         """ Make request to endpoint with OAuth.
         Returns dictionary with response data.
-
+        
         :param endpoint: endpoint path, or a fully qualified URL if raw=True.
         :param method: GET (default), POST or DELETE.
         :param data: data to send in the request body.
@@ -353,6 +354,7 @@ class PyPump(object):
             else:
                 self.set_http()
                 url = self._build_url(endpoint)
+                self.set_https()
                 raw = True
                 return self._requester(fnc, url, raw, **kwargs)
 
