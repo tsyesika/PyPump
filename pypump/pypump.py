@@ -384,9 +384,19 @@ class PyPump(object):
 
     def construct_oauth_url(self):
         """ Constructs verifier OAuth URL """
-        return self._build_url("oauth/authorize?oauth_token={token}".format(
-                token=self.store["oauth-request-token"]
-                ))
+        response = requests.head("http://{0}".format(self.client.server))
+        if response.is_redirect:
+            server = response.headers['location']
+        else:
+            server = response.url
+
+        path = "oauth/authorize?oauth_token={token}".format(
+            token=self.store["oauth-request-token"]
+        )
+        return "{server}{path}".format(
+            server=server,
+            path=path
+        )
 
     def verifier(self, verifier):
         """ Called once verifier has been retrived """
