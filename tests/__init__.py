@@ -134,6 +134,9 @@ class TestMixin(object):
         ))
         return self._response
 
+    def construct_oauth_url(self):
+        return "https://{server}/oauth/authorize?oauth_token=Atoken".format(server=self.client.server)
+
 class TestWebPump(TestMixin, WebPump):
     pass
 
