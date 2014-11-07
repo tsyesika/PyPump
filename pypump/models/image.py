@@ -50,7 +50,7 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
     :param content: (optional) Image text content.
     :param display_name: (optional) Image title.
 
-    Example::
+    Example:
         >>> myimage = pump.Image(display_name='Happy Caturday!')
         >>> myimage.from_file('/path/to/kitteh.png')
     """
@@ -86,7 +86,7 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
 
         :param filename: Path to file on your system.
 
-        Example::
+        Example:
             >>> myimage.from_file('/path/to/dinner.png')
         """
 
