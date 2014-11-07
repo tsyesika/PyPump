@@ -19,7 +19,7 @@ import logging
 import mimetypes
 import os
 
-from pypump.models import (PumpObject, Postable, Likeable, Commentable,
+from pypump.models import (PumpObject, Addressable, Likeable, Commentable,
                            Deleteable, Shareable, Mapper)
 
 _log = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ class ImageContainer(object):
             height=self.height
         )
 
-class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
+class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressable):
 
     object_type = 'image'
     _ignore_attr = ["summary", "image"]
