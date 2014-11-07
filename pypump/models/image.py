@@ -40,31 +40,15 @@ class ImageContainer(object):
 class Image(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
 
     object_type = 'image'
-    _ignore_attr = ["summary",]
+    _ignore_attr = ["summary", "image"]
     _mapping = {}
 
-    id = None
-    url = None
-    display_name = None
-    summary = None
-    content = None
-    author = None
-    published = None
-    updated = None
-    deleted = None
+    def __init__(self, display_name=None, content=None, **kwargs):
 
-    def __init__(self, id=None, url=None, display_name=None, content=None, 
-                 author=None, published=None, updated=None, *args, **kwargs):
+        super(Image, self).__init__(**kwargs)
 
-        super(Image, self).__init__(*args, **kwargs)
-
-        self.id = id
         self.display_name = display_name
         self.content = content
-        self.author = author
-        self.url = url
-        self.published = published
-        self.updated = updated
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
