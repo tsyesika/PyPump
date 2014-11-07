@@ -20,6 +20,22 @@ Classes representing pump.io objects.
         :exclude-members: serialize
         :inherited-members:
 
+.. module:: pypump.models.image
+.. autoclass:: Image
+        :inherited-members:
+
+        .. attribute:: thumbnail
+        
+                :class:`ImageContainer <pypump.models.image.ImageContainer>`
+                holding information about the thumbnail image.
+
+        .. attribute:: original
+
+                :class:`ImageContainer <pypump.models.image.ImageContainer>`
+                holding information about the original image.
+
+.. autoclass:: ImageContainer
+
 .. module:: pypump.models.person
 .. autoclass:: Person
         :inherited-members:
