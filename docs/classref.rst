@@ -11,7 +11,7 @@ Classes doing most of the work.
 .. autoclass:: Client
 
 Pump objects
----------------
+------------
 
 Classes representing pump.io objects.
 
@@ -34,15 +34,21 @@ Classes representing pump.io objects.
                 :class:`ImageContainer <pypump.models.image.ImageContainer>`
                 holding information about the original image.
 
-.. autoclass:: ImageContainer
-
 .. module:: pypump.models.person
 .. autoclass:: Person
         :inherited-members:
 
-.. module:: pypump.models.feed
-
+.. .. module:: pypump.models.feed
 .. .. autoclass:: Feed
 .. .. autoclass:: Inbox
 .. .. autoclass:: Outbox
 .. .. autoclass:: Lists
+
+Plumbing objects
+----------------
+
+Classes you probably don't need to know about.
+
+.. autoclass:: pypump.models.image.ImageContainer
+.. .. autoclass:: pypump.models.PumpObject
+.. .. autoclass:: pypump.models.Mapper
