@@ -25,7 +25,12 @@ from pypump.models import (PumpObject, Addressable, Likeable, Commentable,
 _log = logging.getLogger(__name__)
 
 class ImageContainer(object):
-    """ Container to hold about a specific image """
+    """ Container that holds information about an image.
+    
+    :param url: URL to image file on the pump.io server.
+    :param width: Width of the image.
+    :param height: Height of the image.
+    """
     def __init__(self, url, width, height):
         self.url = url
         self.width = width
@@ -38,10 +43,24 @@ class ImageContainer(object):
         )
 
 class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressable):
+    """ This object represents a pump.io **image**,
+    images are used to post image content with optional text (or html) messages
+    to the pump.io network.
+
+    :param content: (optional) Image text content.
+    :param display_name: (optional) Image title.
+
+    Example::
+        >>> myimage = pump.Image(display_name='Happy Caturday!')
+        >>> myimage.from_file('/path/to/kitteh.png')
+    """
 
     object_type = 'image'
     _ignore_attr = ["summary", "image"]
-    _mapping = {}
+    _mapping = {
+        "thumbnail":"image",
+        "original":"fullImage"
+    }
 
     def __init__(self, display_name=None, content=None, **kwargs):
 
@@ -63,7 +82,14 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
         )
 
     def from_file(self, filename):
-        """ Uploads an image from a filename """
+        """ Uploads an image from a filename on your system.
+
+        :param filename: Path to file on your system.
+
+        Example::
+            >>> myimage.from_file('/path/to/dinner.png')
+        """
+
         mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
         headers = {
             "Content-Type": mimetype,
