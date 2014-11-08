@@ -23,20 +23,20 @@ from pypump.models import PumpObject, Mapper
 _log = logging.getLogger(__name__)
 
 class ItemList(object):
-    """ This object is returned when iterating over a Feed """
+    """ This object is returned when iterating over a :class:`Feed <pypump.models.feed.Feed>`.
+
+    :param feed: Feed object: Feed object to return items from
+    :param offset: int or PumpObject: beginning of slice
+    :param stop: int or PumpObject: end of slice
+    :param limit: int or None: Number of objects to return
+    :param since: PumpObject: Return objects newer than this
+    :param before: PumpObject: Return objects older than this
+    :param cached: bool: Return objects from feed._items instead of API
+    """
+
     _done = False
 
     def __init__(self, feed, offset=None, stop=None, limit=None, since=None, before=None, cached=False):
-        """
-        feed: Feed object: Feed object to return items from
-        offset: int or PumpObject: beginning of slice
-        stop: int or PumpObject: end of slice
-        limit: int or None: Number of objects to return
-        since: PumpObject: Return objects newer than this
-        before: PumpObject: Return objects older than this
-        cached: bool: Return objects from feed._items instead of API
-
-        """
         self.cache = []
         self.feed = feed
         self.url = self.feed.url
@@ -74,8 +74,9 @@ class ItemList(object):
 
 
     def get_obj_id(self, item):
-        """ Get the id of a PumpObject
-        item: id string or PumpObject
+        """ Get the id of a PumpObject.
+
+        :param item: id string or PumpObject
         """
         if item is not None:
             if isinstance(item, six.string_types):
@@ -226,13 +227,13 @@ class ItemList(object):
 
 
 class Feed(PumpObject):
+    """ This object represents a basic pump.io **feed**, which is used for
+    navigating a list of objects (inbox,followers,shares,likes and so on).
+    """
     _ignore_attr = []
-    _mapping = {"display_name": "displayName",
-                "id":"url",
-                "url": "url",
+    _mapping = {"id":"url",
                 "object_types": "objectTypes",
                 "_items": "items",
-                "author": "author",
                 "total_items": "totalItems",
                }
 
@@ -242,10 +243,11 @@ class Feed(PumpObject):
 
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
         """ Get a feed's items.
-        offset: Amount of items to skip before returning data
-        since:  Return items added after this id (ordered old -> new)
-        before: Return items added before this id (ordered new -> old)
-        limit: Amount of items to return
+
+        :param offset: Amount of items to skip before returning data
+        :param since:  Return items added after this id (ordered old -> new)
+        :param before: Return items added before this id (ordered new -> old)
+        :param limit: Amount of items to return
         """
         if self._items is not None and self.total_items is not None:
             if len(self._items) >= self.total_items:
@@ -321,7 +323,17 @@ class Favorites(Feed):
     #API bug, can only get 20 items, see https://github.com/xray7224/PyPump/issues/65
 
 class Inbox(Feed):
-    """ Person's inbox """
+    """ This object represents a pump.io **inbox feed**,
+    it contains all activities posted to the owner of the inbox.
+
+    Example:
+        >>> for activity in pump.me.inbox.items(limit=3):
+        ...     print(activity)
+        Alice posted a note
+        Bob posted a comment in reply to a note
+        Alice liked a comment
+    """
+
     _direct = None
     _minor = None
     _major = None
@@ -331,6 +343,9 @@ class Inbox(Feed):
 
     @property
     def direct(self):
+        """ Direct inbox feed,
+        contains activities addressed directly to the owner of the inbox.
+        """
         url = self._subfeed("direct")
         if "direct" in self.url or "major" in self.url or "minor" in self.url:
             return self
@@ -339,6 +354,7 @@ class Inbox(Feed):
     
     @property
     def major(self):
+        """ Major inbox feed, contains major activities such as notes and images. """
         url = self._subfeed("major")
         if "major" in self.url or "minor" in self.url:
             return self
@@ -347,6 +363,7 @@ class Inbox(Feed):
     
     @property
     def minor(self):
+        """ Minor inbox feed, contains minor activities such as likes, shares and follows. """
         url = self._subfeed("minor")
         if "minor" in self.url or "major" in self.url:
             return self
@@ -355,7 +372,17 @@ class Inbox(Feed):
 
 
 class Outbox(Feed):
-    """ Person's outbox """
+    """ This object represents a pump.io **outbox feed**,
+    it contains all activities posted by the owner of the outbox.
+
+    Example:
+        >>> for activity in pump.me.outbox.items(limit=3):
+        ...     print(activity)
+        Bob posted a note
+        Bob liked an image
+        Bob followed Alice
+    """
+
     _major = None
     _minor = None
 
@@ -364,6 +391,7 @@ class Outbox(Feed):
 
     @property
     def major(self):
+        """ Major outbox feed, contains major activities such as notes and images. """
         url = self._subfeed("major")
         if "major" in self.url or "minor" in self.url:
             return self
@@ -372,6 +400,7 @@ class Outbox(Feed):
 
     @property
     def minor(self):
+        """ Minor outbox feed, contains minor activities such as likes, shares and follows. """
         url = self._subfeed("minor")
         if "major" in self.url or "minor" in self.url:
             return self
@@ -380,6 +409,18 @@ class Outbox(Feed):
 
 
 class Lists(Feed):
+    """ This object represents a pump.io **lists feed**,
+    it contains the :class:`collections <pypump.models.collection.Collection>` (or lists) created by the owner.
+
+    Example:
+        >>> for i in pump.me.lists.items():
+        ...     print(i)
+        Coworkers
+        Acquaintances
+        Family
+        Friends
+    """
+
     # API bug, offset and count doesnt work right,
     # see https://github.com/e14n/pump.io/issues/794
     # TODO can not see lists for persons on remote server (need more auth than 2-leg)
@@ -390,7 +431,18 @@ class Lists(Feed):
         return self._membertype
 
     def create(self, display_name, content=None):
-        """ Creates a new list """
+        """ Create a new user list :class:`collection <pypump.models.collection.Collection>`.
+        
+        :param display_name: List title.
+        :param content: (optional) List description.
+
+        Example:
+            >>> pump.me.lists.create(display_name='Friends', content='List of friends')
+            >>> myfriends = pump.me.lists['Friends']
+            >>> print(myfriends)
+            Friends
+        """
+
         activity = {
             "verb":"create",
             "object":{
