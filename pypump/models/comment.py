@@ -24,29 +24,11 @@ class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable
     _ignore_attr = ["summary",]
     _mapping = {}
 
-    id = None
-    url = None
-    content = None
-    published = None
-    updated = None
-    deleted = None
-    liked = None
-    author = None
-    in_reply_to = None
+    def __init__(self, content=None, in_reply_to=None, **kwargs):
 
-    def __init__(self, content=None, id=None, in_reply_to=None, published=None, updated=None,
-                 deleted=None, liked=None, author=None, url=None, *args, **kwargs):
+        super(Comment, self).__init__(**kwargs)
 
-        super(Comment, self).__init__(*args, **kwargs)
-
-        self.id = id
-        self.url = url
         self.content = content
-        self.published = published
-        self.updated = updated
-        self.deleted = deleted
-        self.liked = liked
-        self.author = author
         self.in_reply_to = in_reply_to
 
     def __repr__(self):
