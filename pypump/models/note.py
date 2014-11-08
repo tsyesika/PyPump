@@ -16,7 +16,7 @@
 ##
 
 from pypump.models import (PumpObject, Postable, Likeable, Shareable, 
-                           Commentable, Deleteable, Mapper)
+                           Commentable, Deleteable)
 
 class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
     """ This object represents a pump.io **note**,

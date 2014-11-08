@@ -17,7 +17,7 @@
 
 import six
 
-from pypump.models import PumpObject, Mapper, Addressable
+from pypump.models import PumpObject, Addressable
 from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)

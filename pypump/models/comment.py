@@ -16,7 +16,7 @@
 ##
 
 from pypump.models import (PumpObject, Commentable, Likeable, Shareable, 
-                           Deleteable, Postable, Mapper)
+                           Deleteable, Postable)
 
 class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable):
     """ This object represents a pump.io **comment**,

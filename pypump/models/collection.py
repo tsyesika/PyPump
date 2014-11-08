@@ -16,7 +16,7 @@
 ##
 import logging
 
-from pypump.models import PumpObject, Mapper
+from pypump.models import PumpObject
 from pypump.models.feed import Feed
 
 _log = logging.getLogger(__name__)
