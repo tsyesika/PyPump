@@ -19,6 +19,19 @@ from pypump.models import (PumpObject, Commentable, Likeable, Shareable,
                            Deleteable, Postable, Mapper)
 
 class Comment(PumpObject, Likeable, Shareable, Deleteable, Commentable, Postable):
+    """ This object represents a pump.io **comment**,
+    comments are used to post text (or html) messages in reply to other objects on the pump.io network.
+
+    :param content: (optional) Comment content.
+    :param in_reply_to: (optional) Object to reply to.
+
+    Example:
+        >>> catpic
+        <Image by alice@example.org>
+        >>> mycomment = pump.Comment(content='Best cat pic ever!', in_reply_to=catpic)
+        >>> mycomment.send()
+
+    """
 
     object_type = 'comment'
     _ignore_attr = ["summary",]

@@ -15,13 +15,11 @@ Pump objects
 
 Classes representing pump.io objects.
 
-.. module:: pypump.models.note
-.. autoclass:: Note
+.. autoclass:: pypump.models.note.Note
         :exclude-members: serialize
         :inherited-members:
 
-.. module:: pypump.models.image
-.. autoclass:: Image
+.. autoclass:: pypump.models.image.Image
         :inherited-members:
 
         .. attribute:: thumbnail
@@ -34,8 +32,10 @@ Classes representing pump.io objects.
                 :class:`ImageContainer <pypump.models.image.ImageContainer>`
                 holding information about the original image.
 
-.. module:: pypump.models.person
-.. autoclass:: Person
+.. autoclass:: pypump.models.comment.Comment
+        :inherited-members:
+
+.. autoclass:: pypump.models.person.Person
         :inherited-members:
 
 .. .. module:: pypump.models.feed
