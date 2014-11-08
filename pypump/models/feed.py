@@ -238,7 +238,6 @@ class Feed(PumpObject):
 
     def __init__(self, url=None, *args, **kwargs):
         super(Feed, self).__init__(*args, **kwargs)
-        self.unserialize({}) #do empty unserialize to set all attributes
         self.url = url or None
 
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
