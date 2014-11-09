@@ -6,14 +6,21 @@ Essentials
 
 Classes doing most of the work.
 
-.. module:: pypump
-.. autoclass:: PyPump
-.. autoclass:: Client
+.. autoclass:: pypump.PyPump
+.. autoclass:: pypump.Client
 
 Pump objects
 ------------
 
-Classes representing pump.io objects.
+Classes representing pump.io objects:
+        * :class:`Note <pypump.models.note.Note>`
+        * :class:`Image <pypump.models.image.Image>`
+        * :class:`Comment <pypump.models.comment.Comment>`
+        * :class:`Person <pypump.models.person.Person>`
+        * :class:`Inbox <pypump.models.feed.Inbox>`
+        * :class:`Outbox <pypump.models.feed.Outbox>`
+        * :class:`Lists <pypump.models.feed.Lists>`
+
 
 .. autoclass:: pypump.models.note.Note
         :exclude-members: serialize
@@ -38,17 +45,22 @@ Classes representing pump.io objects.
 .. autoclass:: pypump.models.person.Person
         :inherited-members:
 
-.. .. module:: pypump.models.feed
-.. .. autoclass:: Feed
-.. .. autoclass:: Inbox
-.. .. autoclass:: Outbox
-.. .. autoclass:: Lists
+.. autoclass:: pypump.models.feed.Inbox
+        :inherited-members:
+.. autoclass:: pypump.models.feed.Outbox
+        :inherited-members:
+.. autoclass:: pypump.models.feed.Lists
+        :inherited-members:
 
-Plumbing objects
-----------------
+Low level objects
+-----------------
 
 Classes you probably don't need to know about.
 
 .. autoclass:: pypump.models.image.ImageContainer
 .. .. autoclass:: pypump.models.PumpObject
 .. .. autoclass:: pypump.models.Mapper
+
+.. autoclass:: pypump.models.feed.Feed
+        :inherited-members:
+.. .. autoclass:: pypump.models.feed.ItemList
