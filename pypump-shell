@@ -16,14 +16,13 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import json
-import sys
-import os
 import logging
 import optparse
-import six
+import sys
 
 import requests
+import six
+
 from pypump import PyPump, Client
 
 try:
@@ -42,12 +41,13 @@ If you need help please visit our docs:
 https://pypump.readthedocs.org/en/latest
 """
 
+
 def ascii_table(headings, data):
     """ Draws an ascii table """
     # first we need to work out how long each column should be
     columns = {}
     for heading in headings:
-        columns[heading] = len(heading)+1 # plus one for the extra padding
+        columns[heading] = len(heading)+1  # plus one for the extra padding
 
     # data could also overspill
     for record in data:
@@ -56,13 +56,12 @@ def ascii_table(headings, data):
             if dlen > columns[heading]:
                 columns[heading] = dlen
 
-
     table = {}
     # okay now we need to pad the headers readying for drawing
     for column, width in columns.items():
         table[column] = "{name}{padding}".format(
-                name=column, padding=" "*(width-len(column))
-                )
+            name=column, padding=" "*(width-len(column))
+            )
 
     heading = "| "
     for column in table.values():
@@ -75,8 +74,8 @@ def ascii_table(headings, data):
         table[i] = "| "
         for column, cdata in record.items():
             table[i] += "{data}{padding} | ".format(
-                    data=cdata, padding=" "*(columns[column]-len(cdata)-1)
-                    )
+                data=cdata, padding=" "*(columns[column]-len(cdata)-1)
+                )
 
     # make the helper function which will draw the seporators
     def draw_sep(columns):
@@ -88,7 +87,7 @@ def ascii_table(headings, data):
 
         return sep + "\r\n"
 
-    sepper = lambda :draw_sep(columns.values())
+    sepper = lambda: draw_sep(columns.values())
     stable = sepper()
     stable += heading + "\r\n"
     stable += sepper()
@@ -96,7 +95,8 @@ def ascii_table(headings, data):
         stable += value + "\r\n"
 
     stable += sepper()
-    return stable # few, glad that's over
+    return stable  # few, glad that's over
+
 
 def verifier(url):
     """ Asks for verification code for OAuth OOB """
@@ -146,8 +146,7 @@ if __name__ == "__main__":
     )
 
     sys.stdout.write("-> Setting up PyPump  ")
-    sys.stdout.flush() # actually get it on the screen - most terms wait for \n
-
+    sys.stdout.flush()  # actually get it on the screen - most terms wait for \n
 
     try:
         pump = PyPump(client=client, verifier_callback=verifier, verify_requests=options.verify)
@@ -190,7 +189,6 @@ if __name__ == "__main__":
             ]
         )
     )
-
 
     embed(
         config=cfg,
