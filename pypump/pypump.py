@@ -223,7 +223,7 @@ class PyPump(object):
                 headers=None, timeout=None, **kwargs):
         """ Make request to endpoint with OAuth.
         Returns dictionary with response data.
-        
+
         :param endpoint: endpoint path, or a fully qualified URL if raw=True.
         :param method: GET (default), POST or DELETE.
         :param data: data to send in the request body.

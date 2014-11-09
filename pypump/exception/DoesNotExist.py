@@ -17,4 +17,3 @@
 
 class DoesNotExist(Exception):
     pass
-

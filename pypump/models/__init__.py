@@ -302,7 +302,7 @@ class Likeable(object):
         Provides the model with the like and unlike methods as well as
         the property likes which will look up who's liked the model instance
         and return you back a list of user objects
-    
+
         must have links["likes"]
     """
 
@@ -329,7 +329,7 @@ class Likeable(object):
 
     def like(self):
         """ Like the object.
-        
+
         Example:
             >>> anote.liked
             False
@@ -341,7 +341,7 @@ class Likeable(object):
 
     def unlike(self):
         """ Unlike a previously liked object.
-        
+
         Example:
             >>> anote.liked
             True
@@ -393,10 +393,10 @@ class Commentable(object):
 
         :param comment: A :class:`Comment <pypump.models.comment.Comment>`
             instance, text content is also accepted.
-        
+
         Example:
             >>> anote.comment(pump.Comment('I agree!'))
-            
+
             """
         if isinstance(comment, six.string_types):
             comment = self._pump.Comment(comment)
@@ -433,7 +433,7 @@ class Shareable(object):
 
     def share(self):
         """ Share the object.
-        
+
         Example:
             >>> anote.share()
         """
@@ -442,7 +442,7 @@ class Shareable(object):
 
     def unshare(self):
         """ Unshare a previously shared object.
-        
+
         Example:
             >>> anote.unshare()
         """
@@ -486,7 +486,7 @@ class Addressable(object):
         for person in people:
             if isinstance(person, six.class_types):
                 tmp.append(person())
-            
+
             if isinstance(person, type(self._pump.Person())):
                 tmp.append({
                     "id": person.id,
@@ -506,7 +506,7 @@ class Addressable(object):
         """List of primary recipients.
         If entry is a :class:`Person` the object will show up
         in their direct inbox when sent.
-        
+
         Example:
             >>> mynote = pump.Note('hello pypumptest1')
             >>> mynote.to = pump.Person('pypumptest1@pumpity.net')
@@ -524,7 +524,7 @@ class Addressable(object):
     def _get_cc(self):
         """List of secondary recipients.
         The object will show up in the recipients inbox when sent.
-        
+
         Example:
             >>> mynote = pump.Note('hello world')
             >>> mynote.cc = pump.Public
@@ -567,10 +567,10 @@ class Addressable(object):
 
 class Postable(Addressable):
     """ Adds .send() """
-    
+
     def send(self):
         """ Send the object to the server.
-        
+
         Example:
             >>> mynote = pump.Note('Hello world!)
             >>> mynote.send()

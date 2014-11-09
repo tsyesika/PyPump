@@ -1,17 +1,17 @@
 ##
 # Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
-# 
-# This program is free software: you can redistribute it and/or modify 
-# it under the terms of the GNU General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. 
-# 
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-# GNU General Public License for more details. 
-# 
-# You should have received a copy of the GNU General Public License 
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
@@ -55,7 +55,7 @@ class Person(PumpObject, Addressable):
     def outbox(self):
         """ :class:`Outbox feed <pypump.models.feed.Outbox>` with all
         :class:`activities <pypump.models.activity.Activity>` sent by the person.
-        
+
         Example:
             >>> for activity in pump.me.outbox[:2]:
             ...     print(activity)
@@ -70,7 +70,7 @@ class Person(PumpObject, Addressable):
     def followers(self):
         """ :class:`Feed <pypump.models.feed.Feed>` with all
         :class:`Person <pypump.models.person.Person>` objects following the person.
-        
+
         Example:
             >>> alice = pump.Person('alice@example.org')
             >>> for follower in alice.followers[:2]:
@@ -86,7 +86,7 @@ class Person(PumpObject, Addressable):
     def following(self):
         """ :class:`Feed <pypump.models.feed.Feed>` with all
         :class:`Person <pypump.models.person.Person>` objects followed by the person.
-        
+
         Example:
             >>> bob = pump.Person('bob@example.org')
             >>> for followee in bob.following[:3]:
@@ -102,7 +102,7 @@ class Person(PumpObject, Addressable):
     def favorites(self):
         """ :class:`Feed <pypump.models.feed.Feed>` with all objects
         liked/favorited by the person.
-        
+
         Example:
             >>> for like in pump.me.favorites[:3]:
             ...     print(like)
@@ -118,7 +118,7 @@ class Person(PumpObject, Addressable):
     def lists(self):
         """ :class:`Lists feed <pypump.models.feed.Lists>` with all lists
         owned by the person.
-        
+
         Example:
             >>> for list in pump.me.lists:
             ...     print(list)
@@ -136,7 +136,7 @@ class Person(PumpObject, Addressable):
         """ :class:`Inbox feed <pypump.models.feed.Inbox>` with all
         :class:`activities <pypump.models.activity.Activity>`
         received by the person, can only be read if logged in as the owner.
-        
+
         Example:
             >>> for activity in pump.me.inbox[:2]:
             ...     print(activity.id)
@@ -194,7 +194,7 @@ class Person(PumpObject, Addressable):
 
         return data
 
-    def follow(self): 
+    def follow(self):
         """ Follow person """
         self._verb('follow')
 

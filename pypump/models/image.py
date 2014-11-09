@@ -1,17 +1,17 @@
 ##
 # Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
-# 
-# This program is free software: you can redistribute it and/or modify 
-# it under the terms of the GNU General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. 
-# 
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-# GNU General Public License for more details. 
-# 
-# You should have received a copy of the GNU General Public License 
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
@@ -26,7 +26,7 @@ _log = logging.getLogger(__name__)
 
 class ImageContainer(object):
     """ Container that holds information about an image.
-    
+
     :param url: URL to image file on the pump.io server.
     :param width: Width of the image.
     :param height: Height of the image.
@@ -95,7 +95,7 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
             "Content-Type": mimetype,
             "Content-Length": os.path.getsize(filename),
         }
-        
+
         # upload image file
         image = self._pump.request(
                 "/api/user/{0}/uploads".format(self._pump.client.nickname),
@@ -144,7 +144,7 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
                 height=full_image.get("height"),
                 width=full_image.get("width")
             )
-            
+
         if "image" in data:
             save_point = "original" if not hasattr(self, "original") else "thumbnail"
             thumbnail = data["image"]

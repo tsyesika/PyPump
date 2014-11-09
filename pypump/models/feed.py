@@ -1,17 +1,17 @@
 ##
 # Copyright (C) 2013 Jessica T. (Tsyesika) <xray7224@googlemail.com>
-# 
-# This program is free software: you can redistribute it and/or modify 
-# it under the terms of the GNU General Public License as published by 
-# the Free Software Foundation, either version 3 of the License, or 
-# (at your option) any later version. 
-# 
-# This program is distributed in the hope that it will be useful, 
-# but WITHOUT ANY WARRANTY; without even the implied warranty of 
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the 
-# GNU General Public License for more details. 
-# 
-# You should have received a copy of the GNU General Public License 
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
@@ -154,7 +154,7 @@ class ItemList(object):
             if isinstance(self._offset, int):
                 #return list based on offset
                 return self.feed._items[self._offset:]
-    
+
             return self.feed._items
         else:
             return tmp
@@ -351,7 +351,7 @@ class Inbox(Feed):
             return self
         self._direct = self._direct or self.__class__(url, pypump=self._pump)
         return self._direct
-    
+
     @property
     def major(self):
         """ Major inbox feed, contains major activities such as notes and images. """
@@ -360,7 +360,7 @@ class Inbox(Feed):
             return self
         self._major = self._major or self.__class__(url, pypump=self._pump)
         return self._major
-    
+
     @property
     def minor(self):
         """ Minor inbox feed, contains minor activities such as likes, shares and follows. """
@@ -432,7 +432,7 @@ class Lists(Feed):
 
     def create(self, display_name, content=None):
         """ Create a new user list :class:`collection <pypump.models.collection.Collection>`.
-        
+
         :param display_name: List title.
         :param content: (optional) List description.
 
@@ -462,4 +462,3 @@ class Lists(Feed):
                     return i
         else:
             return super(Lists, self).__getitem__(key)
-
