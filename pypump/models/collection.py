@@ -16,31 +16,52 @@
 ##
 import logging
 
-from pypump.models import PumpObject
+from pypump.models import (PumpObject, Deleteable)
 from pypump.models.feed import Feed
 
 _log = logging.getLogger(__name__)
 
 
-class Collection(PumpObject):
+class Collection(PumpObject, Deleteable):
+    """ This object represents a pump.io **collection**, collections have
+    a members :class:`Feed <pypump.models.feed.Feed>` and methods for adding
+    and removing objects to that feed.
+
+    :param id: (optional) Collection id.
+
+    Example:
+        >>> friendlist = pump.me.lists['Friends']
+        >>> list(friendlist.members)
+        [<Person: alice@example.org>]
+        >>> friendlist.add(pump.Person('bob@example.org'))
+    """
 
     object_type = 'collection'
-    _members = None
-    _ignore_attr = ["dummyattr", ]
-    _mapping = {}
+    _ignore_attr = ["in_reply_to"]
+    _mapping = {
+        "_members": "members"
+    }
 
-    def __init__(self, id=None, *args, **kwargs):
-        super(Collection, self).__init__(*args, **kwargs)
+    def __init__(self, id=None, **kwargs):
+        super(Collection, self).__init__(**kwargs)
 
         self.id = id
 
     @property
     def members(self):
+        """ :class:`Feed <pypump.models.feed.Feed>` of collection members.
+        """
         self._members = self._members or Feed(self.links["members"], pypump=self._pump)
         return self._members
 
     def add(self, obj):
-        """ Adds a member to the collection """
+        """ Adds a member to the collection.
+        
+        :param obj: Object to add.
+        
+        Example:
+            >>> mycollection.add(pump.Person('bob@example.org'))
+        """
         activity = {
             "verb": "add",
             "object": {
@@ -56,7 +77,13 @@ class Collection(PumpObject):
         self._post_activity(activity)
 
     def remove(self, obj):
-        """ Removes a member from the collection """
+        """ Removes a member from the collection.
+        
+        :param obj: Object to remove.
+        
+        Example:
+            >>> mycollection.remove(pump.Person('bob@example.org'))
+        """
         activity = {
             "verb": "remove",
             "object": {
@@ -70,10 +97,6 @@ class Collection(PumpObject):
         }
 
         self._post_activity(activity)
-
-    def delete(self):
-        """ Deletes the collection """
-        self._pump.request(self.id, method="DELETE")
 
     def __unicode__(self):
         return u'{0}'.format(self.display_name or self.id)

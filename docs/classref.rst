@@ -63,4 +63,6 @@ Classes you probably don't need to know about.
 
 .. autoclass:: pypump.models.feed.Feed
         :inherited-members:
+.. autoclass:: pypump.models.collection.Collection
+        :inherited-members:
 .. .. autoclass:: pypump.models.feed.ItemList
