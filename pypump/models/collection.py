@@ -56,9 +56,9 @@ class Collection(PumpObject, Deleteable):
 
     def add(self, obj):
         """ Adds a member to the collection.
-        
+
         :param obj: Object to add.
-        
+
         Example:
             >>> mycollection.add(pump.Person('bob@example.org'))
         """
@@ -78,9 +78,9 @@ class Collection(PumpObject, Deleteable):
 
     def remove(self, obj):
         """ Removes a member from the collection.
-        
+
         :param obj: Object to remove.
-        
+
         Example:
             >>> mycollection.remove(pump.Person('bob@example.org'))
         """
