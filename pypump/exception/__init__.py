@@ -18,5 +18,8 @@ from __future__ import absolute_import
 
 from pypump.exception.StoreException import StoreException, ValidationError
 
+__all__ = ["StoreException", "ValidationError", "PyPumpException"]
+
+
 class PyPumpException(Exception):
     pass

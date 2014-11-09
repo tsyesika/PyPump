@@ -22,6 +22,7 @@ from pypump.exception import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
+
 class Person(PumpObject, Addressable):
     """ This object represents a pump.io **person**,
     a person is a user on the pump.io network.
@@ -38,7 +39,7 @@ class Person(PumpObject, Addressable):
     """
 
     object_type = 'person'
-    _ignore_attr = ['liked','in_reply_to']
+    _ignore_attr = ['liked', 'in_reply_to']
     _mapping = {
         "username": "preferredUsername",
         "location":"location",
@@ -63,7 +64,7 @@ class Person(PumpObject, Addressable):
             pypumptest2 unliked a comment in reply to a note
             pypumptest2 deleted a note
         """
-        self._outbox = self._outbox or Outbox(self.links['activity-outbox'],pypump=self._pump)
+        self._outbox = self._outbox or Outbox(self.links['activity-outbox'], pypump=self._pump)
         return self._outbox
 
     @property
@@ -79,7 +80,7 @@ class Person(PumpObject, Addressable):
             acct:bob@example.org
             acct:carol@example.org
         """
-        self._followers = self._followers or Followers(self.links['followers'],pypump=self._pump)
+        self._followers = self._followers or Followers(self.links['followers'], pypump=self._pump)
         return self._followers
 
     @property
@@ -95,7 +96,7 @@ class Person(PumpObject, Addressable):
             acct:alice@example.org
             acct:duncan@example.org
         """
-        self._following = self._following or Following(self.links['following'],pypump=self._pump)
+        self._following = self._following or Following(self.links['following'], pypump=self._pump)
         return self._following
 
     @property
@@ -111,7 +112,7 @@ class Person(PumpObject, Addressable):
             image by bob@example.org
             comment by evan@e14n.com
         """
-        self._favorites = self._favorites or Favorites(self.links['favorites'],pypump=self._pump)
+        self._favorites = self._favorites or Favorites(self.links['favorites'], pypump=self._pump)
         return self._favorites
 
     @property
@@ -128,7 +129,7 @@ class Person(PumpObject, Addressable):
             Coworkers
             Friends
         """
-        self._lists = self._lists or Lists(self.links['lists'],pypump=self._pump)
+        self._lists = self._lists or Lists(self.links['lists'], pypump=self._pump)
         return self._lists
 
     @property
@@ -165,7 +166,7 @@ class Person(PumpObject, Addressable):
         super(Person, self).__init__(**kwargs)
 
         if isinstance(webfinger, six.string_types):
-            if not "@" in webfinger: # TODO do better validation
+            if "@" not in webfinger:  # TODO do better validation
                 raise PyPumpException("Not a valid webfinger: %s" % webfinger)
 
             self.id = "acct:{0}".format(webfinger)
@@ -183,10 +184,10 @@ class Person(PumpObject, Addressable):
     def serialize(self, verb):
         data = super(Person, self).serialize()
         data.update({
-            "verb":verb,
-            "object":{
-                "id":self.id,
-                "objectType":self.object_type,
+            "verb": verb,
+            "object": {
+                "id": self.id,
+                "objectType": self.object_type,
                 "displayName": self.display_name,
                 "summary": self.summary,
             }
@@ -203,7 +204,7 @@ class Person(PumpObject, Addressable):
         self._verb('stop-following')
 
     def update(self):
-        #TODO update location
+        # TODO update location
         """ Updates person object"""
         data = self.serialize(verb="update")
         self._post_activity(data)

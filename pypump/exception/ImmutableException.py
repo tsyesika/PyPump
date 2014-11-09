@@ -15,6 +15,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+
 class ImmutableException(Exception):
 
     message = "You can't set %s on %s, the object is immutable."

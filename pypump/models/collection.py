@@ -21,6 +21,7 @@ from pypump.models.feed import Feed
 
 _log = logging.getLogger(__name__)
 
+
 class Collection(PumpObject):
 
     object_type = 'collection'
@@ -46,7 +47,7 @@ class Collection(PumpObject):
                 "objectType": obj.object_type,
                 "id": obj.id
             },
-            "target":{
+            "target": {
                 "objectType": self.object_type,
                 "id": self.id
             }
@@ -62,7 +63,7 @@ class Collection(PumpObject):
                 "objectType": obj.object_type,
                 "id": obj.id
             },
-            "target":{
+            "target": {
                 "objectType": self.object_type,
                 "id": self.id
             }

@@ -24,6 +24,7 @@ from pypump.models import (PumpObject, Addressable, Likeable, Commentable,
 
 _log = logging.getLogger(__name__)
 
+
 class ImageContainer(object):
     """ Container that holds information about an image.
 
@@ -42,6 +43,7 @@ class ImageContainer(object):
             height=self.height
         )
 
+
 class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressable):
     """ This object represents a pump.io **image**,
     images are used to post image content with optional text (or html) messages
@@ -58,8 +60,8 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
     object_type = 'image'
     _ignore_attr = ["summary", "image"]
     _mapping = {
-        "thumbnail":"image",
-        "original":"fullImage"
+        "thumbnail": "image",
+        "original": "fullImage",
     }
 
     def __init__(self, display_name=None, content=None, **kwargs):
@@ -98,11 +100,11 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
 
         # upload image file
         image = self._pump.request(
-                "/api/user/{0}/uploads".format(self._pump.client.nickname),
-                method="POST",
-                data=open(filename, "rb").read(),
-                headers=headers,
-                )
+            "/api/user/{0}/uploads".format(self._pump.client.nickname),
+            method="POST",
+            data=open(filename, "rb").read(),
+            headers=headers,
+        )
 
         # now send it to the feed
         data = {

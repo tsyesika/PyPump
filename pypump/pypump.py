@@ -43,6 +43,7 @@ from pypump.models.collection import Collection, Public
 
 _log = logging.getLogger(__name__)
 
+
 class PyPump(object):
     """Main class to interface with PyPump.
 
@@ -117,7 +118,6 @@ class PyPump(object):
         if "client-expirey" in self.store:
             self.client.expirey = self.store["client-expirey"]
 
-
         if not self.client.key:
             self.client.register()
             # Save the info back to the store
@@ -140,8 +140,8 @@ class PyPump(object):
             return self._me
 
         self._me = self.Person("{username}@{server}".format(
-            username = self.client.nickname,
-            server = self.client.server
+            username=self.client.nickname,
+            server=self.client.server,
         ))
         return self._me
 
@@ -171,15 +171,15 @@ class PyPump(object):
         """ Returns a fully qualified URL """
         server = None
         if "://" in endpoint:
-            #looks like an url, let's break it down
+            # looks like an url, let's break it down
             server, endpoint = self._deconstruct_url(endpoint)
 
         endpoint = endpoint.lstrip("/")
         url = "{proto}://{server}/{endpoint}".format(
-                proto=self.protocol,
-                server=self.client.server if server is None else server,
-                endpoint=endpoint
-                )
+            proto=self.protocol,
+            server=self.client.server if server is None else server,
+            endpoint=endpoint,
+        )
         return url
 
     def _deconstruct_url(self, url):
@@ -202,18 +202,18 @@ class PyPump(object):
                 client = Client(
                     webfinger=self.client.webfinger,
                     name=self.client.name,
-                    type=self.client.type
+                    type=self.client.type,
                 )
                 client.set_pump(self)
                 client.register(server)
             else:
                 client = Client(
-                        webfinger=self.client.webfinger,
-                        key=key,
-                        secret=secret,
-                        type=self.client.type,
-                        name=self.client.name,
-                        )
+                    webfinger=self.client.webfinger,
+                    key=key,
+                    secret=secret,
+                    type=self.client.type,
+                    name=self.client.name,
+                )
                 client.set_pump(self)
 
             self._server_cache[server] = client
@@ -259,12 +259,12 @@ class PyPump(object):
         for attempt in range(1 + retries):
             if method == "POST":
                 request = {
-                        "auth": client,
-                        "headers": headers,
-                        "params": params,
-                        "data": data,
-                        "timeout": timeout,
-                        }
+                    "auth": client,
+                    "headers": headers,
+                    "params": params,
+                    "data": data,
+                    "timeout": timeout,
+                }
 
                 request.update(kwargs)
                 response = self._requester(
@@ -276,11 +276,11 @@ class PyPump(object):
 
             elif method == "GET":
                 request = {
-                        "params": params,
-                        "auth": client,
-                        "headers": headers,
-                        "timeout": timeout,
-                        }
+                    "params": params,
+                    "auth": client,
+                    "headers": headers,
+                    "timeout": timeout,
+                }
 
                 request.update(kwargs)
                 response = self._requester(
@@ -292,11 +292,11 @@ class PyPump(object):
 
             elif method == "DELETE":
                 request = {
-                        "params": params,
-                        "auth": client,
-                        "headers": headers,
-                        "timeout": timeout,
-                        }
+                    "params": params,
+                    "auth": client,
+                    "headers": headers,
+                    "timeout": timeout,
+                }
 
                 request.update(kwargs)
                 response = self._requester(
@@ -320,7 +320,7 @@ class PyPump(object):
                         error = response.content
 
                     if not error:
-                        raise IndexError # yesss i know.
+                        raise IndexError  # yesss i know.
                 except IndexError:
                     error = "400 - Bad request."
                 raise PyPumpException(error)
@@ -330,10 +330,10 @@ class PyPump(object):
 
         error = "Request Failed to {url} (response: {data} | status: {status})"
         error = error.format(
-                url=url,
-                data=response.content,
-                status=response.status_code
-                )
+            url=url,
+            data=response.content,
+            status=response.status_code
+        )
 
         raise PyPumpException(error)
 
@@ -350,7 +350,7 @@ class PyPump(object):
             return response
         except requests.exceptions.ConnectionError:
             if self.protocol == "http" or raw:
-                raise # shoot this seems real.
+                raise  # shoot this seems real.
             else:
                 self.set_http()
                 url = self._build_url(endpoint)
@@ -414,11 +414,11 @@ class PyPump(object):
 
         if server == self.client.server:
             self.oauth = OAuth1(
-                    client_key=self.store["client-key"],
-                    client_secret=self.store["client-secret"],
-                    resource_owner_key=self.store["oauth-access-token"],
-                    resource_owner_secret=self.store["oauth-access-secret"]
-                    )
+                client_key=self.store["client-key"],
+                client_secret=self.store["client-secret"],
+                resource_owner_key=self.store["oauth-access-token"],
+                resource_owner_secret=self.store["oauth-access-secret"],
+            )
             return self.oauth
         else:
             return OAuth1(
@@ -429,10 +429,10 @@ class PyPump(object):
     def request_token(self):
         """ Gets OAuth request token """
         client = OAuth1(
-                client_key=self._server_cache[self.client.server].key,
-                client_secret=self._server_cache[self.client.server].secret,
-                callback_uri=self.callback
-                )
+            client_key=self._server_cache[self.client.server].key,
+            client_secret=self._server_cache[self.client.server].secret,
+            callback_uri=self.callback,
+        )
 
         request = {"auth": client}
         response = self._requester(
@@ -445,19 +445,19 @@ class PyPump(object):
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
-            }
+        }
 
         return data
 
     def request_access(self, verifier):
         """ Get OAuth access token so we can make requests """
         client = OAuth1(
-                client_key=self._server_cache[self.client.server].key,
-                client_secret=self._server_cache[self.client.server].secret,
-                resource_owner_key=self.store["oauth-request-token"],
-                resource_owner_secret=self.store["oauth-request-secret"],
-                verifier=verifier
-                )
+            client_key=self._server_cache[self.client.server].key,
+            client_secret=self._server_cache[self.client.server].secret,
+            resource_owner_key=self.store["oauth-request-token"],
+            resource_owner_secret=self.store["oauth-request-secret"],
+            verifier=verifier,
+        )
 
         request = {"auth": client}
         response = self._requester(
@@ -470,7 +470,8 @@ class PyPump(object):
 
         self.store["oauth-access-token"] = data[self.PARAM_TOKEN][0]
         self.store["oauth-access-secret"] = data[self.PARAM_TOKEN_SECRET][0]
-        self._server_tokens = {} # clean up code.
+        self._server_tokens = {}  # clean up code.
+
 
 class WebPump(PyPump):
     """

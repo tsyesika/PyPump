@@ -17,6 +17,7 @@
 
 from pypump.models import PumpObject, Mapper
 
+
 class Place(PumpObject):
     object_type = 'place'
     _ignore_attr = list()

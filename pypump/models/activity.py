@@ -21,6 +21,7 @@ import logging
 
 _log = logging.getLogger(__name__)
 
+
 class Application(PumpObject):
     _ignore_attr = ["likes", "replies", "shares", "author", "content",
                     "in_reply_to", "liked", "summary"]
@@ -31,14 +32,15 @@ class Application(PumpObject):
 
 
 class Activity(PumpObject):
-    _ignore_attr = [ "author","deleted", "display_name","in_reply_to",
-                    "liked", "summary",]
+    _ignore_attr = ["author", "deleted", "display_name", "in_reply_to",
+                    "liked", "summary"]
+
     _mapping = {
-        "verb":"verb",
-        "generator":"generator",
-        "received":"received",
-        "actor":"actor",
-        "obj":"object"
+        "verb": "verb",
+        "generator": "generator",
+        "received": "received",
+        "actor": "actor",
+        "obj": "object",
     }
 
     def __init__(self, *args, **kwargs):
@@ -47,7 +49,7 @@ class Activity(PumpObject):
     def __repr__(self):
         return '<Activity: {webfinger} {verb}ed {model}>'.format(
             webfinger=self.actor.id.replace("acct:", ""),
-            verb=self.verb.rstrip("e"), # english: e + ed = ed
+            verb=self.verb.rstrip("e"),  # english: e + ed = ed
             model=self.obj.object_type
         )
 

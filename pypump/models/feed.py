@@ -22,6 +22,7 @@ from pypump.models import PumpObject, Mapper
 
 _log = logging.getLogger(__name__)
 
+
 class ItemList(object):
     """ This object is returned when iterating over a :class:`Feed <pypump.models.feed.Feed>`.
 
@@ -43,7 +44,7 @@ class ItemList(object):
         self.itemcount = 0
         self._offset = offset
 
-        #set limit based on offset and stop
+        # set limit based on offset and stop
         if isinstance(stop, int):
             if isinstance(offset, int):
                 self._limit = stop - offset
@@ -52,13 +53,13 @@ class ItemList(object):
         else:
             self._limit = limit
 
-        #set since to stop if stop is a PumpObject
+        # set since to stop if stop is a PumpObject
         if self.get_obj_id(stop):
             self._since = self.get_obj_id(stop)
         else:
             self._since = self.get_obj_id(since)
 
-        #set before to offset if offset is a PumpObject
+        # set before to offset if offset is a PumpObject
         if self.get_obj_id(offset):
             self._before = self.get_obj_id(offset)
             self._offset = None
@@ -71,7 +72,6 @@ class ItemList(object):
             raise PyPumpException("can not have both offset and since/before parameters")
         elif self._since and self._before:
             raise PyPumpException("can not have both since and before parameters")
-
 
     def get_obj_id(self, item):
         """ Get the id of a PumpObject.
@@ -118,7 +118,7 @@ class ItemList(object):
 
         tmp = []
         if self._before is not None:
-            #return list based on before param
+            # return list based on before param
             if not id_in_list(self.feed._items, self._before):
                 return tmp
             if isinstance(self._before, six.string_types):
@@ -134,7 +134,7 @@ class ItemList(object):
             return tmp
 
         if self._since is not None:
-            #return list based on since param
+            # return list based on since param
             if not id_in_list(self.feed._items, self._since):
                 return tmp
             if isinstance(self._since, six.string_types):
@@ -148,11 +148,11 @@ class ItemList(object):
                 self._since = False
             return reversed(tmp)
 
-        if not hasattr(self,'usedcache'):
-            self.usedcache=True #invalidate cache
+        if not hasattr(self, 'usedcache'):
+            self.usedcache = True  # invalidate cache
 
             if isinstance(self._offset, int):
-                #return list based on offset
+                # return list based on offset
                 return self.feed._items[self._offset:]
 
             return self.feed._items
@@ -180,7 +180,7 @@ class ItemList(object):
 
         for i in (self.get_cached() if self._cached else self.get_page(self.url)):
             if not self._cached:
-                #some objects don't have objectType set (inbox activities)
+                # some objects don't have objectType set (inbox activities)
                 if not i.get("objectType"):
                     i["objectType"] = self.feed.object_types[0]
                 obj = Mapper(pypump=self.feed._pump).get_object(i)
@@ -189,7 +189,7 @@ class ItemList(object):
                 obj = i
             self.cache.append(obj)
 
-        #ran out of items
+        # ran out of items
         if len(self.cache) <= 0:
             self._done = True
 
@@ -197,14 +197,13 @@ class ItemList(object):
         if self._since is not None:
             if self.feed.links.get('prev'):
                 self.url = self.feed.links['prev']
-                del self.feed.links['prev'] #avoid using it again
+                del self.feed.links['prev']  # avoid using it again
         else:
             if self.feed.links.get('next'):
                 self.url = self.feed.links['next']
-                del self.feed.links['next'] #avoid using it again
+                del self.feed.links['next']  # avoid using it again
             else:
                 self.url = None
-
 
     def __next__(self):
         """ Return next object or raise StopIteration """
@@ -216,7 +215,7 @@ class ItemList(object):
         else:
             obj = self.cache.pop(0)
 
-        self.itemcount +=1
+        self.itemcount += 1
         return obj
 
     def __iter__(self):
@@ -231,11 +230,12 @@ class Feed(PumpObject):
     navigating a list of objects (inbox,followers,shares,likes and so on).
     """
     _ignore_attr = []
-    _mapping = {"id":"url",
-                "object_types": "objectTypes",
-                "_items": "items",
-                "total_items": "totalItems",
-               }
+    _mapping = {
+        "id": "url",
+        "object_types": "objectTypes",
+        "_items": "items",
+        "total_items": "totalItems",
+    }
 
     def __init__(self, url=None, *args, **kwargs):
         super(Feed, self).__init__(*args, **kwargs)
@@ -251,7 +251,7 @@ class Feed(PumpObject):
         """
         if self._items is not None and self.total_items is not None:
             if len(self._items) >= self.total_items:
-                #return cached items
+                # return cached items
                 return ItemList(self, offset=offset, limit=limit, since=since, before=before, cached=True)
 
         return ItemList(self, offset=offset, limit=limit, since=since, before=before)
@@ -285,7 +285,7 @@ class Feed(PumpObject):
 
         if type(key) is not int:
             raise TypeError('index must be integer')
-        item = ItemList(self, limit=1, offset=key, stop=key+1)
+        item = ItemList(self, limit=1, offset=key, stop=key + 1)
         try:
             return item.next()
         except StopIteration:
@@ -293,11 +293,11 @@ class Feed(PumpObject):
 
     def __getslice__(self, s, e=None):
         if type(s) is not slice:
-            s = slice(s,e)
+            s = slice(s, e)
 
         if self._items is not None and self.total_items is not None:
             if len(self._items) >= self.total_items:
-                #return cached items
+                # return cached items
                 return ItemList(self, offset=s.start, stop=s.stop, cached=True)
 
         return ItemList(self, offset=s.start, stop=s.stop)
@@ -315,12 +315,15 @@ class Feed(PumpObject):
 class Followers(Feed):
     """ Person's followers """
 
+
 class Following(Feed):
     """ People followed by Person """
 
+
 class Favorites(Feed):
     """ Person's favorites """
-    #API bug, can only get 20 items, see https://github.com/xray7224/PyPump/issues/65
+    # API bug, can only get 20 items, see https://github.com/xray7224/PyPump/issues/65
+
 
 class Inbox(Feed):
     """ This object represents a pump.io **inbox feed**,
@@ -424,7 +427,7 @@ class Lists(Feed):
     # API bug, offset and count doesnt work right,
     # see https://github.com/e14n/pump.io/issues/794
     # TODO can not see lists for persons on remote server (need more auth than 2-leg)
-    _membertype="person"
+    _membertype = "person"
 
     @property
     def membertype(self):
@@ -444,12 +447,12 @@ class Lists(Feed):
         """
 
         activity = {
-            "verb":"create",
-            "object":{
-                "objectType":"collection",
-                "objectTypes":[self.membertype],
-                "displayName":display_name,
-                "content":content
+            "verb": "create",
+            "object": {
+                "objectType": "collection",
+                "objectTypes": [self.membertype],
+                "displayName": display_name,
+                "content": content
             }
         }
         self._post_activity(activity, unserialize=False)

@@ -15,6 +15,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
+
 class PumpException(Exception):
     """ This is used when the remote server gives an error """
     pass

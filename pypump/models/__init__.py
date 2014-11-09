@@ -15,12 +15,16 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import logging, re
+import logging
+import re
 import six
+
 from dateutil.parser import parse
+
 from pypump.exception.PumpException import PumpException
 
 _log = logging.getLogger(__name__)
+
 
 class PumpObject(object):
 
@@ -42,7 +46,7 @@ class PumpObject(object):
         "updated": "updated",
         "upstream_duplicates": "upstreamDuplicates",
         "url": "url",
-        "deleted" : "deleted",
+        "deleted": "deleted",
         "object_type": "objectType",
         "_to": "to",
         "_cc": "cc",
@@ -54,7 +58,6 @@ class PumpObject(object):
         "_likes": "likes",
         "_shares": "shares",
     }
-
 
     def __init__(self, pypump=None, *args, **kwargs):
         """ Sets up pump instance """
@@ -178,6 +181,7 @@ class PumpObject(object):
         self._add_links(data)
         return self
 
+
 class Mapper(object):
 
     """ Handles mapping of json attributes to models """
@@ -224,8 +228,7 @@ class Mapper(object):
         elif key in self.feeds:
             self.set_feed(obj, key, data, from_json)
         else:
-            #_log.debug("Ignoring unknown attribute %r", key)
-            pass
+            _log.debug("Ignoring unknown attribute %r", key)
 
     def set_literal(self, obj, key, data, from_json):
         if data is not None:
@@ -296,6 +299,7 @@ class Mapper(object):
 
 
 from pypump.models.feed import Feed
+
 
 class Likeable(object):
     """
@@ -449,6 +453,7 @@ class Shareable(object):
 
         self._verb('unshare')
 
+
 class Deleteable(object):
     """ Provides the model with the ability to be deleted """
 
@@ -463,6 +468,7 @@ class Deleteable(object):
         """
 
         self._verb('delete')
+
 
 class Addressable(object):
     """ Adds methods to set to, cc, bto, bcc"""
@@ -564,6 +570,7 @@ class Addressable(object):
         }
 
         return data
+
 
 class Postable(Addressable):
     """ Adds .send() """

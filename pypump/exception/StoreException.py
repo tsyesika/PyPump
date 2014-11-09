@@ -20,6 +20,7 @@ class StoreException(Exception):
     """ Raised when error occurs in store """
     pass
 
+
 class ValidationError(StoreException):
     """ Raised when validation on a field fails """
     pass

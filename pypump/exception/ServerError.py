@@ -17,6 +17,7 @@
 
 import json
 
+
 class ServerError(Exception):
 
     def __init__(self, data, *args, **kwargs):

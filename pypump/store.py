@@ -29,11 +29,13 @@ from pypump.exception import ValidationError, StoreException
 # Regex taken from WTForms
 EMAIL_REGEX = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", re.IGNORECASE)
 
+
 def webfinger_validator(webfinger):
     """ Validates webfinger is correct - should look like user@host.tld """
     error = "Invalid webfinger. Should be in format username@host.tld"
     if not EMAIL_REGEX.match(webfinger):
         raise ValidationError(error)
+
 
 class AbstractStore(dict):
     """
@@ -107,6 +109,7 @@ class AbstractStore(dict):
     def __str__(self):
         return str(self.export())
 
+
 class DummyStore(AbstractStore):
     """
     This doesn't persistantly store any data it just acts like
@@ -120,6 +123,7 @@ class DummyStore(AbstractStore):
     @classmethod
     def load(cls, webfinger, pypump):
         return cls()
+
 
 class JSONStore(AbstractStore):
     """
@@ -158,7 +162,7 @@ class JSONStore(AbstractStore):
         )
 
         # The `open` built-in doesn't allow us to set the mode
-        mode = stat.S_IRUSR | stat.S_IWUSR #0600
+        mode = stat.S_IRUSR | stat.S_IWUSR  # 0600
         fd = os.open(filename, os.O_WRONLY | os.O_CREAT, mode)
         fout = os.fdopen(fd, "w")
         fout.write(json.dumps(self.export()))

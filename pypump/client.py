@@ -24,6 +24,7 @@ import requests
 
 _log = logging.getLogger(__name__)
 
+
 class ClientException(Exception):
 
     def __init__(self, message, context=None, *args, **kwargs):
@@ -31,6 +32,7 @@ class ClientException(Exception):
             message = "{0} (context: {1})".format(message, context)
 
         super(ClientException, self).__init__(message, *args, **kwargs)
+
 
 class Client(object):
     """This represents a client/application which is using the Pump API.
@@ -130,15 +132,15 @@ class Client(object):
     def request(self, server=None):
         """ Sends the request """
         request = {
-                "headers": {"Content-Type": "application/json"},
-                "timeout": self._pump.timeout,
-                "data": self.context,
-                }
+            "headers": {"Content-Type": "application/json"},
+            "timeout": self._pump.timeout,
+            "data": self.context,
+        }
 
         url = "{proto}://{server}/{endpoint}".format(
             proto=self._pump.protocol,
-            server = server or self.server,
-            endpoint = self.ENDPOINT
+            server=server or self.server,
+            endpoint=self.ENDPOINT,
         )
 
         response = self._pump._requester(requests.post, url, **request)
@@ -152,10 +154,10 @@ class Client(object):
             raise ClientException(server_data["error"], self.context)
 
         _log.debug("Client registration recieved: %(id)s %(secret)s %(expire)s", {
-                "id": server_data["client_id"],
-                "secret": server_data["client_secret"],
-                "expire": server_data["expires_at"]
-                })
+            "id": server_data["client_id"],
+            "secret": server_data["client_secret"],
+            "expire": server_data["expires_at"],
+        })
 
         return server_data
 
