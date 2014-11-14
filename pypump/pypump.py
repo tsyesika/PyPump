@@ -48,15 +48,16 @@ class PyPump(object):
     """Main class to interface with PyPump.
 
     This class keeps everything together and is responsible for making
-    requests to the server on it's own behalf and on the bahalf of the
+    requests to the server on it's own behalf and on the behalf of the
     other clients as well as handling the OAuth requests.
 
     :param client: an instance of :class:`Client <pypump.Client>`.
     :param verifier_callback: If this is our first time registering the
       client, this function will be called with a single argument, the
       url one can post to for completing verification.
-    :param store: this is the :class:`pypump.Store` instance to save any data persistantly.
-    :param verifier_callback: the URI that is used for redirecting a user
+    :param store: this is the :class:`pypump.Store` instance to save
+      any data persistantly.
+    :param callback: the URI that is used for redirecting a user
       after they authenticate this client... assuming this is
       happening over the web.  If not, the callback is "oob", or "out
       of band".
@@ -83,10 +84,7 @@ class PyPump(object):
                  verify_requests=True,
                  retries=0,
                  timeout=30):
-        """
-        This is the main pump instance, this handles the oauth,
-        this also holds the models.
-        """
+
         self._me = None
         self.protocol = "https"
 
@@ -134,7 +132,13 @@ class PyPump(object):
 
     @property
     def me(self):
-        """ Returns Person object of the logged in user """
+        """ Returns :class:`Person <pypump.models.person.Person>` instance of
+        the logged in user.
+
+        Example:
+            >>> pump.me
+            <Person: bob@example.org>
+        """
 
         if self._me is not None:
             return self._me
@@ -233,6 +237,25 @@ class PyPump(object):
         :param client: OAuth client data, if False do request without OAuth.
         :param headers: dictionary of HTTP headers.
         :param timeout: the timeout for a request, in seconds.
+
+        Example:
+            >>> pump.request('https://e14n.com/api/user/evan/profile', raw=True)
+            {u'displayName': u'Evan Prodromou',
+             u'favorites': {u'totalItems': 7227,
+              u'url': u'https://e14n.com/api/user/evan/favorites'},
+             u'id': u'acct:evan@e14n.com',
+             u'image': {u'height': 96,
+              u'url': u'https://e14n.com/uploads/evan/2014/9/24/knyf1g_thumb.jpg',
+              u'width': 96},
+             u'liked': False,
+             u'location': {u'displayName': u'Montreal, Quebec, Canada',
+              u'objectType': u'place'},
+             u'objectType': u'person',
+             u'preferredUsername': u'evan',
+             u'published': u'2013-02-20T15:34:52Z',
+             u'summary': u'I wanna make it with you. http://payb.tc/evanp',
+             u'updated': u'2014-09-24T02:38:32Z',
+             u'url': u'https://e14n.com/evan'}
         """
 
         retries = self.retries if retries is None else retries
@@ -399,7 +422,7 @@ class PyPump(object):
         )
 
     def verifier(self, verifier):
-        """ Called once verifier has been retrived """
+        """ Called once verifier has been retrieved. """
         self.request_access(verifier)
 
     def setup_oauth_client(self, url=None):
