@@ -15,7 +15,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-from pypump.models import PumpObject, Mapper
+from pypump.models import PumpObject, Mapper, Addressable
 
 import logging
 
@@ -31,7 +31,7 @@ class Application(PumpObject):
         super(Application, self).__init__(*args, **kwargs)
 
 
-class Activity(PumpObject):
+class Activity(PumpObject, Addressable):
     _ignore_attr = ["author", "deleted", "display_name", "in_reply_to",
                     "liked", "summary"]
 
