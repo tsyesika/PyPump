@@ -455,7 +455,8 @@ class Lists(Feed):
                 "content": content
             }
         }
-        self._post_activity(activity, unserialize=False)
+        if self._post_activity(activity, unserialize=False):
+            return self[display_name]
 
     def __getitem__(self, key):
         if isinstance(key, six.string_types):
