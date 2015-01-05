@@ -295,6 +295,23 @@ class PyPump(object):
                     endpoint=endpoint,
                     raw=raw,
                     **request
+                )       
+
+            elif method == "PUT":
+                request = {
+                    "auth": client,
+                    "headers": headers,
+                    "params":params,
+                    "data":data,
+                    "timeout":timeout,
+                }
+
+                request.update(kwargs)
+                response = self._requester(
+                   fnc = requests.put,
+                   endpoint = endpoint,
+                   raw = raw,
+                   **request
                 )
 
             elif method == "GET":
