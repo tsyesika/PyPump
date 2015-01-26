@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Command line interface to the pump.io APIs')
 
-    parser.add_argument("--loglevel",
+    parser.add_argument("--log", "--loglevel",
                         dest="loglevel",
                         default="warning",
                         help="Set level of logging. Can be one of {}".format(log_levels))
