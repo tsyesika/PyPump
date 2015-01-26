@@ -17,7 +17,7 @@
 ##
 
 import logging
-import optparse
+import argparse
 import sys
 
 import requests
@@ -105,39 +105,42 @@ def verifier(url):
     return six.moves.input("Verifier: ").lstrip(" ").rstrip(" ")
 
 if __name__ == "__main__":
-    parser = optparse.OptionParser()
+    # Taken from https://docs.python.org/2/library/logging.html#logging-levels
+    log_levels =  "{'CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'NOTSET'}"
 
-    parser.add_option("--log", "--loglevel",
-                      dest="loglevel",
-                      default="warning",
-                      help="Set level of logging")
+    parser = argparse.ArgumentParser(description='Command line interface to the pump.io APIs')
 
-    parser.add_option("--logfile",
-                      dest="logfile",
-                      action="store_true",
-                      default=False,
-                      help="Write logging to pypump-shell.log")
+    parser.add_argument("--loglevel",
+                        dest="loglevel",
+                        default="warning",
+                        help="Set level of logging. Can be one of {}".format(log_levels))
 
-    parser.add_option("--no-check-certificate",
-                      dest="verify",
-                      action="store_false",
-                      default=True,
-                      help="Accepts invalid SSL certificates")
+    parser.add_argument("--logfile",
+                        dest="logfile",
+                        action="store_true",
+                        default=False,
+                        help="Write logging to pypump-shell.log")
 
-    (options, args) = parser.parse_args()
+    parser.add_argument("--no-check-certificate",
+                        dest="verify",
+                        action="store_false",
+                        default=True,
+                        help="Accepts invalid SSL certificates")
+
+    parser.add_argument("webfinger",
+                        help="Webfinger to use when connecting")
+
+    options = parser.parse_args()
 
     log_level = getattr(logging, options.loglevel.upper(), None)
     if not isinstance(log_level, int):
-        raise ValueError('Invalid log level: %s' % options.loglevel)
+        raise ValueError('Invalid log level: {}. Can be one of {}'.format(options.loglevel,
+                                                                          log_levels))
 
     logfile = "pypump-shell.log" if options.logfile else None
     logging.basicConfig(level=log_level, filename=logfile)
 
-    webfinger = "" if len(args) <= 0 else args[0]
-
-    if not webfinger:
-        six.print_("You must specify a webfinger.")
-        sys.exit(1)
+    webfinger = options.webfinger
 
     client = Client(
         webfinger=webfinger,
