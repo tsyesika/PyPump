@@ -23,8 +23,18 @@ try:
 except ImportError:
     from distutils.core import setup
 
+install_requires=[
+    "requests-oauthlib>=0.3.0",
+    "requests>=1.2.0",
+    "python-dateutil>=2.1",
+]
+
 if version_info[0] == 2:
     warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
+
+    # Versions 2.6 and before don't come with argparse in stdlib, so add it to the install_requires
+    if version_info[1] <= 6:
+        install_requires.append("argparse")
 
 setup(
         name="PyPump",
@@ -37,11 +47,7 @@ setup(
         url="https://github.com/xray7224/PyPump",
         packages=["pypump", "pypump.exception", "pypump.models"],
         license="GPLv3+",
-        install_requires=[
-                "requests-oauthlib>=0.3.0",
-                "requests>=1.2.0",
-                "python-dateutil>=2.1",
-                ],
+        install_requires=install_requires,
         classifiers=[
                 "Development Status :: 3 - Alpha",
                 "Programming Language :: Python",
