@@ -278,56 +278,36 @@ class PyPump(object):
             url = endpoint
 
         headers = headers or {"Content-Type": "application/json"}
+        fnc = requests.get
+        request = {
+            "auth": client,
+            "headers": headers,
+            "params": params,
+            "timeout": timeout,
+        }
+        request.update(kwargs)
 
+        if method == "POST":
+            fnc=requests.post
+            request.update({"data": data})
+
+        elif method == "PUT":
+            fnc=requests.put
+            request.update({"data": data})
+
+        elif method == "GET":
+            fnc=requests.get
+
+        elif method == "DELETE":
+            fnc=requests.delete,
+                
         for attempt in range(1 + retries):
-            if method == "POST":
-                request = {
-                    "auth": client,
-                    "headers": headers,
-                    "params": params,
-                    "data": data,
-                    "timeout": timeout,
-                }
-
-                request.update(kwargs)
-                response = self._requester(
-                    fnc=requests.post,
-                    endpoint=endpoint,
-                    raw=raw,
-                    **request
-                )
-
-            elif method == "GET":
-                request = {
-                    "params": params,
-                    "auth": client,
-                    "headers": headers,
-                    "timeout": timeout,
-                }
-
-                request.update(kwargs)
-                response = self._requester(
-                    fnc=requests.get,
-                    endpoint=endpoint,
-                    raw=raw,
-                    **request
-                )
-
-            elif method == "DELETE":
-                request = {
-                    "params": params,
-                    "auth": client,
-                    "headers": headers,
-                    "timeout": timeout,
-                }
-
-                request.update(kwargs)
-                response = self._requester(
-                    fnc=requests.delete,
-                    endpoint=endpoint,
-                    raw=raw,
-                    **request
-                )
+            response = self._requester(
+                fnc=fnc,
+                endpoint=endpoint,
+                raw=raw,
+                **request
+            )
 
             if response.status_code == 200:
                 # huray!
