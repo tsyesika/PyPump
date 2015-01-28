@@ -287,21 +287,21 @@ class PyPump(object):
         }
         request.update(kwargs)
 
+        if method == "POST":
+            fnc=requests.post
+            request.update({"data": data})
+
+        elif method == "PUT":
+            fnc=requests.put
+            request.update({"data": data})
+
+        elif method == "GET":
+            fnc=requests.get
+
+        elif method == "DELETE":
+            fnc=requests.delete,
+                
         for attempt in range(1 + retries):
-            if method == "POST":
-                fnc=requests.post
-                request.update({"data": data})
-
-            elif method == "PUT":
-                fnc=requests.put
-                request.update({"data": data})
-
-            elif method == "GET":
-                fnc=requests.get
-
-            elif method == "DELETE":
-                fnc=requests.delete,
-
             response = self._requester(
                 fnc=fnc,
                 endpoint=endpoint,
