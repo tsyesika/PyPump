@@ -76,6 +76,9 @@ class Collection(PumpObject, Deleteable):
 
         self._post_activity(activity)
 
+        # Remove the cash so it's re-generated next time it's needed
+        self._members = None
+
     def remove(self, obj):
         """ Removes a member from the collection.
 
@@ -97,6 +100,9 @@ class Collection(PumpObject, Deleteable):
         }
 
         self._post_activity(activity)
+
+        # Remove the cash so it's re-generated next time it's needed
+        self._members = None
 
     def __unicode__(self):
         return u'{0}'.format(self.display_name or self.id)
