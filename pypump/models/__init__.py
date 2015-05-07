@@ -159,7 +159,14 @@ class PumpObject(object):
 
         if links.get("links"):
             for endpoint in links['links']:
-                self._add_link(endpoint, links['links'][endpoint]["href"])
+                # It would seem occasionally the links["links"][endpoint] is
+                # just a string (what would be the href value). I don't know
+                # why, it's likely a bug in pump.io but for now we'll support
+                # this too.
+                if isinstance(links['links'][endpoint], dict):
+                    self._add_link(endpoint, links['links'][endpoint]["href"])
+                else:
+                    self._add_link(endpoint, links["links"][endpoint])
 
         for endpoint in endpoints:
             if links.get(endpoint, None) is None:
