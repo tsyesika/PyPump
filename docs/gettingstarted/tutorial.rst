@@ -82,13 +82,13 @@ user's pump.io account!  You can now reconnect like so::
     ...     name="Test.io",
     ...     key=client_credentials[0],
     ...     secret=client_credentials[1],
-    ...     )
+    ...)
     >>> pump = PyPump(
     ...     client=client,
     ...     token=client_tokens[0], # the token
     ...     secret=client_tokens[1], # the token secret
     ...     verifier_callback=simple_verifier
-    ...     )
+    ...)
 
 Okay, we're connected!  Next up, we want to check out what our last 30
 items in our inbox are, but first we need to find ourselves::
@@ -135,7 +135,7 @@ dinner party::
 We can comment on the message saying we'd love to::
 
     >>> our_reply = pump.Comment("I'd love to!")
-    >>> message.comment(our_reply) # this is evans message we got above!
+    >>> message.comment(our_reply) # this is Evan's message we got above!
 
 (Since this Note activity is being instantiated, it needs a
 reference to our PyPump class instance.  Objects that you get back and
@@ -154,7 +154,7 @@ he's said some interesting things?::
     >>>     message = activity.obj
     >>>     print(message.content)
 
-Prehaps we want to know a bit about Evan::
+Perhaps we want to know a bit about Evan::
 
     >>> print(evan.summary)
 
@@ -212,7 +212,7 @@ You can easily do this by doing::
     >>> my_note.to = pump.Public
     >>> my_note.send()
 
-.. TODO: add explaination of how to list all collections and how to use them
+.. TODO: add explanation of how to list all collections and how to use them
 
 You can also send notes to specific people so if I wanted to send
 a note only to evan to invite him over, I could do something like this::

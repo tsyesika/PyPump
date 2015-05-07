@@ -17,7 +17,7 @@ So we need to get started::
     >>> from pypump import PyPump, Client
 
 As Part of our application we will need to ask the user to input a verification code
-from the website to give us access as part of the OAuth mechamism, the function needs
+from the website to give us access as part of the OAuth mechanism, the function needs
 to take a URL and have the user allow our application this function can either return
 the verification code or you can call pump.verify(code), a simple code::
 

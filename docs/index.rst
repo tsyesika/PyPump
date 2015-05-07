@@ -41,20 +41,6 @@ Common
    common/media
 
 
-Models
-------
-
-.. toctree::
-   :maxdepth: 1
-
-   models/inbox
-   models/note
-   models/comment
-   models/image
-   models/person
-   models/activity
-
-
 API
 ---
 
