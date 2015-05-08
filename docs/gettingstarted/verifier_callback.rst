@@ -31,7 +31,7 @@ Callback
 
 Having a function which is called and then returns back the verification might be more
 difficult in GUI programs or other interfaces. We provide a callback mechamism that you
-can use. If the verifier function returns None then PyPump assumes you will be be then
+can use. If the verifier function returns None then PyPump assumes you will be
 calling PyPump.verifier which takes the verifier as the argument.
 
 Complex GUI example
