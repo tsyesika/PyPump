@@ -2,13 +2,13 @@
 Getting Verifier
 ================
 
-As part of OAuth to allow OOB (Out of band) applications to have access to the account
-we have a link that they will click, follow the instructions and then copy the verifier
-into the application which we then relay to the server with other tokens. The server
-will them provide us with the credentials that we can use.
+For OAuth to allow OOB (Out of band) applications to have access to an account,
+we must provide a link, instructions, and a means of copying the verifier into an application
+and relaying it to the server with other tokens. The server
+will then provide us with the credentials that we can use.
 
-You will need to write a method which takes a URL that the user needs to visit and provides
-some way for that user to input a string value, which you will then give to PyPump. This could
+You must write a method which takes a URL that the user needs to visit, provide some 
+way for that user to input a string value (the verification), and then give that value to PyPump. This could
 be simply a case of printing the link and using raw_input/input to get the verifier or it could
 be a more complex function which redraws a GUI and opens a browser. 
 
