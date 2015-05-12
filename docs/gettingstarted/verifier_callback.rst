@@ -7,10 +7,10 @@ we have a link that they will click, follow the instructions and then copy the v
 into the application which we then relay to the server with other tokens. The server
 will them provide us with the credentials that we can use.
 
-You will need to write a method which takes a URL that the user needs to visit and provide
-some way of the users inputting string value which you will then give to PyPump. This could
-just be a case of printing the link and using raw_input/input to get the verifier or it could
-be a more complex funtion which redraws a GUI and opens a browser. 
+You will need to write a method which takes a URL that the user needs to visit and provides
+some way for that user to input a string value, which you will then give to PyPump. This could
+be simply a case of printing the link and using raw_input/input to get the verifier or it could
+be a more complex function which redraws a GUI and opens a browser. 
 
 
 Simple verifier
@@ -29,8 +29,8 @@ verifier in the PyPump Shell::
 Callback
 --------
 
-Having a function which is called and then returns back the verification might be more
-difficult in GUI programs or other interfaces. We provide a callback mechamism that you
+Having a function which is called and then returns the verification might be more
+difficult in GUI programs or other interfaces. We provide a callback mechanism that you
 can use. If the verifier function returns None then PyPump assumes you will be
 calling PyPump.verifier which takes the verifier as the argument.
 
@@ -52,7 +52,7 @@ one up in order to demonstrate exactly what might be involved::
             self.draw("Please wait, loading...")
 
             # setup pypump object
-            clinet = Client(
+            client = Client(
                 webfinger='someone@server.com',
                 type='native',
                 name='An awesome GUI client'
