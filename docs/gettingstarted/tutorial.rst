@@ -61,32 +61,34 @@ your first time, you need to authenticate this client::
     ...     return raw_input('Verifier: ') # they will get a code back
     >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
 
-By default PyPump will use the JSONStore which comes with PyPump. This
-will store the client and OAuth credentials created when you connect
-to pump at ``~/$XDG_CONFIG_HOME/PyPump/credentials.json.`` If you wish
-to change the path or store the data somewhere else (postgres, mongo,
-redis, etc.) we suggest you read the :doc:`../store` documentation.
-
 The PyPump call will try to verify with OAuth. You may wish to change how it
-asks for authentication. PyPump's ``simple_verifier`` by default writes to
+asks for authentication. The ``simple_verifier`` function in the example above writes to
 standard out a URL for the user to click and reads in from standard in for a
 verification code presented by the webserver.
 
-You should store the client credentials and tokens somewhere but ensure
-you store them somewhere safe with this information anyone can access the
-user's pump.io account!  You can now reconnect like so::
+.. note::
+
+        By default PyPump will use the JSONStore which comes with PyPump.
+        This will store the client and OAuth credentials created when you
+        connect to pump at ``~/$XDG_CONFIG_HOME/PyPump/credentials.json.`` If
+        you wish to change the path or store the data somewhere else 
+        (postgres, mongo, redis, etc.) we suggest you read the
+        :doc:`../store` documentation.
+
+        .. warning::
+
+                You should store the client credentials and tokens somewhere safe,
+                with this information anyone can access the user's pump.io account!
+
+You can now reconnect like so::
 
     >>> client = Client(
     ...     webfinger="mizbunny@example.org",
     ...     type="native",
     ...     name="Test.io",
-    ...     key=client_credentials[0],
-    ...     secret=client_credentials[1],
     ...)
     >>> pump = PyPump(
     ...     client=client,
-    ...     token=client_tokens[0], # the token
-    ...     secret=client_tokens[1], # the token secret
     ...     verifier_callback=simple_verifier
     ...)
 
