@@ -36,6 +36,22 @@ class Place(PumpObject):
     def __unicode__(self):
         return u"{name}".format(name=self.display_name or 'unknown')
 
+    def serialize(self):
+        data = {
+            "displayName" : self.display_name,
+            "objectType" : self.object_type,
+        }
+
+        try:
+            data.update({"lon": float(self.longitude),
+                         "lat": float(self.latitude)
+                        })
+        except TypeError, ValueError:
+            #ignore lat/lon data if it has non-floatable content
+            pass
+
+        return data
+
     def unserialize(self, data):
         if ("lon" in data and "lat" in data):
             self.longitude = float(data["lon"])

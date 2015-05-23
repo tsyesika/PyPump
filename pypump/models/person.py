@@ -190,6 +190,7 @@ class Person(PumpObject, Addressable):
                 "objectType": self.object_type,
                 "displayName": self.display_name,
                 "summary": self.summary,
+                "location": self.location.serialize()
             }
         })
 
@@ -204,7 +205,6 @@ class Person(PumpObject, Addressable):
         self._verb('stop-following')
 
     def update(self):
-        # TODO update location
         """ Updates person object"""
         data = self.serialize(verb="update")
         self._post_activity(data)
