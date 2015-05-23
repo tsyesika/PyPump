@@ -46,7 +46,7 @@ class Place(PumpObject):
             data.update({"lon": float(self.longitude),
                          "lat": float(self.latitude)
                         })
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             #ignore lat/lon data if it has non-floatable content
             pass
 
