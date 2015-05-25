@@ -68,9 +68,9 @@ class PyPump(object):
       seconds.
     """
 
-    PARAM_VERIFER = six.b("oauth_verifier")
-    PARAM_TOKEN = six.b("oauth_token")
-    PARAM_TOKEN_SECRET = six.b("oauth_token_secret")
+    PARAM_VERIFER = "oauth_verifier"
+    PARAM_TOKEN = "oauth_token"
+    PARAM_TOKEN_SECRET = "oauth_token_secret"
 
     URL_CLIENT_REGISTRATION = "/api/client/register"
 
@@ -444,7 +444,7 @@ class PyPump(object):
             **request
         )
 
-        data = parse.parse_qs(response.content)
+        data = parse.parse_qs(response.text)
         data = {
             'token': data[self.PARAM_TOKEN][0],
             'token_secret': data[self.PARAM_TOKEN_SECRET][0]
@@ -469,7 +469,7 @@ class PyPump(object):
             **request
         )
 
-        data = parse.parse_qs(response.content)
+        data = parse.parse_qs(response.text)
 
         self.store["oauth-access-token"] = data[self.PARAM_TOKEN][0]
         self.store["oauth-access-secret"] = data[self.PARAM_TOKEN_SECRET][0]

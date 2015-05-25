@@ -1,3 +1,8 @@
+0.7
+===
+- Person.update() now updates Person.location
+- Fixed bug where PyPump with Python3 failed to save credentials to theJSONStore
+
 0.6
 ===
 - Person no longer accept a webfinger without a hostname
