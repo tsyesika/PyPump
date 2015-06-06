@@ -197,7 +197,7 @@ class Mapper(object):
     # {"json_attr":("model_attr", "datatype"), .. } or similar
     literals = ["content", "display_name", "id", "object_type", "summary",
                 "url", "preferred_username", "verb", "username",
-                "total_items", "liked"]
+                "total_items", "liked", "license"]
     dates = ["updated", "published", "deleted", "received"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to",
                "location"]

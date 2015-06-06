@@ -62,14 +62,16 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
     _mapping = {
         "thumbnail": "image",
         "original": "fullImage",
+        "license": "license",
     }
 
-    def __init__(self, display_name=None, content=None, **kwargs):
+    def __init__(self, display_name=None, content=None, license=None, **kwargs):
 
         super(Image, self).__init__(**kwargs)
 
         self.display_name = display_name
         self.content = content
+        self.license = license
 
     def __repr__(self):
         return "<{type} by {webfinger}>".format(
@@ -113,7 +115,7 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
         }
         data.update(self.serialize())
 
-        if not self.content and not self.display_name:
+        if not self.content and not self.display_name and not self.license:
             self._post_activity(data)
         else:
             self._post_activity(data, unserialize=False)
@@ -123,6 +125,8 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
                 image['content'] = self.content
             if self.display_name:
                 image['displayName'] = self.display_name
+            if self.license:
+                image['license'] = self.license
             data = {
                 "verb": "update",
                 "object": image,
