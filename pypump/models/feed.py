@@ -87,13 +87,11 @@ class ItemList(object):
     def get_page(self, url):
         """ Get a page of items from API """
         if url:
-            try:
-                data = self.feed._request(url,
+            data = self.feed._request(url,
                                           offset=self._offset,
                                           since=self._since,
                                           before=self._before)
-            except:
-                return []
+
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
             self._since = False if self._since is not None else None
