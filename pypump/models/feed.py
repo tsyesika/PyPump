@@ -192,7 +192,12 @@ class ItemList(object):
             self._done = True
 
         # check what to do next time
-        if self._since is not None:
+        if hasattr(self.feed, 'issue65'):
+            # work around API bug for favorites feed, see https://github.com/xray7224/PyPump/issues/65
+            if self._offset is None:
+                self._offset = 0
+            self._offset += 20
+        elif self._since is not None:
             if self.feed.links.get('prev'):
                 self.url = self.feed.links['prev']
                 del self.feed.links['prev']  # avoid using it again
@@ -317,10 +322,11 @@ class Followers(Feed):
 class Following(Feed):
     """ People followed by Person """
 
-
 class Favorites(Feed):
     """ Person's favorites """
     # API bug, can only get 20 items, see https://github.com/xray7224/PyPump/issues/65
+    # mark feed so we can enable bug work around in ItemList._build_cache()
+    issue65 = True
 
 
 class Inbox(Feed):
