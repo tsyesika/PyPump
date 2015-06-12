@@ -85,7 +85,7 @@ I wonder what was posted last::
 Oh it's an image, lets see the thumbnail::
 
     >>> url = latest_activity.obj.thumbnail.url
-    >>> fout = open("some_image.{0}".format(url.split(".")[-1], "wb")
+    >>> fout = open("some_image.{0}".format(url.split(".")[-1]), "wb")
     >>> import urllib2 # this will be different with python3
     >>> fout.write(urllib2.urlopen(url).read())
     >>> fout.close()
@@ -97,7 +97,7 @@ Hmm, I want to see a bigger version::
     <Image at https://some.server/uploads/somefriend/2013/7/7/JkdX2.png">
     >>> # you will find Images often hold other pump.Image objects, we just need to extra the url
     >>> large_url = large_url.url
-    >>> fout = open("some_image_larger.{0}".format(large_url.split(".")[-1], "wb")
+    >>> fout = open("some_image_larger.{0}".format(large_url.split(".")[-1]), "wb")
     >>> fout.write(urllib2.urlopen(url).read())
     >>> fout.close()
 
