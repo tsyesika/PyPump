@@ -95,6 +95,8 @@ class ItemList(object):
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
             self._since = False if self._since is not None else None
+            if not hasattr(self.feed, 'issue65'):
+                self._offset = False
             if self._since is not None:
                 # we want oldest items first when using 'since'
                 return reversed(data['items'])
