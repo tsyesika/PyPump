@@ -91,6 +91,13 @@ class JSONStoreTest(PyPumpTest):
         except OSError:
             pass
 
+    def test_creating_pypump_dir(self):
+        os.environ["XDG_CONFIG_HOME"] = os.path.join(os.path.abspath("."), "pypump_config")
+        store = JSONStore()
+        store["unittest"] = "framework"
+
+        os.rmtree(os.environ["XDG_CONFIG_HOME"])
+
     def test_permissions(self):
         store = JSONStore(filename=self.filename)
         store["unittest"] = "framework"
