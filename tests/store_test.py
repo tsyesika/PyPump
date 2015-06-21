@@ -1,10 +1,11 @@
 from __future__ import absolute_import
 
 import os
+import shutil
 import stat
 
-from tests import PyPumpTest
 from pypump import AbstractStore, JSONStore
+from tests import PyPumpTest
 
 class TestStore(AbstractStore):
     """ Provide a more testable store """
@@ -80,8 +81,7 @@ class JSONStoreTest(PyPumpTest):
         filename = os.path.abspath(".")
         filename = os.path.join(filename, "pypumpstoretest.json")
 
-        if os.path.exists(filename):
-            raise OSError("{0} already exists".format(filename))
+        self.assertFalse(os.path.exists(filename), "{0} already exists".format(filename))
 
         self.filename = filename
 
@@ -93,10 +93,12 @@ class JSONStoreTest(PyPumpTest):
 
     def test_creating_pypump_dir(self):
         os.environ["XDG_CONFIG_HOME"] = os.path.join(os.path.abspath("."), "pypump_config")
+        self.assertFalse(os.path.exists(os.environ["XDG_CONFIG_HOME"]), "{0} already exists".format(os.environ["XDG_CONFIG_HOME"]))
+
         store = JSONStore()
         store["unittest"] = "framework"
 
-        os.rmtree(os.environ["XDG_CONFIG_HOME"])
+        shutil.rmtree(os.environ["XDG_CONFIG_HOME"], ignore_errors=True)
 
     def test_permissions(self):
         store = JSONStore(filename=self.filename)
