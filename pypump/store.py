@@ -183,7 +183,7 @@ class JSONStore(AbstractStore):
 
         base_path = os.path.join(config_home, "PyPump")
         if not os.path.isdir(base_path):
-            os.mkdir(base_path)
+            os.makedirs(base_path)
 
         return os.path.join(base_path, "credentials.json")
 
