@@ -16,18 +16,17 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>.
 ##
 
-import os
-import json
 import argparse
+import json
+import os
 
 from pypump import PyPump, Client
 
-class App(object):
 
+class App(object):
     client_name = 'pypump-post-note'
     pump = None
-    config_file = os.path.join(os.environ['HOME'],'.config',
-                               client_name, 'config.json')
+    config_file = os.path.join(os.environ['HOME'],'.config', client_name, 'config.json')
     config = dict()
 
     def __init__(self):
@@ -47,27 +46,27 @@ class App(object):
         # have to authorize the app with our account.
         webfinger = self.args.webfinger
 
-        client=Client(
+        client = Client(
             webfinger=webfinger,
             type='native',
             name=self.client_name,
             key=self.config.get(webfinger, {}).get('key'),
-            secret=self.config.get(webfinger, {}).get('secret')
+            secret=self.config.get(webfinger, {}).get('secret'),
         )
 
         self.pump = PyPump(
             client=client,
             token=self.config.get(webfinger, {}).get('token'),
             secret=self.config.get(webfinger, {}).get('token_secret'),
-            verifier_callback=self.verifier
+            verifier_callback=self.verifier,
         )
 
         # Add account credentials to config in case we didnt have it already
         self.config[webfinger] = {
-            'key' : self.pump.get_registration()[0],
-            'secret' : self.pump.get_registration()[1],
-            'token' : self.pump.get_token()[0],
-            'token_secret' : self.pump.get_token()[1],
+            'key': self.pump.get_registration()[0],
+            'secret': self.pump.get_registration()[1],
+            'token': self.pump.get_token()[0],
+            'token_secret': self.pump.get_token()[1],
         }
 
         self.write_config()
@@ -89,7 +88,7 @@ class App(object):
         with open(self.config_file, 'w') as f:
             f.write(json.dumps(self.config))
             f.close()
-    
+
     def read_config(self):
         """ Read config from file """
         try:
@@ -106,13 +105,15 @@ class App(object):
             note_title = self.args.note_title
         else:
             note_title = None
+
         note_content = self.args.note_content
-        mynote = self.pump.Note(display_name=note_title, content = note_content)
+        mynote = self.pump.Note(display_name=note_title, content=note_content)
         mynote.to = self.pump.me.followers
         mynote.cc = self.pump.Public
         mynote.send()
 
         return mynote.id or None
+
 
 if __name__ == '__main__':
     app = App()
