@@ -23,7 +23,6 @@ import json
 import logging
 
 import requests
-import six
 
 from six.moves.urllib import parse
 from requests_oauthlib import OAuth1
@@ -288,19 +287,16 @@ class PyPump(object):
         request.update(kwargs)
 
         if method == "POST":
-            fnc=requests.post
+            fnc = requests.post
             request.update({"data": data})
-
         elif method == "PUT":
-            fnc=requests.put
+            fnc = requests.put
             request.update({"data": data})
-
         elif method == "GET":
-            fnc=requests.get
-
+            fnc = requests.get
         elif method == "DELETE":
-            fnc=requests.delete,
-                
+            fnc = requests.delete
+
         for attempt in range(1 + retries):
             response = self._requester(
                 fnc=fnc,

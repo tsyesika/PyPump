@@ -38,16 +38,17 @@ class Place(PumpObject):
 
     def serialize(self):
         data = {
-            "displayName" : self.display_name,
-            "objectType" : self.object_type,
+            "displayName": self.display_name,
+            "objectType": self.object_type,
         }
 
         try:
-            data.update({"lon": float(self.longitude),
-                         "lat": float(self.latitude)
-                        })
+            data.update({
+                "lon": float(self.longitude),
+                "lat": float(self.latitude),
+            })
         except (TypeError, ValueError):
-            #ignore lat/lon data if it has non-floatable content
+            # ignore lat/lon data if it has non-floatable content
             pass
 
         return data

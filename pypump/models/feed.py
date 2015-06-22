@@ -87,10 +87,7 @@ class ItemList(object):
     def get_page(self, url):
         """ Get a page of items from API """
         if url:
-            data = self.feed._request(url,
-                                          offset=self._offset,
-                                          since=self._since,
-                                          before=self._before)
+            data = self.feed._request(url, offset=self._offset, since=self._since, before=self._before)
 
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
@@ -323,6 +320,7 @@ class Followers(Feed):
 
 class Following(Feed):
     """ People followed by Person """
+
 
 class Favorites(Feed):
     """ Person's favorites """
