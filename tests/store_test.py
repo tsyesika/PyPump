@@ -7,6 +7,7 @@ import stat
 from pypump import AbstractStore, JSONStore
 from tests import PyPumpTest
 
+
 class TestStore(AbstractStore):
     """ Provide a more testable store """
     save_called = False
@@ -17,6 +18,7 @@ class TestStore(AbstractStore):
         This will just change a flag to show it's been called
         """
         self.save_called = True
+
 
 class StoreTest(PyPumpTest):
     """
@@ -31,13 +33,12 @@ class StoreTest(PyPumpTest):
         def empty_store_key():
             store["coffee"]
         self.assertRaises(KeyError, empty_store_key)
-            
+
         # Store something
         store["coffee"] = "awesome"
 
         # Check we can get the same value back out
         self.assertEqual(store["coffee"], "awesome")
-
 
     def test_save_on_set(self):
         """ Test that save is called when a value is set """
@@ -71,6 +72,7 @@ class StoreTest(PyPumpTest):
         self.assertRaises(KeyError, empty_store_key)
 
         self.assertEqual(store["hai-key"], "value")
+
 
 class JSONStoreTest(PyPumpTest):
     """
@@ -106,5 +108,5 @@ class JSONStoreTest(PyPumpTest):
 
         mode = os.stat(self.filename).st_mode
 
-        #we're only going to test to make sure "others" can't read the file
+        # we're only going to test to make sure "others" can't read the file
         self.assertEqual(mode & stat.S_IRWXO, 0, "File mode is insecure")

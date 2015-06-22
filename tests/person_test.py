@@ -1,11 +1,13 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 from __future__ import absolute_import
+
 import six
-from tests import PyPumpTest
+
 from pypump.models.place import Place
+from tests import PyPumpTest
+
 
 class PersonTest(PyPumpTest):
-    
     def setUp(self):
         super(PersonTest, self).setUp()
         self.response.data = {
@@ -61,26 +63,26 @@ class PersonTest(PyPumpTest):
 
     def test_person(self):
         person = self.pump.Person("TestUser@example.com")
-        #is a Person object
+        # is a Person object
         self.assertTrue(isinstance(person, type(self.pump.Person())))
-        #repr
+        # repr
         self.assertEqual(person.__repr__(), '<Person: TestUser@example.com>')
-        #string
+        # string
         self.assertEqual(person.__str__(), self.response['displayName'])
-        #unicode
+        # unicode
         person.display_name = u'Test användarson'
         if six.PY3:
             self.assertEqual(person.__str__(), person.display_name)
         else:
             self.assertEqual(person.__str__(), person.display_name.encode('utf-8'))
-    
+
     def test_follow(self):
         """ Tests that pypump sends correct data when attempting to follow a person """
         person = self.pump.Person("TestUser@example.com")
-        
+
         # PyPump now expects the object returned back to it
         self.response.data = {
-            "actor": {"objectType": "person", "id":"acct:foo@bar"},
+            "actor": {"objectType": "person", "id": "acct:foo@bar"},
             "verb": "follow",
             "object": self.response.data
         }
@@ -91,7 +93,7 @@ class PersonTest(PyPumpTest):
 
         # Test ID is the correct ID
         self.assertEquals(person.id, self.request["object"]["id"])
-        
+
         # Ensure object type is correct
         self.assertEquals(person.object_type, self.request["object"]["objectType"])
 
@@ -100,10 +102,10 @@ class PersonTest(PyPumpTest):
         person = self.pump.Person("TestUser@example.com")
         person.summary = "New summary!"
         person.display_name = "New user"
-        
+
         self.response.data = {
             "verb": "update",
-            "actor": {"objectType": "person", "id":person.id},
+            "actor": {"objectType": "person", "id": person.id},
             "object": {
                 "id": person.id,
                 "summary": person.summary,
@@ -125,7 +127,7 @@ class PersonTest(PyPumpTest):
         person = self.pump.Person("TestUser@example.com")
 
         self.response.data = {
-            "actor": {"objectType": "person", "id":"acct:foo@bar"},
+            "actor": {"objectType": "person", "id": "acct:foo@bar"},
             "verb": "stop-following",
             "object": self.response.data
         }
@@ -133,7 +135,7 @@ class PersonTest(PyPumpTest):
 
         self.assertEquals(self.request["verb"], "stop-following")
         self.assertEquals(self.request["object"]["id"], person.id)
-        self.assertEquals(self.request["object"]["objectType"], person.object_type) 
+        self.assertEquals(self.request["object"]["objectType"], person.object_type)
 
     def test_minimal_unserialize(self):
         """ Test the smallest amount of data can be given to unserialize """
@@ -161,6 +163,6 @@ class PersonTest(PyPumpTest):
 
         # Test image model was made
         #self.assertTrue(isinstance(person.image, self.pump.Image))
-        
+
         # Test place model was made
-        self.assertTrue(isinstance(person.location, Place)) 
+        self.assertTrue(isinstance(person.location, Place))

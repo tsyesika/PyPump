@@ -3,8 +3,8 @@ from tests import PyPumpTest
 
 from pypump.models import PumpObject
 
+
 class PumpObjectTest(PyPumpTest):
-    
     def setUp(self):
         super(PumpObjectTest, self).setUp()
 
@@ -40,7 +40,7 @@ class PumpObjectTest(PyPumpTest):
             "lists": {
                 "url": "https://example.com/api/user/testuser/lists/person"
             },
-            "pump_io": { },
+            "pump_io": {},
             "location": {
                 "displayName": "North Pole",
                 "objectType": "place"

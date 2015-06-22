@@ -1,11 +1,13 @@
 from __future__ import absolute_import
 
-import unittest
 import json
-import six
 import os
+import unittest
+
+import six
 
 from pypump import WebPump, PyPump, Client, AbstractStore
+
 
 class Response(object):
 
@@ -27,12 +29,14 @@ class Response(object):
     def content(self):
         return self.data
 
+
 class Bucket(object):
     """ Container for useful test data """
 
     def __init__(self, **data):
         for key, value in data.items():
             setattr(self, key, value)
+
 
 class TestStore(AbstractStore):
     def save(self):
@@ -54,10 +58,10 @@ class TestStore(AbstractStore):
         store["oauth-access-token"] = "AccessToken"
         store["oauth-access-secret"] = "AccessSecret"
 
-        store["verifier"] = "AVerifier" # not strictly needed.
-
+        store["verifier"] = "AVerifier"  # not strictly needed.
 
         return store
+
 
 class TestMixin(object):
 
@@ -137,8 +141,10 @@ class TestMixin(object):
     def construct_oauth_url(self):
         return "https://{server}/oauth/authorize?oauth_token=Atoken".format(server=self.client.server)
 
+
 class TestWebPump(TestMixin, WebPump):
     pass
+
 
 class TestPump(TestMixin, PyPump):
 
@@ -149,6 +155,7 @@ class TestPump(TestMixin, PyPump):
     def _callback(self, url):
         return 'a verifier'
 
+
 class PyPumpTest(unittest.TestCase):
     """
         This is the base test class for PyPump.
@@ -158,7 +165,6 @@ class PyPumpTest(unittest.TestCase):
         values.
 
     """
-
     def setUp(self):
         """ This will setup everything needed to test PyPump """
         # response from server, any string will be treated as a json string

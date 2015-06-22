@@ -1,8 +1,9 @@
 from __future__ import absolute_import
+
 from tests import PyPumpTest
 
+
 class ImageTest(PyPumpTest):
-    
     def setUp(self):
         super(ImageTest, self).setUp()
         self.imgdata = {
@@ -12,17 +13,17 @@ class ImageTest(PyPumpTest):
             "id": "https://example.com/api/image/Pi9rux49S6C1Yhta0zbxyz",
             "author": {
                 "objectType": "person",
-                "id" : "acct:testuser@example.com",
+                "id": "acct:testuser@example.com",
             },
             "image": {
                 "url": "https://example.com/uploads/testuser/2013/12/24/XMAS13_thumb.jpg",
                 "height": 240,
-                "width": 320
+                "width": 320,
             },
             "fullImage": {
                 "url": "https://example.com/uploads/testuser/2013/12/24/XMAS13.jpg",
                 "width": 1280,
-                "height": 960
+                "height": 960,
             },
             "objectType": "image",
             "published": "2013-12-24T23:23:11Z",
@@ -34,29 +35,29 @@ class ImageTest(PyPumpTest):
             },
             "likes": {
                 "url": "https://example.com/api/image/Pi9rux49S6C1Yhta0zbxyz/likes",
-                "totalItems": 0
+                "totalItems": 0,
             },
             "replies": {
                 "url": "https://example.com/api/image/Pi9rux49S6C1Yhta0zbxyz/replies",
-                "totalItems": 0
+                "totalItems": 0,
             },
             "shares": {
                 "url": "https://example.com/api/image/Pi9rux49S6C1Yhta0zbxyz/shares",
-                "totalItems": 0
+                "totalItems": 0,
             },
             "liked": "false",
             "pump_io": {
-                "shared": "false"
-            }
+                "shared": "false",
+            },
         }
 
         self.mini_data = {
-            "objectType" : "image",
-            "id" : "foo",
-            "image" : {
+            "objectType": "image",
+            "id": "foo",
+            "image": {
                 "url": "https://example.com/uploads/testuser/2013/12/24/XMAS13_thumb.jpg",
                 "height": 240,
-                "width": 320
+                "width": 320,
             }
         }
 
@@ -64,9 +65,11 @@ class ImageTest(PyPumpTest):
             "verb": "post",
             "object": self.imgdata,
         }
+
     def test_create_empty(self):
         image = self.pump.Image()
-        #object to string
+
+        # object to string
         self.assertEqual(image.__str__(), 'image by unknown')
 
     def test_mini_unserialize(self):
@@ -77,10 +80,10 @@ class ImageTest(PyPumpTest):
         # Make the image object
         image = self.pump.Image().unserialize(self.imgdata)
 
-        #object is Image instance
+        # object is Image instance
         self.assertTrue(isinstance(image, type(self.pump.Image())))
 
-        #object to string
+        # object to string
         self.assertEqual(image.__str__(), 'image by testuser@example.com')
 
         # Test unserialization is correct
@@ -110,7 +113,7 @@ class ImageTest(PyPumpTest):
         image.from_file(self.bucket.path_to_png)
 
         # Test the data sent is correct.
-        upload_request = self.requests[0] # It always happens to be the first request
+        upload_request = self.requests[0]  # It always happens to be the first request
 
         # Test that the data is the same
         binary_image = open(self.bucket.path_to_png, "rb").read()

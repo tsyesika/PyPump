@@ -1,11 +1,12 @@
-#-*- coding: utf-8 -*-
-from tests import PyPumpTest
-from pypump.models.collection import Collection
-from pypump.models.feed import Feed
+# -*- coding: utf-8 -*-
 import six
 
+from pypump.models.collection import Collection
+from pypump.models.feed import Feed
+from tests import PyPumpTest
+
+
 class CollectionTest(PyPumpTest):
-    
     def setUp(self):
         super(CollectionTest, self).setUp()
         self.response.data = {
@@ -31,11 +32,11 @@ class CollectionTest(PyPumpTest):
             },
             "replies": {
                 "url": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA/replies",
-                "items": [ ]
+                "items": []
             },
             "shares": {
                 "url": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA/shares",
-                "items": [ ]
+                "items": []
             },
             "url": "https://example.com/testuser/list/CZGYt-ljQ2WcmqfU1n5znA",
             "id": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA",
@@ -52,9 +53,10 @@ class CollectionTest(PyPumpTest):
         self.collection = Collection(pypump=self.pump).unserialize(self.response.data)
 
     def test_collection(self):
-        #is a Collection object
+        # is a Collection object
         self.assertTrue(isinstance(self.collection, Collection))
-        #object to string
+
+        # object to string
         self.assertEqual(self.collection.__str__(), self.collection.display_name)
         self.collection.display_name = u'test list for Testanvändare'
         if six.PY3:
@@ -65,34 +67,41 @@ class CollectionTest(PyPumpTest):
     def test_collection_attr_display_name(self):
         self.assertTrue(hasattr(self.collection, 'display_name'))
         self.assertEqual(self.collection.display_name, self.response["displayName"])
+
     def test_collection_attr_url(self):
         self.assertTrue(hasattr(self.collection, 'url'))
         self.assertEqual(self.collection.url, self.response["url"])
+
     def test_collection_attr_members(self):
         self.assertTrue(hasattr(self.collection, 'members'))
         self.assertTrue(isinstance(self.collection.members, Feed))
+
     def test_collection_attr_author(self):
         self.assertTrue(hasattr(self.collection, 'author'))
         self.assertTrue(isinstance(self.collection.author, type(self.pump.Person())))
+
     def test_collection_attr_links(self):
         self.assertTrue(hasattr(self.collection, 'links'))
+
         # we should expand this test when we have settled on way to show links
         self.assertTrue(self.collection.links is not None)
+
     def test_collection_add(self):
         self.response.data = {
             "verb": "add",
             "object": {
                 "objectType": "person",
-                "id": "testuser2@example.com"
+                "id": "testuser2@example.com",
             },
             "target": {
-                "objectType": "collection", 
-                "id": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA"
+                "objectType": "collection",
+                "id": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA",
             }
         }
 
         person = self.pump.Person('testuser2@example.com')
         self.collection.add(person)
+
     def test_collection_remove(self):
         self.response.data = {
             "verb": "remove",
@@ -102,10 +111,9 @@ class CollectionTest(PyPumpTest):
             },
             "target": {
                 "objectType": "collection",
-                "id": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA"
+                "id": "https://example.com/api/collection/CZGYt-ljQ2WcmqfU1n5znA",
             }
         }
 
         person = self.pump.Person('testuser2@example.com')
         self.collection.remove(person)
-       

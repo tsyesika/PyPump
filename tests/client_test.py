@@ -1,11 +1,11 @@
 from __future__ import absolute_import
-from tests import PyPumpTest
 
 from pypump import Client
+from tests import PyPumpTest
+
 
 class ClientTest(PyPumpTest):
     """ Test that the clients can register and update via OpenID """
-
     def setUp(self):
         super(ClientTest, self).setUp()
 

@@ -4,12 +4,10 @@ import six
 from six.moves.urllib import parse
 
 from tests import PyPumpTest
-from pypump import Client
+
 
 class WebPumpTest(PyPumpTest):
     """ Tests to ensure the WebPump works as it should do """
-
-
     def test_url_is_set(self):
         """ Tests that URL is provided with token for OAuth """
         self.assertTrue(isinstance(self.webpump.url, six.string_types))
