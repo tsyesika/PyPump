@@ -25,7 +25,7 @@ except ImportError:
 
 install_requires = [
     "requests-oauthlib>=0.3.0",
-    "requests>=1.2.0",
+    "requests>=2.3.0",
     "python-dateutil>=2.1",
 ]
 
