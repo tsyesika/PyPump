@@ -1,5 +1,6 @@
 0.7
 ===
+- Added Audio and Video objects
 - Work around bug in pump.io favorites feed which only let us get 20 latest items (https://github.com/xray7224/PyPump/issues/65)
 - Person.update() now updates Person.location
 - Fixed bug where PyPump with Python3 failed to save credentials to theJSONStore
