@@ -18,6 +18,8 @@
 import logging
 import re
 import six
+import os
+import mimetypes
 
 from dateutil.parser import parse
 
@@ -197,7 +199,7 @@ class Mapper(object):
     # {"json_attr":("model_attr", "datatype"), .. } or similar
     literals = ["content", "display_name", "id", "object_type", "summary",
                 "url", "preferred_username", "verb", "username",
-                "total_items", "liked", "license"]
+                "total_items", "liked", "license", "stream", "embed_code"]
     dates = ["updated", "published", "deleted", "received"]
     objects = ["generator", "actor", "obj", "author", "in_reply_to",
                "location"]
@@ -591,3 +593,57 @@ class Postable(Addressable):
         """
         data = self.serialize()
         self._post_activity(data)
+
+
+class Uploadable(Addressable):
+    """ Adds .from_file() """
+
+    def from_file(self, filename):
+        """ Uploads a file from a filename on your system.
+
+        :param filename: Path to file on your system.
+
+        Example:
+            >>> myimage.from_file('/path/to/dinner.png')
+        """
+
+        mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
+        headers = {
+            "Content-Type": mimetype,
+            "Content-Length": os.path.getsize(filename),
+        }
+
+        # upload file
+        file_data = self._pump.request(
+            "/api/user/{0}/uploads".format(self._pump.client.nickname),
+            method="POST",
+            data=open(filename, "rb").read(),
+            headers=headers,
+        )
+
+        # now post it to the feed
+        data = {
+            "verb": "post",
+            "object": file_data,
+        }
+        data.update(self.serialize())
+
+        if not self.content and not self.display_name and not self.license:
+            self._post_activity(data)
+        else:
+            self._post_activity(data, unserialize=False)
+
+            # update post with display_name and content
+            if self.content:
+                file_data['content'] = self.content
+            if self.display_name:
+                file_data['displayName'] = self.display_name
+            if self.license:
+                file_data['license'] = self.license
+            data = {
+                "verb": "update",
+                "object": file_data,
+            }
+            self._post_activity(data)
+
+        return self
