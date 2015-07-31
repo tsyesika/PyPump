@@ -37,6 +37,7 @@ from pypump.models.comment import Comment
 from pypump.models.person import Person
 from pypump.models.image import Image
 from pypump.models.place import Place
+from pypump.models.media import (Video, Audio)
 
 from pypump.models.collection import Collection, Public
 
@@ -166,6 +167,8 @@ class PyPump(object):
         self.Collection = factory(self, Collection)
         self.Comment = factory(self, Comment)
         self.Image = factory(self, Image)
+        self.Video = factory(self, Video)
+        self.Audio = factory(self, Audio)
         self.Person = factory(self, Person)
         self.Place = factory(self, Place)
         self.Public = Public()
