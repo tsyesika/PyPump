@@ -19,7 +19,7 @@ import logging
 import mimetypes
 import os
 
-from pypump.models import (PumpObject, Addressable, Likeable, Commentable,
+from pypump.models import (PumpObject, Uploadable, Likeable, Commentable,
                            Deleteable, Shareable, Mapper)
 
 _log = logging.getLogger(__name__)
@@ -44,7 +44,7 @@ class ImageContainer(object):
         )
 
 
-class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressable):
+class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Uploadable):
     """ This object represents a pump.io **image**,
     images are used to post image content with optional text (or html) messages
     to the pump.io network.
@@ -84,56 +84,6 @@ class Image(PumpObject, Likeable, Shareable, Commentable, Deleteable, Addressabl
             type=self.object_type,
             webfinger=getattr(self.author, 'webfinger', 'unknown')
         )
-
-    def from_file(self, filename):
-        """ Uploads an image from a filename on your system.
-
-        :param filename: Path to file on your system.
-
-        Example:
-            >>> myimage.from_file('/path/to/dinner.png')
-        """
-
-        mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
-        headers = {
-            "Content-Type": mimetype,
-            "Content-Length": os.path.getsize(filename),
-        }
-
-        # upload image file
-        image = self._pump.request(
-            "/api/user/{0}/uploads".format(self._pump.client.nickname),
-            method="POST",
-            data=open(filename, "rb").read(),
-            headers=headers,
-        )
-
-        # now send it to the feed
-        data = {
-            "verb": "post",
-            "object": image,
-        }
-        data.update(self.serialize())
-
-        if not self.content and not self.display_name and not self.license:
-            self._post_activity(data)
-        else:
-            self._post_activity(data, unserialize=False)
-
-            # update image with display_name and content
-            if self.content:
-                image['content'] = self.content
-            if self.display_name:
-                image['displayName'] = self.display_name
-            if self.license:
-                image['license'] = self.license
-            data = {
-                "verb": "update",
-                "object": image,
-            }
-            self._post_activity(data)
-
-        return self
 
     def unserialize(self, data):
 
