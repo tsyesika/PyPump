@@ -51,6 +51,34 @@ class MediaObject(PumpObject, Likeable, Shareable, Commentable, Deleteable, Uplo
             webfinger=getattr(self.author, 'webfinger', 'unknown')
         )
 
+    def _get_fileurl(self, data):
+        if data.get("pump_io", {}).get("proxyURL"):
+            return data["pump_io"]["proxyURL"]
+        else:
+            return data["url"]
+
+    def unserialize(self, data):
+        if "stream" in data:
+            stream = data["stream"]
+            self.stream = StreamContainer(
+                url=self._get_fileurl(stream)
+            )
+        Mapper(pypump=self._pump).parse_map(self, data=data)
+        self._add_links(data)
+        return self
+
+
+class StreamContainer(object):
+    """ Container that holds information about a stream.
+
+    :param url: URL to the file on the pump.io server.
+    """
+    def __init__(self, url):
+        self.url = url
+
+    def __repr__(self):
+        return "<Stream: {url}>".format(url=self.url)
+
 
 class Video(MediaObject):
 
@@ -103,17 +131,10 @@ class Image(MediaObject):
     }
 
     def unserialize(self, data):
-
-        def get_fileurl(data):
-            if data.get("pump_io", {}).get("proxyURL"):
-                return data["pump_io"]["proxyURL"]
-            else:
-                return data["url"]
-
         if "fullImage" in data:
             full_image = data["fullImage"]
             self.original = ImageContainer(
-                url=get_fileurl(full_image),
+                url=self._get_fileurl(full_image),
                 height=full_image.get("height"),
                 width=full_image.get("width")
             )
@@ -123,7 +144,7 @@ class Image(MediaObject):
             thumbnail = data["image"]
 
             setattr(self, save_point, ImageContainer(
-                url=get_fileurl(thumbnail),
+                url=self._get_fileurl(thumbnail),
                 height=thumbnail.get("height"),
                 width=thumbnail.get("width")
             ))
