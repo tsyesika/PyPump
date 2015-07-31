@@ -35,9 +35,8 @@ from pypump.exception import PyPumpException
 from pypump.models.note import Note
 from pypump.models.comment import Comment
 from pypump.models.person import Person
-from pypump.models.image import Image
 from pypump.models.place import Place
-from pypump.models.media import (Video, Audio)
+from pypump.models.media import (Video, Audio, Image)
 
 from pypump.models.collection import Collection, Public
 

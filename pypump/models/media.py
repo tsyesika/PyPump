@@ -17,7 +17,7 @@
 
 import logging
 from pypump.models import (PumpObject, Likeable, Shareable, Commentable,
-                           Deleteable, Uploadable)
+                           Deleteable, Uploadable, Mapper)
 
 _log = logging.getLogger(__name__)
 
@@ -60,3 +60,74 @@ class Video(MediaObject):
 class Audio(MediaObject):
 
     object_type = 'audio'
+
+
+class ImageContainer(object):
+    """ Container that holds information about an image.
+
+    :param url: URL to image file on the pump.io server.
+    :param width: Width of the image.
+    :param height: Height of the image.
+    """
+    def __init__(self, url, width, height):
+        self.url = url
+        self.width = width
+        self.height = height
+
+    def __repr__(self):
+        return "<Image {width}x{height}>".format(
+            width=self.width,
+            height=self.height
+        )
+
+
+class Image(MediaObject):
+    """ This object represents a pump.io **image**,
+    images are used to post image content with optional text (or html) messages
+    to the pump.io network.
+
+    :param content: (optional) Image text content.
+    :param display_name: (optional) Image title.
+
+    Example:
+        >>> myimage = pump.Image(display_name='Happy Caturday!')
+        >>> myimage.from_file('/path/to/kitteh.png')
+    """
+
+    object_type = 'image'
+    _ignore_attr = ["summary", "image"]
+    _mapping = {
+        "thumbnail": "image",
+        "original": "fullImage",
+        "license": "license",
+    }
+
+    def unserialize(self, data):
+
+        def get_fileurl(data):
+            if data.get("pump_io", {}).get("proxyURL"):
+                return data["pump_io"]["proxyURL"]
+            else:
+                return data["url"]
+
+        if "fullImage" in data:
+            full_image = data["fullImage"]
+            self.original = ImageContainer(
+                url=get_fileurl(full_image),
+                height=full_image.get("height"),
+                width=full_image.get("width")
+            )
+
+        if "image" in data:
+            save_point = "original" if not hasattr(self, "original") else "thumbnail"
+            thumbnail = data["image"]
+
+            setattr(self, save_point, ImageContainer(
+                url=get_fileurl(thumbnail),
+                height=thumbnail.get("height"),
+                width=thumbnail.get("width")
+            ))
+        Mapper(pypump=self._pump).parse_map(self, data=data)
+        self._add_links(data)
+
+        return self
