@@ -81,11 +81,33 @@ class StreamContainer(object):
 
 
 class Video(MediaObject):
+    """ This object represents a pump.io **video** object,
+    video objects are used to post video content with optional text (or html) messages
+    to the pump.io network.
+
+    :param content: (optional) Video text content.
+    :param display_name: (optional) Video title.
+
+    Example:
+        >>> myogv = pump.Video(display_name='Happy Caturday!')
+        >>> myogv.from_file('/path/to/kitteh.ogv')
+    """
 
     object_type = 'video'
 
 
 class Audio(MediaObject):
+    """ This object represents a pump.io **audio** object,
+    audio objects are used to post audio content with optional text (or html) messages
+    to the pump.io network.
+
+    :param content: (optional) Audio text content.
+    :param display_name: (optional) Audio title.
+
+    Example:
+        >>> myogg = pump.Audio(display_name='Happy Caturday!')
+        >>> myogg.from_file('/path/to/kitteh.ogg')
+    """
 
     object_type = 'audio'
 
