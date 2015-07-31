@@ -14,7 +14,9 @@ Pump objects
 
 Classes representing pump.io objects:
         * :class:`Note <pypump.models.note.Note>`
-        * :class:`Image <pypump.models.image.Image>`
+        * :class:`Image <pypump.models.media.Image>`
+        * :class:`Audio <pypump.models.media.Audio>`
+        * :class:`Video <pypump.models.media.Video>`
         * :class:`Comment <pypump.models.comment.Comment>`
         * :class:`Person <pypump.models.person.Person>`
         * :class:`Inbox <pypump.models.feed.Inbox>`
@@ -39,6 +41,23 @@ Classes representing pump.io objects:
                 :class:`ImageContainer <pypump.models.media.ImageContainer>`
                 holding information about the original image.
 
+.. autoclass:: pypump.models.media.Audio
+        :inherited-members:
+
+        .. attribute:: stream
+
+                :class:`StreamContainer <pypump.models.media.StreamContainer>`
+                holding information about the stream.
+
+.. autoclass:: pypump.models.media.Video
+        :inherited-members:
+
+        .. attribute:: stream
+
+                :class:`StreamContainer <pypump.models.media.StreamContainer>`
+                holding information about the stream.
+
+
 .. autoclass:: pypump.models.comment.Comment
         :inherited-members:
 
@@ -58,6 +77,7 @@ Low level objects
 Classes you probably don't need to know about.
 
 .. autoclass:: pypump.models.media.ImageContainer
+.. autoclass:: pypump.models.media.StreamContainer
 .. .. autoclass:: pypump.models.PumpObject
 .. .. autoclass:: pypump.models.Mapper
 
