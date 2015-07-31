@@ -57,7 +57,7 @@ Low level objects
 
 Classes you probably don't need to know about.
 
-.. autoclass:: pypump.models.image.ImageContainer
+.. autoclass:: pypump.models.media.ImageContainer
 .. .. autoclass:: pypump.models.PumpObject
 .. .. autoclass:: pypump.models.Mapper
 
