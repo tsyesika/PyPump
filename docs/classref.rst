@@ -31,12 +31,12 @@ Classes representing pump.io objects:
 
         .. attribute:: thumbnail
         
-                :class:`ImageContainer <pypump.models.image.ImageContainer>`
+                :class:`ImageContainer <pypump.models.media.ImageContainer>`
                 holding information about the thumbnail image.
 
         .. attribute:: original
 
-                :class:`ImageContainer <pypump.models.image.ImageContainer>`
+                :class:`ImageContainer <pypump.models.media.ImageContainer>`
                 holding information about the original image.
 
 .. autoclass:: pypump.models.comment.Comment
