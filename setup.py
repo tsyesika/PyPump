@@ -32,10 +32,6 @@ install_requires = [
 if version_info[0] == 2:
     warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
 
-    # Versions 2.6 doesn't come with argparse in stdlib, so add it to the install_requires
-    if version_info[1] == 6:
-        install_requires.append("argparse")
-
 setup(
     name="PyPump",
     version="0.6",
@@ -52,7 +48,6 @@ setup(
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
         "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",

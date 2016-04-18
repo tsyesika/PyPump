@@ -19,7 +19,7 @@ What does PyPump require?
 
 PyPump works with:
 
-- Python (2.6, 2.7, 3.3+)
+- Python (2.7, 3.3+)
 - requests-oauthlib 0.3.0+
 - requests 1.2.0+
 
