@@ -57,7 +57,7 @@ your first time, you need to authenticate this client::
     ...     name="Test.io"
     ...     )
     >>> def simple_verifier(url):
-    ...     print 'Go to: ' + url
+    ...     print('Go to: ' + url)
     ...     return raw_input('Verifier: ') # they will get a code back
     >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
 
