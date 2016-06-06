@@ -23,7 +23,7 @@ The following will create (for the first time) a connection to a pump.io server 
     ...     type="native"
     ...)
     >>> def simple_verifier(url):
-    ...     print 'Go to: ' + url
+    ...     print('Go to: ' + url)
     ...     return raw_input('Verifier: ') # they will get a code back
     >>> pump = PyPump(client=client, verifier_callback=simple_verifier)
 
