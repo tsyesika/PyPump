@@ -22,8 +22,8 @@ to take a URL and have the user allow our application this function can either r
 the verification code or you can call pump.verify(code), a simple code::
 
     >>> def simple_verifier(url):
-    ...     print 'Please follow the instructions at the following URL:'
-    ...     print url
+    ...     print('Please follow the instructions at the following URL:')
+    ...     print(url)
     ...     return raw_input("Verifier: ") # the verifier is a string
 
 .. note:: If you wish to call pump.verify(<verification code>) return None from your verifier function

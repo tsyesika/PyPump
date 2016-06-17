@@ -22,8 +22,8 @@ verifier in the PyPump Shell::
 
     def verifier(url):
         """ Asks for verification code for OAuth OOB """
-        print "Please open and follow the instructions:"
-        print url
+        print("Please open and follow the instructions:")
+        print(url)
         return raw_input("Verifier: ")
 
 Callback
