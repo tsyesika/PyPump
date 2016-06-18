@@ -350,14 +350,12 @@ class PyPump(object):
             response = fnc(url, **kwargs)
             return response
         except requests.exceptions.ConnectionError:
-            if self.protocol == "http" or raw:
-                raise  # shoot this seems real.
-            else:
+            if not self.verify_requests and self.protocol == "https":
                 self.set_http()
                 url = self._build_url(endpoint)
-                self.set_https()
-                raw = True
                 return self._requester(fnc, url, raw, **kwargs)
+            else:
+                raise
 
     def set_https(self):
         """ Enforces protocol to be https """
