@@ -16,8 +16,11 @@ matrix:
 
 install:
   - python setup.py develop
+  - pip install -q coverage codecov
 script:
-  - python setup.py test
+  - coverage run --branch setup.py test
+
+after_success: codecov
 
 notifications:
   irc:
