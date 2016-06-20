@@ -27,3 +27,4 @@ notifications:
     channels:
       - "ircs://irc.megworld.co.uk:9000#pypump"
   
+sudo: false
