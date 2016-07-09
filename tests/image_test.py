@@ -75,6 +75,21 @@ class ImageTest(PyPumpTest):
     def test_mini_unserialize(self):
         image = self.pump.Image().unserialize(self.mini_data)
 
+        # object is Image instance
+        self.assertTrue(isinstance(image, type(self.pump.Image())))
+
+        # Test unserialization is correct
+        self.assertEqual(image.id, self.mini_data["id"])
+        # Test that both original and thumbnail gets information from data["image"]
+        # if data["fullImage"] does not exist.
+        self.assertEqual(image.thumbnail.url, self.mini_data["image"]["url"])
+        self.assertEqual(image.original.url, self.mini_data["image"]["url"])
+        self.assertEqual(image.thumbnail.height, self.imgdata["image"]["height"])
+        self.assertEqual(image.thumbnail.width, self.imgdata["image"]["width"])
+        self.assertEqual(image.original.height, self.imgdata["image"]["height"])
+        self.assertEqual(image.original.width, self.imgdata["image"]["width"])
+
+
     def test_unserialize(self):
         """ Tests image unserialization is successful """
         # Make the image object
