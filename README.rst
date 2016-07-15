@@ -1,3 +1,9 @@
+.. image:: https://travis-ci.org/xray7224/PyPump.svg?branch=master
+       :target: https://travis-ci.org/xray7224/PyPump
+
+.. image:: https://codecov.io/github/xray7224/PyPump/coverage.svg?branch=master
+       :target: https://codecov.io/github/xray7224/PyPump
+
 ================================
 PyPump - Python Pump.io Library
 ================================

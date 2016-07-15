@@ -153,6 +153,14 @@ class Image(MediaObject):
     }
 
     def unserialize(self, data):
+        if "image" in data:
+            thumbnail = data["image"]
+            self.thumbnail = ImageContainer(
+                url=self._get_fileurl(thumbnail),
+                height=thumbnail.get("height"),
+                width=thumbnail.get("width")
+            )
+
         if "fullImage" in data:
             full_image = data["fullImage"]
             self.original = ImageContainer(
@@ -160,16 +168,9 @@ class Image(MediaObject):
                 height=full_image.get("height"),
                 width=full_image.get("width")
             )
+        else:
+            self.original = self.thumbnail
 
-        if "image" in data:
-            save_point = "original" if not hasattr(self, "original") else "thumbnail"
-            thumbnail = data["image"]
-
-            setattr(self, save_point, ImageContainer(
-                url=self._get_fileurl(thumbnail),
-                height=thumbnail.get("height"),
-                width=thumbnail.get("width")
-            ))
         Mapper(pypump=self._pump).parse_map(self, data=data)
         self._add_links(data)
 

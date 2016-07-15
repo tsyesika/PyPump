@@ -158,7 +158,7 @@ class JSONStore(AbstractStore):
         # Create a temp file and only then re-name it to the config
         filename = "{filename}.{date}.tmp".format(
             filename=self.filename,
-            date=datetime.datetime.utcnow().isoformat()
+            date=datetime.datetime.utcnow().strftime('%Y-%m-%dT%H_%M_%S.%f')
         )
 
         # The `open` built-in doesn't allow us to set the mode
