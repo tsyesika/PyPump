@@ -71,55 +71,55 @@ class FeedTest(PyPumpTest):
         self.assertTrue(self.feed.links is not None)
 
     def test_feed_slice_0_to_5(self):
-        sliceditems = list(self.feed[:5])
+        sliceditems = self.feed[:5]
         self.assertEqual(len(sliceditems), 5)
         self.assertEqual(sliceditems[0].id, self.response['items'][0]['id'])
-        self.assertEqual(sliceditems[-1].id, self.response['items'][4]['id'])
+        self.assertEqual(list(sliceditems)[-1].id, self.response['items'][4]['id'])
 
     def test_feed_slice_3_to_6(self):
-        sliceditems = list(self.feed[3:6])
+        sliceditems = self.feed[3:6]
         self.assertEqual(len(sliceditems), 3)
         self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
-        self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])
+        self.assertEqual(list(sliceditems)[-1].id, self.response['items'][5]['id'])
 
     def test_feed_slice_id_to_inf(self):
-        sliceditems = list(self.feed[slice('acct:testuser10@example.com', None)])
+        sliceditems = self.feed[slice('acct:testuser10@example.com', None)]
         self.assertEqual(len(sliceditems), 9)
         self.assertEqual(sliceditems[0].id, self.response['items'][11]['id'])
-        self.assertEqual(sliceditems[-1].id, self.response['items'][19]['id'])
+        self.assertEqual(list(sliceditems)[-1].id, self.response['items'][19]['id'])
 
     def test_feed_slice_zero_to_id(self):
-        sliceditems = list(self.feed[slice('acct:testuser5@example.com')])
+        sliceditems = self.feed[slice('acct:testuser5@example.com')]
         self.assertEqual(len(sliceditems), 5)
-        self.assertEqual(sliceditems[-1].id, self.response['items'][0]['id'])
+        self.assertEqual(list(sliceditems)[-1].id, self.response['items'][0]['id'])
         self.assertEqual(sliceditems[0].id, self.response['items'][4]['id'])
 
     def test_feed_items_before(self):
         # before and limit 3
-        items = list(self.feed.items(before='acct:testuser10@example.com', limit=3))
+        items = self.feed.items(before='acct:testuser10@example.com', limit=3)
         self.assertEqual(len(items), 3)
         self.assertEqual(items[0].id, self.response['items'][11]['id'])
-        self.assertEqual(items[-1].id, self.response['items'][13]['id'])
+        self.assertEqual(list(items)[-1].id, self.response['items'][13]['id'])
 
     def test_feed_items_since(self):
         # since and limit 12 (limit more than items returned)
-        items = list(self.feed.items(since='acct:testuser10@example.com', limit=12))
+        items = self.feed.items(since='acct:testuser10@example.com', limit=12)
         self.assertEqual(len(items), 10)
         self.assertEqual(items[0].id, self.response['items'][9]['id'])
-        self.assertEqual(items[-1].id, self.response['items'][0]['id'])
+        self.assertEqual(list(items)[-1].id, self.response['items'][0]['id'])
 
     def test_feed_items_no_limit(self):
         # no limit
-        items = list(self.feed.items(limit=None))
+        items = self.feed.items(limit=None)
         self.assertEqual(len(items), 20)
         self.assertEqual(items[0].id, self.response['items'][0]['id'])
-        self.assertEqual(items[-1].id, self.response['items'][19]['id'])
+        self.assertEqual(list(items)[-1].id, self.response['items'][19]['id'])
 
     def test_feed_items_offset(self):
         # offset
-        items = list(self.feed.items(offset=18))
+        items = self.feed.items(offset=18)
         self.assertEqual(len(items), 2)
 
         # offset and limit
-        items = list(self.feed.items(offset=10, limit=5))
+        items = self.feed.items(offset=10, limit=5)
         self.assertEqual(len(items), 5)

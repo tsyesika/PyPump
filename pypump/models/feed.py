@@ -207,6 +207,43 @@ class ItemList(object):
             else:
                 self.url = None
 
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return self.__getslice__(key)
+
+        if type(key) is not int:
+            raise TypeError('index must be integer')
+
+        if self._offset:
+            key = self._offset + key
+
+        item = ItemList(self.feed, limit=1, before=self._before, since=self._since, offset=key, stop=key + 1, cached=self.feed.is_cached)
+        try:
+            return item.next()
+        except StopIteration:
+            raise IndexError("ItemList index out of range")
+
+    def __getslice__(self, s, e=None):
+        if type(s) is not slice:
+            s = slice(s, e)
+
+        offset = self._offset or 0
+        if isinstance(s.start, int) and s.start >= 0:
+            offset = offset + s.start
+
+        if self._limit is not None:
+            if isinstance(s.stop, int) and s.stop >= 0:
+                stop = self._limit + s.stop
+            else:
+                stop = self._limit
+        else:
+            stop = s.stop
+
+        return ItemList(self.feed, offset=offset, stop=stop, cached=self.feed.is_cached)
+
+    def __len__(self):
+        return len([item for item in self])
+
     def __next__(self):
         """ Return next object or raise StopIteration """
         if len(self.cache) <= 0:
@@ -220,11 +257,20 @@ class ItemList(object):
         self.itemcount += 1
         return obj
 
-    def __iter__(self):
-        return self
-
     def next(self):
         return self.__next__()
+
+    def clone(self):
+        return ItemList(self.feed,
+                        limit=self._limit,
+                        offset=self._offset,
+                        before=self._before,
+                        since=self._since,
+                        cached=self.feed.is_cached
+                        )
+
+    def __iter__(self):
+        return self.clone()
 
 
 class Feed(PumpObject):
@@ -243,6 +289,10 @@ class Feed(PumpObject):
         super(Feed, self).__init__(*args, **kwargs)
         self.url = url or None
 
+    @property
+    def is_cached(self):
+        return self._items is not None and self.total_items is not None and len(self._items) >= self.total_items
+
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
         """ Get a feed's items.
 
@@ -251,12 +301,7 @@ class Feed(PumpObject):
         :param before: Return items added before this id (ordered new -> old)
         :param limit: Amount of items to return
         """
-        if self._items is not None and self.total_items is not None:
-            if len(self._items) >= self.total_items:
-                # return cached items
-                return ItemList(self, offset=offset, limit=limit, since=since, before=before, cached=True)
-
-        return ItemList(self, offset=offset, limit=limit, since=since, before=before)
+        return ItemList(self, offset=offset, limit=limit, since=since, before=before, cached=self.is_cached)
 
     def _request(self, url, offset=None, since=None, before=None):
         params = dict()
@@ -287,22 +332,18 @@ class Feed(PumpObject):
 
         if type(key) is not int:
             raise TypeError('index must be integer')
-        item = ItemList(self, limit=1, offset=key, stop=key + 1)
-        try:
-            return item.next()
-        except StopIteration:
-            raise IndexError
+
+        item = ItemList(self, limit=1, offset=key, stop=key + 1, cached=self.is_cached)
+        return item[key]
 
     def __getslice__(self, s, e=None):
         if type(s) is not slice:
             s = slice(s, e)
 
-        if self._items is not None and self.total_items is not None:
-            if len(self._items) >= self.total_items:
-                # return cached items
-                return ItemList(self, offset=s.start, stop=s.stop, cached=True)
+        return ItemList(self, offset=s.start, stop=s.stop, cached=self.is_cached)
 
-        return ItemList(self, offset=s.start, stop=s.stop)
+    def __len__(self):
+        return self.total_items
 
     def __iter__(self):
         return self.items(limit=None)
