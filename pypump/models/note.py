@@ -48,7 +48,7 @@ class Note(PumpObject, Postable, Likeable, Shareable, Commentable, Deleteable):
         self.display_name = display_name
 
     def serialize(self):
-        """ Converts the post to JSON """
+        """ Converts the post to something compatible with `json.dumps` """
         data = super(Note, self).serialize()
         data.update({
             "verb": "post",
