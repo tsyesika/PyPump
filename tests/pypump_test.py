@@ -25,16 +25,24 @@ class PyPumpTest(TestCase):
         pump = PyPump(client, verifier, store=store)
         self.assertEqual(pump.protocol, "https")
 
+        # verify == True
         fnc_mock = mock.Mock()
         fnc_mock.side_effect = request_excs.ConnectionError
         with self.assertRaises(request_excs.ConnectionError):
             pump._requester(fnc_mock, "")
+
         self.assertEqual(len(fnc_mock.call_args_list), 1)
+        self.assertTrue(fnc_mock.call_args_list[0][0][0].startswith("https://"))
         self.assertEqual(pump.protocol, "https")
 
+        # verify == False
         fnc_mock.reset_mock()
         pump.verify_requests = False
         with self.assertRaises(request_excs.ConnectionError):
             pump._requester(fnc_mock, "")
+
         self.assertEqual(len(fnc_mock.call_args_list), 2)
-        self.assertEqual(pump.protocol, "http")
+        self.assertTrue(fnc_mock.call_args_list[0][0][0].startswith("https://"))
+        self.assertTrue(fnc_mock.call_args_list[1][0][0].startswith("http://"))
+        # make sure that we're reset to https after
+        self.assertEqual(pump.protocol, "https")
