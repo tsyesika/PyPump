@@ -6,6 +6,7 @@
 - Person.update() now updates Person.location
 - Fixed bug where PyPump with Python3 failed to save credentials to theJSONStore
 - Dropped Python 2.6 support, PyPump now supports Python 2.7 or 3.3+
+- PyPump now tries HTTPS first, and then only falls back to HTTP if `verify_requests` is `False`
 
 0.6
 ===

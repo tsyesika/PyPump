@@ -29,8 +29,13 @@ install_requires = [
     "python-dateutil>=2.1",
 ]
 
+tests_require = None
+
 if version_info[0] == 2:
     warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
+    tests_require = [
+        "mock",
+    ]
 
 setup(
     name="PyPump",
@@ -44,6 +49,7 @@ setup(
     packages=["pypump", "pypump.exception", "pypump.models"],
     license="GPLv3+",
     install_requires=install_requires,
+    tests_require=tests_require,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python",
