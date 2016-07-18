@@ -25,7 +25,7 @@ import logging
 import requests
 
 from six.moves.urllib import parse
-from requests_oauthlib import OAuth1
+from requests_oauthlib import OAuth1, OAuth1Session
 
 from pypump.store import JSONStore
 from pypump.client import Client
@@ -279,25 +279,49 @@ class PyPump(object):
             url = endpoint
 
         headers = headers or {"Content-Type": "application/json"}
-        fnc = requests.get
-        request = {
-            "auth": client,
-            "headers": headers,
-            "params": params,
-            "timeout": timeout,
-        }
-        request.update(kwargs)
-
-        if method == "POST":
-            fnc = requests.post
-            request.update({"data": data})
-        elif method == "PUT":
-            fnc = requests.put
-            request.update({"data": data})
-        elif method == "GET":
+        if client is None:
             fnc = requests.get
-        elif method == "DELETE":
-            fnc = requests.delete
+            request = {
+                "headers": headers,
+                "params": params,
+                "timeout": timeout,
+         }
+            request.update(kwargs)
+
+            if method == "POST":
+                fnc = requests.post
+                request.update({"data": data})
+            elif method == "PUT":
+                fnc = requests.put
+                request.update({"data": data})
+            elif method == "GET":
+                fnc = requests.get
+            elif method == "DELETE":
+                fnc = requests.delete
+        else:
+            c = client.client
+            oas = OAuth1Session(c.client_key,
+                                client_secret=c.client_secret,
+                                resource_owner_key=c.resource_owner_key,
+                                resource_owner_secret=c.resource_owner_secret
+                               )
+            request = {
+                "headers": headers,
+                "params": params,
+                "timeout": timeout,
+            }
+            request.update(kwargs)
+
+            if method == "POST":
+                fnc = oas.post
+                request.update({"data": data})
+            elif method == "PUT":
+                fnc = oas.put
+                request.update({"data": data})
+            elif method == "GET":
+                fnc = oas.get
+            elif method == "DELETE":
+                fnc = oas.delete
 
         for attempt in range(1 + retries):
             response = self._requester(
