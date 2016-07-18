@@ -345,13 +345,9 @@ class PyPump(object):
             url = endpoint
 
         kwargs["verify"] = self.verify_requests
-        kwargs["allow_redirects"] = False
 
         try:
             response = fnc(url, **kwargs)
-            if response.is_redirect:
-                url = response.headers["location"]
-                response = fnc(url, **kwargs)
             return response
         except requests.exceptions.ConnectionError:
             if (self.verify_requests and self.protocol == "https") or raw:
