@@ -280,7 +280,6 @@ class PyPump(object):
 
         headers = headers or {"Content-Type": "application/json"}
         if client is None:
-            fnc = requests.get
             request = {
                 "headers": headers,
                 "params": params,
