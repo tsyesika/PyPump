@@ -279,14 +279,14 @@ class PyPump(object):
             url = endpoint
 
         headers = headers or {"Content-Type": "application/json"}
-        if client is None:
-            request = {
-                "headers": headers,
-                "params": params,
-                "timeout": timeout,
-         }
-            request.update(kwargs)
+        request = {
+            "headers": headers,
+            "params": params,
+            "timeout": timeout,
+        }
+        request.update(kwargs)
 
+        if client is None:
             if method == "POST":
                 fnc = requests.post
                 request.update({"data": data})
@@ -304,12 +304,6 @@ class PyPump(object):
                                 resource_owner_key=c.resource_owner_key,
                                 resource_owner_secret=c.resource_owner_secret
                                )
-            request = {
-                "headers": headers,
-                "params": params,
-                "timeout": timeout,
-            }
-            request.update(kwargs)
 
             if method == "POST":
                 fnc = oas.post
