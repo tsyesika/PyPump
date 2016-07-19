@@ -518,8 +518,6 @@ class WebPump(PyPump):
         if "oauth-access-token" not in self.store:
             return False
 
-        # if it redirects to the profile it'll raise an exception as
-        # it doesn't sign the redirection request.
         response = self.request("/api/whoami", allow_redirects=False)
 
         # It should response with a redirect to our profile if it's logged in
