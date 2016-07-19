@@ -25,7 +25,7 @@ import logging
 import requests
 
 from six.moves.urllib import parse
-from requests_oauthlib import OAuth1
+from requests_oauthlib import OAuth1, OAuth1Session
 
 from pypump.store import JSONStore
 from pypump.client import Client
@@ -265,8 +265,14 @@ class PyPump(object):
         # check client has been setup
         if client is None:
             client = self.setup_oauth_client(endpoint)
+            c = client.client
+            fnc = OAuth1Session(c.client_key,
+                                client_secret=c.client_secret,
+                                resource_owner_key=c.resource_owner_key,
+                                resource_owner_secret=c.resource_owner_secret
+                               )
         elif client is False:
-            client = None
+            fnc = requests
 
         params = {} if params is None else params
 
@@ -279,9 +285,7 @@ class PyPump(object):
             url = endpoint
 
         headers = headers or {"Content-Type": "application/json"}
-        fnc = requests.get
         request = {
-            "auth": client,
             "headers": headers,
             "params": params,
             "timeout": timeout,
@@ -289,15 +293,15 @@ class PyPump(object):
         request.update(kwargs)
 
         if method == "POST":
-            fnc = requests.post
+            fnc = fnc.post
             request.update({"data": data})
         elif method == "PUT":
-            fnc = requests.put
+            fnc = fnc.put
             request.update({"data": data})
         elif method == "GET":
-            fnc = requests.get
+            fnc = fnc.get
         elif method == "DELETE":
-            fnc = requests.delete
+            fnc = fnc.delete
 
         for attempt in range(1 + retries):
             response = self._requester(
@@ -514,8 +518,6 @@ class WebPump(PyPump):
         if "oauth-access-token" not in self.store:
             return False
 
-        # if it redirects to the profile it'll raise an exception as
-        # it doesn't sign the redirection request.
         response = self.request("/api/whoami", allow_redirects=False)
 
         # It should response with a redirect to our profile if it's logged in
