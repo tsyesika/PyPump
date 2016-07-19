@@ -265,8 +265,14 @@ class PyPump(object):
         # check client has been setup
         if client is None:
             client = self.setup_oauth_client(endpoint)
+            c = client.client
+            fnc = OAuth1Session(c.client_key,
+                                client_secret=c.client_secret,
+                                resource_owner_key=c.resource_owner_key,
+                                resource_owner_secret=c.resource_owner_secret
+                               )
         elif client is False:
-            client = None
+            fnc = requests
 
         params = {} if params is None else params
 
@@ -286,35 +292,16 @@ class PyPump(object):
         }
         request.update(kwargs)
 
-        if client is None:
-            if method == "POST":
-                fnc = requests.post
-                request.update({"data": data})
-            elif method == "PUT":
-                fnc = requests.put
-                request.update({"data": data})
-            elif method == "GET":
-                fnc = requests.get
-            elif method == "DELETE":
-                fnc = requests.delete
-        else:
-            c = client.client
-            oas = OAuth1Session(c.client_key,
-                                client_secret=c.client_secret,
-                                resource_owner_key=c.resource_owner_key,
-                                resource_owner_secret=c.resource_owner_secret
-                               )
-
-            if method == "POST":
-                fnc = oas.post
-                request.update({"data": data})
-            elif method == "PUT":
-                fnc = oas.put
-                request.update({"data": data})
-            elif method == "GET":
-                fnc = oas.get
-            elif method == "DELETE":
-                fnc = oas.delete
+        if method == "POST":
+            fnc = fnc.post
+            request.update({"data": data})
+        elif method == "PUT":
+            fnc = fnc.put
+            request.update({"data": data})
+        elif method == "GET":
+            fnc = fnc.get
+        elif method == "DELETE":
+            fnc = fnc.delete
 
         for attempt in range(1 + retries):
             response = self._requester(
