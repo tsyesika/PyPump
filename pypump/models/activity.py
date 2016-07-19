@@ -30,17 +30,16 @@ class Application(PumpObject):
     def __init__(self, *args, **kwargs):
         super(Application, self).__init__(*args, **kwargs)
 
-
 class Activity(PumpObject, Addressable):
     _ignore_attr = ["author", "deleted", "display_name", "in_reply_to",
                     "liked", "summary"]
 
     _mapping = {
-        "verb": "verb",
-        "generator": "generator",
-        "received": "received",
-        "actor": "actor",
-        "obj": "object",
+        "verb": ("verb", "literal"),
+        "generator": ("generator", "object"),
+        "received": ("received", "date"),
+        "actor": ("actor", "object"),
+        "obj": ("object", "object")
     }
 
     def __init__(self, *args, **kwargs):

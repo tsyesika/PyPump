@@ -39,7 +39,7 @@ class Collection(PumpObject, Deleteable):
     object_type = 'collection'
     _ignore_attr = ["in_reply_to"]
     _mapping = {
-        "_members": "members"
+        "_members": ("members", "feed")
     }
 
     def __init__(self, id=None, **kwargs):

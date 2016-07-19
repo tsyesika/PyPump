@@ -33,32 +33,32 @@ class PumpObject(object):
     _ignore_attr = list()
 
     _mapping = {
-        "attachments": "attachments",
-        "author": "author",
-        "content": "content",
-        "display_name": "displayName",
-        "downstream_duplicates": "downstreamDuplicates",
-        "id": "id",
-        "image": "image",
-        "in_reply_to": "inReplyTo",
-        "liked": "liked",
-        "links": "links",
-        "published": "published",
-        "summary": "summary",
-        "updated": "updated",
-        "upstream_duplicates": "upstreamDuplicates",
-        "url": "url",
-        "deleted": "deleted",
-        "object_type": "objectType",
-        "_to": "to",
-        "_cc": "cc",
-        "_bto": "bto",
-        "_bcc": "bcc",
-        "_comments": "replies",
-        "_followers": "followers",
-        "_following": "following",
-        "_likes": "likes",
-        "_shares": "shares",
+        "attachments": ("attachments", "literal"),
+        "author": ("author", "object"),
+        "content": ("content", "literal"),
+        "display_name": ("displayName", "literal"),
+        "downstream_duplicates": ("downstreamDuplicates", None),
+        "id": ("id", "literal"),
+        "image": ("image", None),
+        "in_reply_to": ("inReplyTo", "object"),
+        "liked": ("liked", "literal"),
+        "links": ("links", None),
+        "published": ("published", "date"),
+        "summary": ("summary", "literal"),
+        "updated": ("updated", "date"),
+        "upstream_duplicates": ("upstreamDuplicates", None),
+        "url": ("url", "literal"),
+        "deleted": ("deleted", "date"),
+        "object_type": ("objectType", "literal"),
+        "_to": ("to", "list"),
+        "_cc": ("cc", "list"),
+        "_bto": ("bto", "list"),
+        "_bcc": ("bcc", "list"),
+        "_comments": ("replies", "feed"),
+        "_followers": ("followers", "feed"),
+        "_following": ("following", "feed"),
+        "_likes": ("likes", "feed"),
+        "_shares": ("shares", "feed")
     }
 
     def __init__(self, pypump=None, *args, **kwargs):
@@ -195,17 +195,6 @@ class Mapper(object):
 
     """ Handles mapping of json attributes to models """
 
-    # TODO probably better to move this into the models,
-    # {"json_attr":("model_attr", "datatype"), .. } or similar
-    literals = ["content", "display_name", "id", "object_type", "summary",
-                "url", "preferred_username", "verb", "username",
-                "total_items", "liked", "license", "embed_code"]
-    dates = ["updated", "published", "deleted", "received"]
-    objects = ["generator", "actor", "obj", "author", "in_reply_to",
-               "location"]
-    lists = ["_to", "_cc", "_bto", "_bcc", "object_types", "_items"]
-    feeds = ["_comments", "_followers", "_following", "_likes", "_shares"]
-
     def __init__(self, pypump=None, *args, **kwargs):
         self._pump = pypump
 
@@ -215,26 +204,26 @@ class Mapper(object):
 
         if "data" in kwargs:
             for k, v in mapping.items():
-                if kwargs["data"].get(v, None) is not None:
-                    val = kwargs["data"][v]
+                if kwargs["data"].get(v[0], None) is not None:
+                    val = kwargs["data"][v[0]]
                 else:
                     val = None
-                self.add_attr(obj, k, val, from_json=True)
+                self.add_attr(obj, k, val, v[1], from_json=True)
         else:
             for k, v in mapping.items():
                 if k in kwargs:
-                    self.add_attr(obj, k, kwargs[k])
+                    self.add_attr(obj, k, kwargs[k], v[1])
 
-    def add_attr(self, obj, key, data, from_json=False):
-        if key in self.objects:
+    def add_attr(self, obj, key, data, data_type, from_json=False):
+        if data_type == "object":
             self.set_object(obj, key, data, from_json)
-        elif key in self.dates:
+        elif data_type == "date":
             self.set_date(obj, key, data, from_json)
-        elif key in self.lists:
+        elif data_type == "list":
             self.set_list(obj, key, data, from_json)
-        elif key in self.literals:
+        elif data_type == "literal":
             self.set_literal(obj, key, data, from_json)
-        elif key in self.feeds:
+        elif data_type == "feed":
             self.set_feed(obj, key, data, from_json)
         else:
             _log.debug("Ignoring unknown attribute %r", key)

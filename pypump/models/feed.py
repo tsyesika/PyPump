@@ -318,10 +318,10 @@ class Feed(PumpObject):
     """
     _ignore_attr = []
     _mapping = {
-        "id": "url",
-        "object_types": "objectTypes",
-        "_items": "items",
-        "total_items": "totalItems",
+        "id": ("url", "literal"),
+        "object_types": ("objectTypes", "literal"),
+        "_items": ("items", "list"),
+        "total_items": ("totalItems", "literal")
     }
 
     def __init__(self, url=None, *args, **kwargs):
