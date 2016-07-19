@@ -1,12 +1,13 @@
 0.7
 ===
-- Fix bug where Image.original never got any info (#145)
+- Fixed bug where Image.original never got any info (https://github.com/xray7224/PyPump/issues/145)
 - Added Audio and Video objects
 - Work around bug in pump.io favorites feed which only let us get 20 latest items (https://github.com/xray7224/PyPump/issues/65)
 - Person.update() now updates Person.location
 - Fixed bug where PyPump with Python3 failed to save credentials to theJSONStore
 - Dropped Python 2.6 support, PyPump now supports Python 2.7 or 3.3+
 - PyPump now tries HTTPS first, and then only falls back to HTTP if `verify_requests` is `False`
+- Fixed bug where `PyPump.request()` didnt sign oauth request on redirect (https://github.com/xray7224/PyPump/issues/120)
 
 0.6
 ===
