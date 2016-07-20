@@ -343,6 +343,9 @@ class Feed(PumpObject):
         return ItemList(self, offset=s.start, stop=s.stop, cached=self.is_cached)
 
     def __len__(self):
+        if self.total_items is None:
+            # a hacky way to populate the cache
+            list(ItemList(self, limit=1, cached=False))
         return self.total_items
 
     def __iter__(self):
