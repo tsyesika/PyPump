@@ -214,14 +214,34 @@ class ItemList(object):
         if type(key) is not int:
             raise TypeError('index must be integer')
 
-        if self._offset:
-            key = self._offset + key
-
-        item = ItemList(self.feed, limit=1, before=self._before, since=self._since, offset=key, stop=key + 1, cached=self.feed.is_cached)
-        try:
-            return item.next()
-        except StopIteration:
+        total = self._limit or self.feed.total_items
+        if key > total or key < -total:
             raise IndexError("ItemList index out of range")
+
+        if self._since or self._before:
+            # we can't combine since/before and offset, so grab all results up to the one we want
+            if key < 0:
+                key = key + total
+            items = ItemList(self.feed, before=self._before, since=self._since, limit=key + 1, cached=self.feed.is_cached)
+            items = list(items)
+
+            # last item fetched will be the one for us
+            return items[-1]
+        else:
+            if self._offset:
+                # shift key by current offset
+                if key >= 0:
+                    key = self._offset + key
+                else:
+                    key = key + total + self._offset
+            elif key < 0:
+                key = key + total
+
+            item = ItemList(self.feed, limit=1, offset=key, stop=key + 1, cached=self.feed.is_cached)
+            try:
+                return item.next()
+            except StopIteration:
+                raise IndexError("ItemList index out of range")
 
     def __getslice__(self, s, e=None):
         if type(s) is not slice:
