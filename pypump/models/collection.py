@@ -51,7 +51,8 @@ class Collection(PumpObject, Deleteable):
     def members(self):
         """ :class:`Feed <pypump.models.feed.Feed>` of collection members.
         """
-        self._members = self._members or Feed(self.links["members"], pypump=self._pump)
+        if self._members is None:
+            self._members = Feed(self.links["members"], pypump=self._pump)
         return self._members
 
     def add(self, obj):
