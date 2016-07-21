@@ -123,3 +123,9 @@ class FeedTest(PyPumpTest):
         # offset and limit
         items = self.feed.items(offset=10, limit=5)
         self.assertEqual(len(items), 5)
+
+    def test_slice_slice(self):
+        sliceditems = self.feed[3:10][:3]
+        self.assertEqual(len(sliceditems), 3)
+        self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])

@@ -251,15 +251,7 @@ class ItemList(object):
         if isinstance(s.start, int) and s.start >= 0:
             offset = offset + s.start
 
-        if self._limit is not None:
-            if isinstance(s.stop, int) and s.stop >= 0:
-                stop = self._limit + s.stop
-            else:
-                stop = self._limit
-        else:
-            stop = s.stop
-
-        return ItemList(self.feed, offset=offset, stop=stop, cached=self.feed.is_cached)
+        return ItemList(self.feed, offset=offset, limit=s.stop, cached=self.feed.is_cached)
 
     def __len__(self):
         return len([item for item in self])
