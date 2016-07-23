@@ -36,8 +36,8 @@ templates_path = ['_templates']
 source_suffix = '.rst'
 
 # Versions/Release
-version = "0.6"
-release = "0.6-dev"
+version = "0.7"
+release = "0.7"
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
