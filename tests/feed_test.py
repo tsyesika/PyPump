@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import six
 
+from pypump.exception import PyPumpException
 from pypump.models.feed import Feed
 from tests import PyPumpTest
 
@@ -26,6 +27,16 @@ class FeedTest(PyPumpTest):
         }
 
         self.feed = Feed(pypump=self.pump).unserialize(self.response.data)
+
+    def test_before_since_offset_exceptions(self):
+        with self.assertRaises(PyPumpException):
+            self.feed.items(before="something", offset=12)
+
+        with self.assertRaises(PyPumpException):
+            self.feed.items(since="something", offset=12)
+
+        with self.assertRaises(PyPumpException):
+            self.feed.items(since="something", before="something")
 
     def test_feed(self):
         # is a Feed object
@@ -139,6 +150,18 @@ class FeedTest(PyPumpTest):
         # now try with an ID
         with self.assertRaises(TypeError):
             sliceditems[slice(self.response['items'][4]['id'])]
+
+    def test_feed_sliced_by_id(self):
+        sliceditems = self.feed[slice('acct:testuser10@example.com', None)][:3]
+        self.assertEqual(len(sliceditems), 3)
+        self.assertEqual(sliceditems[0].id, self.response['items'][11]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][13]['id'])
+
+        with self.assertRaises(PyPumpException):
+            self.feed[slice('acct:testuser10@example.com', None)][3:]
+
+        with self.assertRaises(PyPumpException):
+            self.feed[slice('acct:testuser10@example.com', None)][:-3]
 
     def test_zero_to_negative_slicing(self):
         sliceditems = self.feed[:-18]

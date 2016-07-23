@@ -16,9 +16,10 @@
 ##
 
 import logging
-import six
+
 from pypump.exception import PyPumpException
 from pypump.models import PumpObject, Mapper
+import six
 
 _log = logging.getLogger(__name__)
 
@@ -92,7 +93,7 @@ class ItemList(object):
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
             self._since = False if self._since is not None else None
-            if not hasattr(self.feed, 'issue65'):
+            if getattr(self.feed, 'issue65', False):
                 self._offset = False
             if self._since is not None:
                 # we want oldest items first when using 'since'
@@ -191,7 +192,7 @@ class ItemList(object):
             self._done = True
 
         # check what to do next time
-        if hasattr(self.feed, 'issue65'):
+        if getattr(self.feed, 'issue65', False):
             # work around API bug for favorites feed, see https://github.com/xray7224/PyPump/issues/65
             if self._offset is None:
                 self._offset = 0
@@ -246,6 +247,13 @@ class ItemList(object):
     def _getslice(self, s):
         if not isinstance(s.start, (type(None), int)) or not isinstance(s.stop, (type(None), int)):
             raise TypeError('slice indices must be integers or None')
+
+        if self._before is not None or self._since is not None:
+            if s.start is not None:
+                raise PyPumpException("can not have both offset and since/before parameters")
+            elif s.stop is not None and s.stop < 0:
+                raise PyPumpException("can not count backwards with since/before parameters")
+            return ItemList(self.feed, before=self._before, since=self._since, limit=s.stop, cached=self.feed.is_cached)
 
         offset = self._offset or 0
         if isinstance(s.start, int) and s.start >= 0:
@@ -345,22 +353,19 @@ class Feed(PumpObject):
 
     def __getitem__(self, key):
         if isinstance(key, slice):
-            return self._getslice(key)
+            stop = key.stop
+            if stop is None:
+                stop = len(self)
+            elif isinstance(stop, int) and stop < 0:
+                stop = len(self) + stop
+
+            return ItemList(self, offset=key.start, stop=stop, cached=self.is_cached)
 
         if type(key) is not int:
             raise TypeError('index must be integer')
 
         item = ItemList(self, limit=1, offset=key, stop=key + 1, cached=self.is_cached)
         return item[key]
-
-    def _getslice(self, s):
-        stop = s.stop
-        if stop is None:
-            stop = len(self)
-        elif isinstance(stop, int) and stop < 0:
-            stop = len(self) + stop
-
-        return ItemList(self, offset=s.start, stop=stop, cached=self.is_cached)
 
     def __len__(self):
         if self.total_items is None:
