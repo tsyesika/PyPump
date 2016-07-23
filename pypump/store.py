@@ -24,7 +24,7 @@ import re
 import stat
 import datetime
 
-from pypump.exception import ValidationError, StoreException
+from pypump.exceptions import ValidationError, StoreException
 
 # Regex taken from WTForms
 EMAIL_REGEX = re.compile(r"^.+@[^.].*\.[a-z]{2,10}$", re.IGNORECASE)

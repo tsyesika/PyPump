@@ -17,9 +17,10 @@
 
 import logging
 
-from pypump.exception import PyPumpException
-from pypump.models import PumpObject, Mapper
 import six
+
+from pypump.exceptions import PyPumpException
+from pypump.models import PumpObject, Mapper
 
 _log = logging.getLogger(__name__)
 

@@ -16,6 +16,29 @@
 ##
 
 
+class PyPumpException(Exception):
+    pass
+
+
 class PumpException(Exception):
     """ This is used when the remote server gives an error """
+    pass
+
+
+class ClientException(Exception):
+
+    def __init__(self, message, context=None, *args, **kwargs):
+        if context is not None:
+            message = "{0} (context: {1})".format(message, context)
+
+        super(ClientException, self).__init__(message, *args, **kwargs)
+
+
+class StoreException(Exception):
+    """ Raised when error occurs in store """
+    pass
+
+
+class ValidationError(StoreException):
+    """ Raised when validation on a field fails """
     pass

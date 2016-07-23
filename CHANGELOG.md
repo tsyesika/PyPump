@@ -9,6 +9,7 @@
 - PyPump now tries HTTPS first, and then only falls back to HTTP if `verify_requests` is `False`
 - Fixed bug where `PyPump.request()` didnt sign oauth request on redirect (https://github.com/xray7224/PyPump/issues/120)
 - Implement list methods on ItemList and Feed (`__getitem__` and `__len__`)
+- Moved exceptions into single module and removed some unused exceptions. Make sure to update your import statements!
 
 0.6
 ===
