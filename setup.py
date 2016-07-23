@@ -16,7 +16,6 @@
 ##
 
 from sys import version_info
-from warnings import warn
 
 try:
     from setuptools import setup
@@ -32,7 +31,6 @@ install_requires = [
 tests_require = None
 
 if version_info[0] == 2:
-    warn("For SNI support, please install the following from PyPI: 'ndg-httpsclient', 'pyopenssl', 'pyasn1'")
     tests_require = [
         "mock",
     ]
