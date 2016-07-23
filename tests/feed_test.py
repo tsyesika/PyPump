@@ -76,6 +76,12 @@ class FeedTest(PyPumpTest):
         self.assertEqual(sliceditems[0].id, self.response['items'][0]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][4]['id'])
 
+    def test_feed_slice_5_to_inf(self):
+        sliceditems = self.feed[5:]
+        self.assertEqual(len(sliceditems), 15)
+        self.assertEqual(sliceditems[0].id, self.response['items'][5]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][19]['id'])
+
     def test_feed_slice_3_to_6(self):
         sliceditems = self.feed[3:6]
         self.assertEqual(len(sliceditems), 3)
@@ -129,3 +135,15 @@ class FeedTest(PyPumpTest):
         self.assertEqual(len(sliceditems), 3)
         self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])
+
+    def test_zero_to_negative_slicing(self):
+        sliceditems = self.feed[:-18]
+        self.assertEqual(len(sliceditems), 2)
+        self.assertEqual(sliceditems[0].id, self.response['items'][0]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][1]['id'])
+
+    def test_negative_to_inf_slicing(self):
+        sliceditems = self.feed[-18:]
+        self.assertEqual(len(sliceditems), 18)
+        self.assertEqual(sliceditems[0].id, self.response['items'][2]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][19]['id'])

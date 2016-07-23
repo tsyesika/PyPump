@@ -250,8 +250,13 @@ class ItemList(object):
         offset = self._offset or 0
         if isinstance(s.start, int) and s.start >= 0:
             offset = offset + s.start
+        limit = self._limit or 0
+        if isinstance(s.stop, int) and s.stop > limit:
+            limit = len(self)
+        else:
+            limit = s.stop
 
-        return ItemList(self.feed, offset=offset, limit=s.stop, cached=self.feed.is_cached)
+        return ItemList(self.feed, offset=offset, limit=limit, cached=self.feed.is_cached)
 
     def __len__(self):
         return len([item for item in self])
@@ -352,7 +357,11 @@ class Feed(PumpObject):
         if type(s) is not slice:
             s = slice(s, e)
 
-        return ItemList(self, offset=s.start, stop=s.stop, cached=self.is_cached)
+        stop = s.stop
+        if isinstance(stop, int) and stop > len(self):
+            stop = len(self)
+
+        return ItemList(self, offset=s.start, stop=stop, cached=self.is_cached)
 
     def __len__(self):
         if self.total_items is None:
