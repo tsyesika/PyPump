@@ -16,9 +16,10 @@
 ##
 
 import logging
-import six
+
 from pypump.exception import PyPumpException
 from pypump.models import PumpObject, Mapper
+import six
 
 _log = logging.getLogger(__name__)
 
@@ -33,6 +34,8 @@ class ItemList(object):
     :param since: PumpObject: Return objects newer than this
     :param before: PumpObject: Return objects older than this
     :param cached: bool: Return objects from feed._items instead of API
+    :raises PyPumpException: if offset is given as well as before/since
+    :raises PyPumpException: if both before since are given
     """
 
     _done = False
@@ -92,7 +95,7 @@ class ItemList(object):
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
             self._since = False if self._since is not None else None
-            if not hasattr(self.feed, 'issue65'):
+            if getattr(self.feed, 'issue65', False):
                 self._offset = False
             if self._since is not None:
                 # we want oldest items first when using 'since'
@@ -191,7 +194,7 @@ class ItemList(object):
             self._done = True
 
         # check what to do next time
-        if hasattr(self.feed, 'issue65'):
+        if getattr(self.feed, 'issue65', False):
             # work around API bug for favorites feed, see https://github.com/xray7224/PyPump/issues/65
             if self._offset is None:
                 self._offset = 0
@@ -207,6 +210,78 @@ class ItemList(object):
             else:
                 self.url = None
 
+    def __getitem__(self, key):
+        """
+        This method has the same limitations as the method on :class:`Feed <pypump.models.feed.Feed>`
+
+        Additionally raises `PyPumpException` if an offset is specified as well as before/since.
+        """
+        if isinstance(key, slice):
+            return self._getslice(key)
+
+        if type(key) is not int:
+            raise TypeError('index must be integer')
+
+        total = self._limit or self.feed.total_items
+        if key > total or key < -total:
+            raise IndexError("ItemList index out of range")
+
+        if self._since or self._before:
+            # we can't combine since/before and offset, so grab all results up to the one we want
+            if key < 0:
+                key = key + total
+            items = ItemList(self.feed, before=self._before, since=self._since, limit=key + 1, cached=self.feed.is_cached)
+            items = list(items)
+
+            # last item fetched will be the one for us
+            return items[-1]
+        else:
+            if self._offset:
+                # shift key by current offset
+                if key >= 0:
+                    key = self._offset + key
+                else:
+                    key = key + total + self._offset
+            elif key < 0:
+                key = key + total
+
+            item = ItemList(self.feed, limit=1, offset=key, stop=key + 1, cached=self.feed.is_cached)
+            try:
+                return item.next()
+            except StopIteration:
+                raise IndexError("ItemList index out of range")
+
+    def _getslice(self, s):
+        if not isinstance(s.start, (type(None), int)) or not isinstance(s.stop, (type(None), int)):
+            raise TypeError('slice indices must be integers or None')
+
+        if self._before is not None or self._since is not None:
+            if s.start is not None:
+                raise PyPumpException("can not have both offset and since/before parameters")
+            elif s.stop is not None and s.stop < 0:
+                raise PyPumpException("can not count backwards with since/before parameters")
+            return ItemList(self.feed, before=self._before, since=self._since, limit=s.stop, cached=self.feed.is_cached)
+
+        offset = self._offset or 0
+        stop = s.stop
+
+        if stop is None:
+            stop = len(self)
+        elif isinstance(stop, int) and stop < 0:
+            stop = len(self) + stop
+        stop =  stop + offset
+
+        if s.start is not None:
+            if s.start > 0:
+                offset = offset + s.start
+            elif s.start < 0:
+                offset = len(self) + offset + s.start
+
+        return ItemList(self.feed, offset=offset, stop=stop, cached=self.feed.is_cached)
+
+    def __len__(self):
+        return len([item for item in self])
+
     def __next__(self):
         """ Return next object or raise StopIteration """
         if len(self.cache) <= 0:
@@ -220,16 +295,25 @@ class ItemList(object):
         self.itemcount += 1
         return obj
 
-    def __iter__(self):
-        return self
-
     def next(self):
         return self.__next__()
+
+    def clone(self):
+        return ItemList(self.feed,
+                        limit=self._limit,
+                        offset=self._offset,
+                        before=self._before,
+                        since=self._since,
+                        cached=self.feed.is_cached
+                        )
+
+    def __iter__(self):
+        return self.clone()
 
 
 class Feed(PumpObject):
     """ This object represents a basic pump.io **feed**, which is used for
-    navigating a list of objects (inbox,followers,shares,likes and so on).
+    navigating a list of objects (inbox, followers, shares, likes and so on).
     """
     _ignore_attr = []
     _mapping = {
@@ -243,6 +327,10 @@ class Feed(PumpObject):
         super(Feed, self).__init__(*args, **kwargs)
         self.url = url or None
 
+    @property
+    def is_cached(self):
+        return self._items is not None and self.total_items is not None and len(self._items) >= self.total_items
+
     def items(self, offset=None, limit=20, since=None, before=None, *args, **kwargs):
         """ Get a feed's items.
 
@@ -251,12 +339,7 @@ class Feed(PumpObject):
         :param before: Return items added before this id (ordered new -> old)
         :param limit: Amount of items to return
         """
-        if self._items is not None and self.total_items is not None:
-            if len(self._items) >= self.total_items:
-                # return cached items
-                return ItemList(self, offset=offset, limit=limit, since=since, before=before, cached=True)
-
-        return ItemList(self, offset=offset, limit=limit, since=since, before=before)
+        return ItemList(self, offset=offset, limit=limit, since=since, before=before, cached=self.is_cached)
 
     def _request(self, url, offset=None, since=None, before=None):
         params = dict()
@@ -282,27 +365,35 @@ class Feed(PumpObject):
         return url + feedname
 
     def __getitem__(self, key):
+        """
+        ``key`` should either be an integer or a ``slice`` object. If a ``slice``
+        object is passed in with a step parameter, the stepping will be silently
+        ignored. For example::
+
+            >>> inbox = pump.me.inbox[slice(0, 10, 2)]
+            >>> print(len(inbox))
+            10  # step been ignored
+        """
         if isinstance(key, slice):
-            return self.__getslice__(key)
+            stop = key.stop
+            if stop is None:
+                stop = len(self)
+            elif isinstance(stop, int) and stop < 0:
+                stop = len(self) + stop
+
+            return ItemList(self, offset=key.start, stop=stop, cached=self.is_cached)
 
         if type(key) is not int:
             raise TypeError('index must be integer')
-        item = ItemList(self, limit=1, offset=key, stop=key + 1)
-        try:
-            return item.next()
-        except StopIteration:
-            raise IndexError
 
-    def __getslice__(self, s, e=None):
-        if type(s) is not slice:
-            s = slice(s, e)
+        item = ItemList(self, limit=1, offset=key, stop=key + 1, cached=self.is_cached)
+        return item[key]
 
-        if self._items is not None and self.total_items is not None:
-            if len(self._items) >= self.total_items:
-                # return cached items
-                return ItemList(self, offset=s.start, stop=s.stop, cached=True)
-
-        return ItemList(self, offset=s.start, stop=s.stop)
+    def __len__(self):
+        if self.total_items is None:
+            # a hacky way to populate the cache
+            list(ItemList(self, limit=1, cached=False))
+        return self.total_items
 
     def __iter__(self):
         return self.items(limit=None)
