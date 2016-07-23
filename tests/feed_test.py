@@ -141,13 +141,32 @@ class FeedTest(PyPumpTest):
         items = self.feed.items(offset=10, limit=5)
         self.assertEqual(len(items), 5)
 
-    def test_slice_slice(self):
+    def test_slice_slice_zero_to_3(self):
         sliceditems = self.feed[3:10][:3]
         self.assertEqual(len(sliceditems), 3)
         self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])
 
-        # now try with an ID
+    def test_slice_slice_zero_to_negative(self):
+        sliceditems = self.feed[3:10][:-3]
+        self.assertEqual(len(sliceditems), 4)
+        self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][6]['id'])
+
+    def test_slice_slice_3_to_end(self):
+        sliceditems = self.feed[3:10][3:]
+        self.assertEqual(len(sliceditems), 4)
+        self.assertEqual(sliceditems[0].id, self.response['items'][6]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][9]['id'])
+
+    def test_slice_slice_negative_to_end(self):
+        sliceditems = self.feed[3:10][-3:]
+        self.assertEqual(len(sliceditems), 3)
+        self.assertEqual(sliceditems[0].id, self.response['items'][7]['id'])
+        self.assertEqual(sliceditems[-1].id, self.response['items'][9]['id'])
+
+    def test_slice_slice_with_id(self):
+        sliceditems = self.feed[3:10]
         with self.assertRaises(TypeError):
             sliceditems[slice(self.response['items'][4]['id'])]
 

@@ -256,15 +256,21 @@ class ItemList(object):
             return ItemList(self.feed, before=self._before, since=self._since, limit=s.stop, cached=self.feed.is_cached)
 
         offset = self._offset or 0
-        if isinstance(s.start, int) and s.start >= 0:
-            offset = offset + s.start
         stop = s.stop
+
         if stop is None:
             stop = len(self)
         elif isinstance(stop, int) and stop < 0:
             stop = len(self) + stop
+        stop =  stop + offset
 
-        return ItemList(self.feed, offset=offset, limit=stop, cached=self.feed.is_cached)
+        if s.start is not None:
+            if s.start > 0:
+                offset = offset + s.start
+            elif s.start < 0:
+                offset = len(self) + offset + s.start
+
+        return ItemList(self.feed, offset=offset, stop=stop, cached=self.feed.is_cached)
 
     def __len__(self):
         return len([item for item in self])
