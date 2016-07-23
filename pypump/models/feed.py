@@ -34,6 +34,8 @@ class ItemList(object):
     :param since: PumpObject: Return objects newer than this
     :param before: PumpObject: Return objects older than this
     :param cached: bool: Return objects from feed._items instead of API
+    :raises PyPumpException: if offset is given as well as before/since
+    :raises PyPumpException: if both before since are given
     """
 
     _done = False
@@ -209,6 +211,11 @@ class ItemList(object):
                 self.url = None
 
     def __getitem__(self, key):
+        """
+        This method has the same limitations as the method on :class:`Feed <pypump.models.feed.Feed>`
+
+        Additionally raises `PyPumpException` if an offset is specified as well as before/since.
+        """
         if isinstance(key, slice):
             return self._getslice(key)
 
@@ -306,7 +313,7 @@ class ItemList(object):
 
 class Feed(PumpObject):
     """ This object represents a basic pump.io **feed**, which is used for
-    navigating a list of objects (inbox,followers,shares,likes and so on).
+    navigating a list of objects (inbox, followers, shares, likes and so on).
     """
     _ignore_attr = []
     _mapping = {
@@ -358,6 +365,15 @@ class Feed(PumpObject):
         return url + feedname
 
     def __getitem__(self, key):
+        """
+        ``key`` should either be an integer or a ``slice`` object. If a ``slice``
+        object is passed in with a step parameter, the stepping will be silently
+        ignored. For example::
+
+            >>> inbox = pump.me.inbox[slice(0, 10, 2)]
+            >>> print(len(inbox))
+            10  # step been ignored
+        """
         if isinstance(key, slice):
             stop = key.stop
             if stop is None:
