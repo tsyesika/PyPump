@@ -8,6 +8,7 @@
 - Dropped Python 2.6 support, PyPump now supports Python 2.7 or 3.3+
 - PyPump now tries HTTPS first, and then only falls back to HTTP if `verify_requests` is `False`
 - Fixed bug where `PyPump.request()` didnt sign oauth request on redirect (https://github.com/xray7224/PyPump/issues/120)
+- Implement list methods on ItemList and Feed (`__getitem__` and `__len__`)
 
 0.6
 ===
