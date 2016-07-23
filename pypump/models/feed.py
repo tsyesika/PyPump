@@ -244,6 +244,9 @@ class ItemList(object):
                 raise IndexError("ItemList index out of range")
 
     def _getslice(self, s):
+        if not isinstance(s.start, (type(None), int)) or not isinstance(s.stop, (type(None), int)):
+            raise TypeError('slice indices must be integers or None')
+
         offset = self._offset or 0
         if isinstance(s.start, int) and s.start >= 0:
             offset = offset + s.start

@@ -136,6 +136,10 @@ class FeedTest(PyPumpTest):
         self.assertEqual(sliceditems[0].id, self.response['items'][3]['id'])
         self.assertEqual(sliceditems[-1].id, self.response['items'][5]['id'])
 
+        # now try with an ID
+        with self.assertRaises(TypeError):
+            sliceditems[slice(self.response['items'][4]['id'])]
+
     def test_zero_to_negative_slicing(self):
         sliceditems = self.feed[:-18]
         self.assertEqual(len(sliceditems), 2)
