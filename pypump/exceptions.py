@@ -25,6 +25,15 @@ class PumpException(Exception):
     pass
 
 
+class ClientException(Exception):
+
+    def __init__(self, message, context=None, *args, **kwargs):
+        if context is not None:
+            message = "{0} (context: {1})".format(message, context)
+
+        super(ClientException, self).__init__(message, *args, **kwargs)
+
+
 class StoreException(Exception):
     """ Raised when error occurs in store """
     pass

@@ -22,16 +22,9 @@ import logging
 
 import requests
 
+from pypump.exceptions import ClientException
+
 _log = logging.getLogger(__name__)
-
-
-class ClientException(Exception):
-
-    def __init__(self, message, context=None, *args, **kwargs):
-        if context is not None:
-            message = "{0} (context: {1})".format(message, context)
-
-        super(ClientException, self).__init__(message, *args, **kwargs)
 
 
 class Client(object):
