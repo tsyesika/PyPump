@@ -46,7 +46,7 @@ setup(
     author_email="tfmyz@inboxen.org",
     scripts=['pypump-shell'],
     url="https://github.com/xray7224/PyPump",
-    packages=["pypump", "pypump.exception", "pypump.models"],
+    packages=["pypump", "pypump.models"],
     license="GPLv3+",
     install_requires=install_requires,
     tests_require=tests_require,

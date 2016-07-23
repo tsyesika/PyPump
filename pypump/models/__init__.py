@@ -23,7 +23,7 @@ import mimetypes
 
 from dateutil.parser import parse
 
-from pypump.exception.PumpException import PumpException
+from pypump.exceptions import PumpException
 
 _log = logging.getLogger(__name__)
 

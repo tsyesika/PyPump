@@ -16,6 +16,20 @@
 ##
 
 
+class PyPumpException(Exception):
+    pass
+
+
 class PumpException(Exception):
     """ This is used when the remote server gives an error """
+    pass
+
+
+class StoreException(Exception):
+    """ Raised when error occurs in store """
+    pass
+
+
+class ValidationError(StoreException):
+    """ Raised when validation on a field fails """
     pass

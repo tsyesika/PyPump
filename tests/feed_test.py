@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import six
 
-from pypump.exception import PyPumpException
+from pypump.exceptions import PyPumpException
 from pypump.models.feed import Feed
 from tests import PyPumpTest
 

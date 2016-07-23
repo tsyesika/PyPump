@@ -29,7 +29,7 @@ from requests_oauthlib import OAuth1, OAuth1Session
 
 from pypump.store import JSONStore
 from pypump.client import Client
-from pypump.exception import PyPumpException
+from pypump.exceptions import PyPumpException
 
 # load models
 from pypump.models.note import Note
