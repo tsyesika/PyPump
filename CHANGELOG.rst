@@ -6,9 +6,9 @@
 - Person.update() now updates Person.location
 - Fixed bug where PyPump with Python3 failed to save credentials to theJSONStore
 - Dropped Python 2.6 support, PyPump now supports Python 2.7 or 3.3+
-- PyPump now tries HTTPS first, and then only falls back to HTTP if `verify_requests` is `False`
-- Fixed bug where `PyPump.request()` didnt sign oauth request on redirect `#120 <https://github.com/xray7224/PyPump/issues/120>`_
-- Implement list methods on ItemList and Feed (`__getitem__` and `__len__`)
+- PyPump now tries HTTPS first, and then only falls back to HTTP if ``verify_requests`` is ``False``
+- Fixed bug where ``PyPump.request()`` didnt sign oauth request on redirect `#120 <https://github.com/xray7224/PyPump/issues/120>`_
+- Implement list methods on ItemList and Feed (``__getitem__`` and ``__len__``)
 - Moved exceptions into single module and removed some unused exceptions. Make sure to update your import statements!
 
 0.6
@@ -18,11 +18,11 @@
 - Recipients can now be set for Comment, Person objects
 - Recipient properties (.to, .cc, .bto, .bcc) has been moved from Activity to Activity.obj
 - Feeds (inbox, followers, etc) can now be sliced by object or object_id.
-- `Feed.items(offset=int|since=id|before=id, limit=20)` method.
+- ``Feed.items(offset=int|since=id|before=id, limit=20)`` method.
 - Unicode improvements when printing Pump objects.
 - Instead of skipping an Object attribute which has no response data (f.ex Note.deleted when note has not been deleted) we now set the attribute to None.
 - Fixed WebPump OAuth token issue (`#89 <https://github.com/xray7224/PyPump/issues/89>`_)
-- Allow you to use `<commentable object\>.comment()` by passing in just a string apposed to a Comment object. `44f3426 <https://github.com/xray7224/PyPump/commit/44f34268a4d0f97107438baf05510b75f9fdebee>`_
+- Allow you to use ``<commentable object\>.comment()`` by passing in just a string apposed to a Comment object. `44f3426 <https://github.com/xray7224/PyPump/commit/44f34268a4d0f97107438baf05510b75f9fdebee>`_
 - Introduce "Store" object for saving persistant data.
 
 Earlier Releases
