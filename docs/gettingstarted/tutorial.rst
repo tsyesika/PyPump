@@ -169,43 +169,6 @@ our outbox::
     ...     content="I took this the other day, came out really well!")
     >>> img.from_file("sunset.jpg")
 
-Want to see what the model actually looks like?
-All activities in pump.io have a .serialize method::
-
-    >>> output = message.serialize(indent=4)
-    >>> print(output)
-    {
-        "id": "http://coding.example/api/activity/bwkflwken",
-        "actor": {
-            "id": "acct:bwk@coding.example",
-            "objectType": "person",
-            "displayName": "Brian Kernighan"
-        },
-        "verb": "follow",
-        "to": [
-            {
-                "id": "acct:ken@coding.example",
-                "objectType": "person"
-            }
-        ],
-        "object": {
-            "id": "acct:ken@coding.example",
-            "objectType": "person",
-            "displayName": "Ken Thompson"
-        },
-        "published": "1974-01-01T00:00:00",
-        "links": [
-            {
-                "rel": "self",
-                "href": "http://coding.example/api/activity/bwkflwken"
-            }
-        ]
-    }
-
-.. (Yes, that was stolen from the Pump API docs :))
-
-(similarly, all activity classes provide a unserialize class method).
-
 When posting an image or a note you may wish to post it to
 more people than just your followers (which is the default on most pump servers).
 You can easily do this by doing::
