@@ -1,10 +1,9 @@
+Web Development using PyPump
+============================
+
 .. warning::
 
     This section needs to be updated.
-
-
-Web Development using PyPump
-============================
 
 One of the problem with PyPump and Web development is that you often have
 a view which is called and then must return a function. While it is possible

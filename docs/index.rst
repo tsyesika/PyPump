@@ -6,6 +6,8 @@
 PyPump - Python Pump.io Library
 ===============================
 
+Release v\ |release|.
+
 PyPump is a simple but powerful and pythonic way of interfacing with the `pump.io <http://pump.io>`_ API.
 
 PyPump is under the `GPLv3 <https://www.gnu.org/licenses/gpl.html>`_. You should probably
@@ -18,9 +20,8 @@ If you're new to PyPump and feeling a bit overwhelmed the :doc:`gettingstarted/t
 place to go, however if you're familiar with python and understand pump, check out the
 :doc:`gettingstarted/qnd` guide!
 
-Contents
---------
 .. toctree::
+   :caption: User documentation
    :maxdepth: 1
 
    gettingstarted/installing
@@ -32,21 +33,29 @@ Contents
 
    store
 
-Common
-------
-
-.. toctree::
-   :maxdepth: 1
-
    common/media
 
 
-API
----
-
 .. toctree::
-   :maxdepth: 2
+   :caption: API documentation
+   :maxdepth: 1
 
    classref
+
+
+About PyPump
+============
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Version history
+
+    changelog
+
+Links
+-----
+* `PyPump on Github <https://github.com/xray7224/PyPump>`_
+* `PyPump on PyPI <https://pypi.python.org/pypi/pypump>`_
+
 
 This was build on |today|
