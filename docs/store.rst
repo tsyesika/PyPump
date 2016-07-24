@@ -23,7 +23,7 @@ extra methods other than dictionary methods you need to implement
 are::
 
   @classmethod
-  def load(cls, webfiger, pump):
+  def load(cls, webfinger, pump):
       """
       This should return an instance of the store object full of any
       data that has been saved. It's your responsibility to set the
