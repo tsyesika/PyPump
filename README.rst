@@ -45,12 +45,6 @@ You can install it via pip::
 
     $ pip install pypump
 
-If you're using Python 2, you may wish to install the following packages for SNI support::
-
-    $ pip install ndg-httpsclient pyopenssl pyasn1
-
-These packages are not automatually installed due to pyopenssl being a C extension.
-
 Chat with us?
 =============
 
