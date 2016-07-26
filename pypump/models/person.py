@@ -64,7 +64,8 @@ class Person(PumpObject, Addressable):
             pypumptest2 unliked a comment in reply to a note
             pypumptest2 deleted a note
         """
-        self._outbox = self._outbox or Outbox(self.links['activity-outbox'], pypump=self._pump)
+        if self._outbox is None:
+            self._outbox = Outbox(self.links['activity-outbox'], pypump=self._pump)
         return self._outbox
 
     @property
@@ -80,7 +81,8 @@ class Person(PumpObject, Addressable):
             acct:bob@example.org
             acct:carol@example.org
         """
-        self._followers = self._followers or Followers(self.links['followers'], pypump=self._pump)
+        if self._followers is None:
+            self._followers = Followers(self.links['followers'], pypump=self._pump)
         return self._followers
 
     @property
@@ -96,7 +98,8 @@ class Person(PumpObject, Addressable):
             acct:alice@example.org
             acct:duncan@example.org
         """
-        self._following = self._following or Following(self.links['following'], pypump=self._pump)
+        if self._following is None:
+            self._following = Following(self.links['following'], pypump=self._pump)
         return self._following
 
     @property
@@ -112,7 +115,8 @@ class Person(PumpObject, Addressable):
             image by bob@example.org
             comment by evan@e14n.com
         """
-        self._favorites = self._favorites or Favorites(self.links['favorites'], pypump=self._pump)
+        if self._favorites is None:
+            self._favorites = Favorites(self.links['favorites'], pypump=self._pump)
         return self._favorites
 
     @property
@@ -129,7 +133,8 @@ class Person(PumpObject, Addressable):
             Coworkers
             Friends
         """
-        self._lists = self._lists or Lists(self.links['lists'], pypump=self._pump)
+        if self._lists is None:
+            self._lists = Lists(self.links['lists'], pypump=self._pump)
         return self._lists
 
     @property
@@ -147,7 +152,8 @@ class Person(PumpObject, Addressable):
         """
         if not self.isme:
             raise PyPumpException("You can't read other people's inboxes")
-        self._inbox = self._inbox or Inbox(self.links['activity-inbox'], pypump=self._pump)
+        if self._inbox is None:
+            self._inbox = Inbox(self.links['activity-inbox'], pypump=self._pump)
         return self._inbox
 
     @property

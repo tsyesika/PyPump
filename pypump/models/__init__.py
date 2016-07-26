@@ -335,7 +335,8 @@ class Likeable(object):
         """
 
         endpoint = self.links["likes"]
-        self._likes = self._likes or Feed(endpoint, pypump=self._pump)
+        if self._likes is None:
+            self._likes = Feed(endpoint, pypump=self._pump)
         return self._likes
 
     favorites = likes
@@ -397,7 +398,8 @@ class Commentable(object):
         """
 
         endpoint = self.links["replies"]
-        self._comments = self._comments or Feed(endpoint, pypump=self._pump)
+        if self._comments is None:
+            self._comments = Feed(endpoint, pypump=self._pump)
         return self._comments
 
     def comment(self, comment):
@@ -441,7 +443,8 @@ class Shareable(object):
         """
 
         endpoint = self.links["shares"]
-        self._shares = self._shares or Feed(endpoint, pypump=self._pump)
+        if self._shares is None:
+            self._shares = Feed(endpoint, pypump=self._pump)
         return self._shares
 
     def share(self):

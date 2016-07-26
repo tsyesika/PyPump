@@ -448,7 +448,8 @@ class Inbox(Feed):
         url = self._subfeed("direct")
         if "direct" in self.url or "major" in self.url or "minor" in self.url:
             return self
-        self._direct = self._direct or self.__class__(url, pypump=self._pump)
+        if self._direct is None:
+            self._direct = self.__class__(url, pypump=self._pump)
         return self._direct
 
     @property
@@ -457,7 +458,8 @@ class Inbox(Feed):
         url = self._subfeed("major")
         if "major" in self.url or "minor" in self.url:
             return self
-        self._major = self._major or self.__class__(url, pypump=self._pump)
+        if self._major is None:
+            self._major = self.__class__(url, pypump=self._pump)
         return self._major
 
     @property
@@ -466,7 +468,8 @@ class Inbox(Feed):
         url = self._subfeed("minor")
         if "minor" in self.url or "major" in self.url:
             return self
-        self._minor = self._minor or self.__class__(url, pypump=self._pump)
+        if self._minor is None:
+            self._minor = self.__class__(url, pypump=self._pump)
         return self._minor
 
 
@@ -494,7 +497,8 @@ class Outbox(Feed):
         url = self._subfeed("major")
         if "major" in self.url or "minor" in self.url:
             return self
-        self._major = self._major or self.__class__(url, pypump=self._pump)
+        if self._major is None:
+            self._major = self.__class__(url, pypump=self._pump)
         return self._major
 
     @property
@@ -503,7 +507,8 @@ class Outbox(Feed):
         url = self._subfeed("minor")
         if "major" in self.url or "minor" in self.url:
             return self
-        self._minor = self._minor or self.__class__(url, pypump=self._pump)
+        if self._minor is None:
+            self._minor = self.__class__(url, pypump=self._pump)
         return self._minor
 
 
