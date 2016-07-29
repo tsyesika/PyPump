@@ -55,8 +55,8 @@ class PumpObject(object):
         "_bto": ("bto", "list"),
         "_bcc": ("bcc", "list"),
         "_comments": ("replies", "Feed"),
-        "_followers": ("followers", "Feed"),
-        "_following": ("following", "Feed"),
+        "_followers": ("followers", "Followers"),
+        "_following": ("following", "Following"),
         "_likes": ("likes", "Feed"),
         "_shares": ("shares", "Feed")
     }

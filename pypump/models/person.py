@@ -16,12 +16,14 @@
 ##
 
 import six
+import logging
 
 from pypump.models import PumpObject, Addressable
 from pypump.exceptions import PyPumpException
 from pypump.models.feed import (Followers, Following, Lists,
                                 Favorites, Inbox, Outbox)
 
+_log = logging.getLogger(__name__)
 
 class Person(PumpObject, Addressable):
     """ This object represents a pump.io **person**,
@@ -42,7 +44,9 @@ class Person(PumpObject, Addressable):
     _ignore_attr = ['liked', 'in_reply_to']
     _mapping = {
         "username": ("preferredUsername", "literal"),
-        "location": ("location", "Place")
+        "location": ("location", "Place"),
+        "_favorites": ("favorites", "Favorites"),
+        "_lists": ("lists", "Lists"),
     }
 
     _inbox = None
@@ -184,8 +188,8 @@ class Person(PumpObject, Addressable):
             try:
                 data = self._pump.request(self.links['self'])
                 self.unserialize(data)
-            except:
-                pass
+            except Exception as e:
+                _log.debug(e)
 
     def serialize(self, verb):
         data = super(Person, self).serialize()
