@@ -235,29 +235,24 @@ class Mapper(object):
             setattr(obj, key, None)
 
     def get_object(self, data):
-        try:
-            # Look for suitable PyPump model based on objectType
-            obj_type = data.get("objectType").capitalize()
+        """ Return PumpObject based on data["objectType"] """
+
+        obj_type = data.get("objectType").capitalize()
+        import pypump.models.activity
+
+        if getattr(self._pump, obj_type, False):
+            # Primary objects (Pump.Note etc)
             obj = getattr(self._pump, obj_type)
-            obj = obj().unserialize(data)
-            _log.debug("Created PyPump model %r" % obj.__class__)
-            return obj
-        except AttributeError as e:
-            _log.debug("Exception: %s" % e)
-            try:
-                import pypump.models.activity
-                # Look for suitable pumpobject model based on objectType
-                obj_type = data.get("objectType").capitalize()
-                obj = getattr(pypump.models.activity, obj_type)
-                obj = obj(pypump=self._pump).unserialize(data)
-                _log.debug("Created activity.* model: %r" % obj.__class__)
-                return obj
-            except AttributeError as e:
-                # Fall back to PumpObject
-                _log.debug("Exception: %s" % e)
-                obj = PumpObject(pypump=self._pump).unserialize(data)
-                _log.debug("Created PumpObject: %r" % obj.object_type)
-                return obj
+        elif getattr(pypump.models.activity, obj_type, False):
+            # Secondary objects (Activity, Application)
+            obj = getattr(pypump.models.activity, obj_type)
+        else:
+            # Fall back to PumpObject
+            obj = PumpObject
+
+        obj = obj(pypump=self._pump).unserialize(data)
+        _log.debug("Created PumpObject: %r" % obj_type)
+        return obj
 
     def set_object(self, obj, key, data, from_json):
         if from_json:
