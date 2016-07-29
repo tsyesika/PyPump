@@ -37,16 +37,15 @@ class PumpObject(object):
         "author": ("author", "PumpObject"),
         "content": ("content", "literal"),
         "display_name": ("displayName", "literal"),
-        "downstream_duplicates": ("downstreamDuplicates", None),
+        "downstream_duplicates": ("downstreamDuplicates", "list"),
         "id": ("id", "literal"),
-        "image": ("image", None),
         "in_reply_to": ("inReplyTo", "PumpObject"),
         "liked": ("liked", "literal"),
-        "links": ("links", None),
+        # Links are not handled by Mapper yet # "links": ("links", None),
         "published": ("published", "date"),
         "summary": ("summary", "literal"),
         "updated": ("updated", "date"),
-        "upstream_duplicates": ("upstreamDuplicates", None),
+        "upstream_duplicates": ("upstreamDuplicates", "list"),
         "url": ("url", "literal"),
         "deleted": ("deleted", "date"),
         "object_type": ("objectType", "literal"),
@@ -236,8 +235,9 @@ class Mapper(object):
         try:
             obj_type = data.get("objectType").capitalize()
         except:
-            _log.debug("%r : %r" % (data, obj_type))
+            pass
         if obj_type is None:
+            _log.debug("Mapper: No object type for data : %r" % data)
             return
 
         import pypump.models.activity
@@ -255,7 +255,7 @@ class Mapper(object):
             # Fall back to PumpObject
             obj = PumpObject
         else:
-            _log.debug("No object found for data: %r" % data)
+            _log.debug("Mapper: No object found for data: %r" % data)
             return
         obj = obj(pypump=self._pump).unserialize(data)
         _log.debug("Created PumpObject: %r" % obj_type)

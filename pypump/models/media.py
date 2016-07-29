@@ -27,7 +27,7 @@ class MediaObject(PumpObject, Likeable, Shareable, Commentable, Deleteable, Uplo
     object_type = 'dummy'
     _ignore_attr = ["summary"]
     _mapping = {
-        "stream": ("stream", "StreamContainer"),
+        #"stream": ("stream", "StreamContainer"),
         "license": ("license", "literal"),
         "embed_code": ("embedCode", "literal")
     }
@@ -147,10 +147,12 @@ class Image(MediaObject):
     object_type = 'image'
     _ignore_attr = ["summary", "image"]
     _mapping = {
-        "thumbnail": ("image", "ImageContainer"),
-        "original": ("fullImage", "ImageContainer"),
+        #"thumbnail": ("image", "ImageContainer"),
+        #"original": ("fullImage", "ImageContainer"),
         "license": ("license", "literal")
     }
+
+    thumbnail = None
 
     def unserialize(self, data):
         if "image" in data:
