@@ -34,13 +34,13 @@ class PumpObject(object):
 
     _mapping = {
         "attachments": ("attachments", "literal"),
-        "author": ("author", "object"),
+        "author": ("author", "PumpObject"),
         "content": ("content", "literal"),
         "display_name": ("displayName", "literal"),
         "downstream_duplicates": ("downstreamDuplicates", None),
         "id": ("id", "literal"),
         "image": ("image", None),
-        "in_reply_to": ("inReplyTo", "object"),
+        "in_reply_to": ("inReplyTo", "PumpObject"),
         "liked": ("liked", "literal"),
         "links": ("links", None),
         "published": ("published", "date"),
@@ -215,9 +215,7 @@ class Mapper(object):
                     self.add_attr(obj, k, kwargs[k], v[1])
 
     def add_attr(self, obj, key, data, data_type, from_json=False):
-        if data_type == "object":
-            self.set_object(obj, key, data, from_json)
-        elif data_type == "date":
+        if data_type == "date":
             self.set_date(obj, key, data, from_json)
         elif data_type == "list":
             self.set_list(obj, key, data, from_json)
@@ -226,7 +224,7 @@ class Mapper(object):
         elif data_type == "feed":
             self.set_feed(obj, key, data, from_json)
         else:
-            _log.debug("Ignoring unknown attribute %r", key)
+            self.set_object(obj, key, data, data_type, from_json)
 
     def set_literal(self, obj, key, data, from_json):
         if data is not None:
@@ -234,10 +232,16 @@ class Mapper(object):
         else:
             setattr(obj, key, None)
 
-    def get_object(self, data):
-        """ Return PumpObject based on data["objectType"] """
+    def get_object(self, data, obj_type=None):
+        """ Return PumpObject based on object type"""
 
-        obj_type = data.get("objectType").capitalize()
+        try:
+            obj_type = data.get("objectType").capitalize()
+        except:
+            _log.debug("%r : %r" % (data, obj_type))
+        if obj_type is None:
+            return
+
         import pypump.models.activity
 
         if getattr(self._pump, obj_type, False):
@@ -246,18 +250,22 @@ class Mapper(object):
         elif getattr(pypump.models.activity, obj_type, False):
             # Secondary objects (Activity, Application)
             obj = getattr(pypump.models.activity, obj_type)
-        else:
+        elif data.get("objectType", False):
             # Fall back to PumpObject
             obj = PumpObject
-
+        else:
+            _log.debug("No object found for data: %r" % data)
+            return
         obj = obj(pypump=self._pump).unserialize(data)
         _log.debug("Created PumpObject: %r" % obj_type)
         return obj
 
-    def set_object(self, obj, key, data, from_json):
+    def set_object(self, obj, key, data, data_type, from_json):
         if from_json:
             if data is not None:
-                setattr(obj, key, self.get_object(data))
+                pump_obj = self.get_object(data, data_type)
+                if pump_obj is not None:
+                    setattr(obj, key, pump_obj)
             else:
                 setattr(obj, key, None)
 

@@ -42,7 +42,7 @@ class Person(PumpObject, Addressable):
     _ignore_attr = ['liked', 'in_reply_to']
     _mapping = {
         "username": ("preferredUsername", "literal"),
-        "location": ("location", "object")
+        "location": ("location", "Place")
     }
 
     _inbox = None

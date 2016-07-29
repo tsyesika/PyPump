@@ -36,10 +36,10 @@ class Activity(PumpObject, Addressable):
 
     _mapping = {
         "verb": ("verb", "literal"),
-        "generator": ("generator", "object"),
+        "generator": ("generator", "PumpObject"),
         "received": ("received", "date"),
-        "actor": ("actor", "object"),
-        "obj": ("object", "object")
+        "actor": ("actor", "PumpObject"),
+        "obj": ("object", "PumpObject")
     }
 
     def __init__(self, *args, **kwargs):
