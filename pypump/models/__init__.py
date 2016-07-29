@@ -54,11 +54,11 @@ class PumpObject(object):
         "_cc": ("cc", "list"),
         "_bto": ("bto", "list"),
         "_bcc": ("bcc", "list"),
-        "_comments": ("replies", "feed"),
-        "_followers": ("followers", "feed"),
-        "_following": ("following", "feed"),
-        "_likes": ("likes", "feed"),
-        "_shares": ("shares", "feed")
+        "_comments": ("replies", "Feed"),
+        "_followers": ("followers", "Feed"),
+        "_following": ("following", "Feed"),
+        "_likes": ("likes", "Feed"),
+        "_shares": ("shares", "Feed")
     }
 
     def __init__(self, pypump=None, *args, **kwargs):
@@ -221,8 +221,6 @@ class Mapper(object):
             self.set_list(obj, key, data, from_json)
         elif data_type == "literal":
             self.set_literal(obj, key, data, from_json)
-        elif data_type == "feed":
-            self.set_feed(obj, key, data, from_json)
         else:
             self.set_object(obj, key, data, data_type, from_json)
 
@@ -250,6 +248,9 @@ class Mapper(object):
         elif getattr(pypump.models.activity, obj_type, False):
             # Secondary objects (Activity, Application)
             obj = getattr(pypump.models.activity, obj_type)
+        elif getattr(pypump.models.feed, obj_type, False):
+            # Feed objects
+            obj = getattr(pypump.models.feed, obj_type)
         elif data.get("objectType", False):
             # Fall back to PumpObject
             obj = PumpObject
@@ -286,17 +287,6 @@ class Mapper(object):
                     else:
                         tmplist.append(self.get_object(i))
             setattr(obj, key, tmplist)
-
-    def set_feed(self, obj, key, data, from_json):
-        from pypump.models.feed import Feed
-        if from_json:
-            if data is not None:
-                try:
-                    setattr(obj, key, Feed(pypump=self._pump).unserialize(data))
-                except Exception as e:
-                    _log.debug("Exception %s" % e)
-            else:
-                setattr(obj, key, [])
 
 
 from pypump.models.feed import Feed
