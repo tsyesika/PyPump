@@ -91,7 +91,7 @@ class ItemList(object):
     def get_page(self, url):
         """ Get a page of items from API """
         if url:
-            data = self.feed._request(url, offset=self._offset, since=self._since, before=self._before)
+            self.feed._request(url, offset=self._offset, since=self._since, before=self._before)
 
             # set values to False to avoid using them for next request
             self._before = False if self._before is not None else None
@@ -100,9 +100,9 @@ class ItemList(object):
                 self._offset = False
             if self._since is not None:
                 # we want oldest items first when using 'since'
-                return reversed(data['items'])
+                return reversed(self.feed._items)
             else:
-                return data['items']
+                return self.feed._items
         else:
             return []
 
@@ -180,15 +180,7 @@ class ItemList(object):
             return
 
         for i in (self.get_cached() if self._cached else self.get_page(self.url)):
-            if not self._cached:
-                # some objects don't have objectType set (inbox activities)
-                if not i.get("objectType"):
-                    i["objectType"] = self.feed.object_types[0]
-                obj = Mapper(pypump=self.feed._pump).get_object(i)
-
-            else:
-                obj = i
-            self.cache.append(obj)
+            self.cache.append(i)
 
         # ran out of items
         if len(self.cache) <= 0:
@@ -350,7 +342,6 @@ class Feed(PumpObject):
         _log.debug("Feed._request: url: %s, params: %s", url, params)
         data = self._pump.request(url, params=params)
         self.unserialize(data)
-        return data
 
     def unserialize(self, data):
         Mapper(pypump=self._pump).parse_map(self, data=data)
