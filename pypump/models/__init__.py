@@ -260,6 +260,7 @@ class Mapper(object):
             return
         obj = obj(pypump=self._pump).unserialize(data)
         _log.debug("Created PumpObject: %r" % obj_type)
+
         return obj
 
     def set_object(self, obj, key, data, data_type, from_json):
@@ -286,6 +287,11 @@ class Mapper(object):
                     if isinstance(i, six.string_types):
                         tmplist.append(i)
                     else:
+                        try:
+                            if not i.get("objectType"):
+                                i["objectType"] = obj.object_types[0]
+                        except Exception as e:
+                            _log.debug(e)
                         tmplist.append(self.get_object(i))
             setattr(obj, key, tmplist)
 

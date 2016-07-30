@@ -432,6 +432,8 @@ class Inbox(Feed):
         Bob posted a comment in reply to a note
         Alice liked a comment
     """
+    _ignore_attr = ['object_types',]
+    object_types = ['activity',]
 
     _direct = None
     _minor = None
@@ -484,6 +486,8 @@ class Outbox(Feed):
         Bob liked an image
         Bob followed Alice
     """
+    _ignore_attr = ['object_types',]
+    object_types = ['activity',]
 
     _major = None
     _minor = None
