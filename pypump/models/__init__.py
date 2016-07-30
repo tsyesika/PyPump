@@ -233,7 +233,8 @@ class Mapper(object):
         """ Return PumpObject based on object type"""
 
         try:
-            obj_type = data.get("objectType").capitalize()
+            if obj_type is None or obj_type == "PumpObject":
+                obj_type = data.get("objectType").capitalize()
         except:
             pass
         if obj_type is None:
