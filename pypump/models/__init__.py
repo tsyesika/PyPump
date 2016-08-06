@@ -241,17 +241,14 @@ class Mapper(object):
             _log.debug("Mapper: No object type for data : %r" % data)
             return
 
-        import pypump.models.activity
+        import pypump.models
 
         if getattr(self._pump, obj_type, False):
             # Primary objects (Pump.Note etc)
             obj = getattr(self._pump, obj_type)
-        elif getattr(pypump.models.activity, obj_type, False):
-            # Secondary objects (Activity, Application)
-            obj = getattr(pypump.models.activity, obj_type)
-        elif getattr(pypump.models.feed, obj_type, False):
-            # Feed objects
-            obj = getattr(pypump.models.feed, obj_type)
+        elif getattr(pypump.models, obj_type, False):
+            # Secondary objects from pypump.models
+            obj = getattr(pypump.models, obj_type)
         elif data.get("objectType", False):
             # Fall back to PumpObject
             obj = PumpObject
@@ -639,3 +636,7 @@ class Uploadable(Addressable):
             self._post_activity(data)
 
         return self
+
+from pypump.models.media import (Image, Audio, Video, ImageContainer, StreamContainer)
+from pypump.models.activity import (Activity, Application)
+from pypump.models.feed import (Feed, Followers, Following, Favorites, Lists)
