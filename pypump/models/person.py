@@ -43,6 +43,7 @@ class Person(PumpObject, Addressable):
     object_type = 'person'
     _ignore_attr = ['liked', 'in_reply_to']
     _mapping = {
+        "image": ("image", "ImageContainer"),
         "username": ("preferredUsername", "literal"),
         "location": ("location", "Place"),
         "_favorites": ("favorites", "Favorites"),
