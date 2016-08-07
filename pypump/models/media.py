@@ -27,7 +27,7 @@ class MediaObject(PumpObject, Likeable, Shareable, Commentable, Deleteable, Uplo
     object_type = 'dummy'
     _ignore_attr = ["summary"]
     _mapping = {
-        #"stream": ("stream", "StreamContainer"),
+        "stream": ("stream", "StreamContainer"),
         "license": ("license", "literal"),
         "embed_code": ("embedCode", "literal")
     }
@@ -58,26 +58,34 @@ class MediaObject(PumpObject, Likeable, Shareable, Commentable, Deleteable, Uplo
             return data["url"]
 
     def unserialize(self, data):
-        if "stream" in data:
-            stream = data["stream"]
-            self.stream = StreamContainer(
-                url=self._get_fileurl(stream)
-            )
         Mapper(pypump=self._pump).parse_map(self, data=data)
         self._add_links(data)
         return self
 
 
-class StreamContainer(object):
+class StreamContainer(PumpObject):
     """ Container that holds information about a stream.
 
     :param url: URL to the file on the pump.io server.
     """
-    def __init__(self, url):
+
+    _ignore_attr = ['author', 'attachments', 'content', 'deleted', 'display_name',
+                    'downstream_duplicates', 'upstream_duplicates', 'summary',
+                    'published', 'links', 'updated', 'in_reply_to', 'liked']
+    _mapping = {
+        "url": ("url", "literal"),
+    }
+
+    def __init__(self, url=None, **kwargs):
+        super(StreamContainer, self).__init__(**kwargs)
         self.url = url
 
     def __repr__(self):
         return "<Stream: {url}>".format(url=self.url)
+
+    def unserialize(self, data):
+        Mapper(pypump=self._pump).parse_map(self, data=data)
+        return self
 
 
 class Video(MediaObject):
@@ -112,14 +120,26 @@ class Audio(MediaObject):
     object_type = 'audio'
 
 
-class ImageContainer(object):
+class ImageContainer(PumpObject):
     """ Container that holds information about an image.
 
     :param url: URL to image file on the pump.io server.
     :param width: Width of the image.
     :param height: Height of the image.
     """
-    def __init__(self, url, width, height):
+
+    _ignore_attr = ['author', 'attachments', 'content', 'deleted', 'display_name',
+                    'downstream_duplicates', 'upstream_duplicates', 'summary',
+                    'published', 'links', 'updated', 'in_reply_to', 'liked']
+    _mapping = {
+        "url": ("url", "literal"),
+        "width": ("width", "literal"),
+        "height": ("height", "literal"),
+    }
+
+    def __init__(self, url=None, width=None, height=None, **kwargs):
+        super(ImageContainer, self).__init__(**kwargs)
+
         self.url = url
         self.width = width
         self.height = height
@@ -129,6 +149,10 @@ class ImageContainer(object):
             width=self.width,
             height=self.height
         )
+
+    def unserialize(self, data):
+        Mapper(pypump=self._pump).parse_map(self, data=data)
+        return self
 
 
 class Image(MediaObject):
@@ -147,33 +171,16 @@ class Image(MediaObject):
     object_type = 'image'
     _ignore_attr = ["summary", "image"]
     _mapping = {
-        #"thumbnail": ("image", "ImageContainer"),
-        #"original": ("fullImage", "ImageContainer"),
+        "thumbnail": ("image", "ImageContainer"),
+        "original": ("fullImage", "ImageContainer"),
         "license": ("license", "literal")
     }
 
-    thumbnail = None
-
     def unserialize(self, data):
-        if "image" in data:
-            thumbnail = data["image"]
-            self.thumbnail = ImageContainer(
-                url=self._get_fileurl(thumbnail),
-                height=thumbnail.get("height"),
-                width=thumbnail.get("width")
-            )
-
-        if "fullImage" in data:
-            full_image = data["fullImage"]
-            self.original = ImageContainer(
-                url=self._get_fileurl(full_image),
-                height=full_image.get("height"),
-                width=full_image.get("width")
-            )
-        else:
-            self.original = self.thumbnail
-
         Mapper(pypump=self._pump).parse_map(self, data=data)
         self._add_links(data)
+
+        if self.original is None:
+            self.original = self.thumbnail
 
         return self
