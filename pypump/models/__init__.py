@@ -613,7 +613,7 @@ class Uploadable(Addressable):
         mimetype = mimetypes.guess_type(filename)[0] or "application/octal-stream"
         headers = {
             "Content-Type": mimetype,
-            "Content-Length": os.path.getsize(filename),
+            "Content-Length": str(os.path.getsize(filename)),
         }
 
         # upload file
